@@ -335,7 +335,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 					cputf8_t utf;
 					jclass_get_utf8_from_cp(j, &utf, idx);
 
-					j_printf("field %s is deprecated\n", utf.value);
+					j_printf("member %s is deprecated\n", utf.value);
 #endif
 				}
 				break;
