@@ -35,6 +35,15 @@
 #define ACC_ABSTRACT			0x0400
 #define ACC_STRICT				0x0800
 
+#define T_BOOLEAN				0x0004
+#define T_CHAR					0x0005
+#define T_FLOAT					0x0006
+#define T_DOUBLE				0x0007
+#define T_BYTE					0x0008
+#define T_SHORT					0x0009
+#define T_INT					0x000A
+#define T_LONG					0x000B
+
 
 
 typedef struct cpinfo {
