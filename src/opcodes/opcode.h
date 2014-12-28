@@ -29,6 +29,11 @@
 #define PC32		j_bswap32(*(uint32_t*) (&j->code[j->regs.pc]))
 #define PC64		j_bswap64(*(uint64_t*) (&j->code[j->regs.pc]))
 
+#define R0			j->regs.r0
+#define R1			j->regs.r1
+#define R2			j->regs.r2
+#define R3			j->regs.r3
+
 
 #include "nop.h"
 #include "const.h"
@@ -51,6 +56,8 @@
 #include "conv.h"
 #include "cmp.h"
 #include "if.h"
+#include "branch.h"
+#include "fields.h"
 
 
 typedef void (*opcode_handler_t) (jcontext_t*);
@@ -214,7 +221,29 @@ opcode_handler_t j_opcodes[255] = {
 	OP(ifge),
 	OP(ifgt),
 	OP(ifle),
-	/* TODO: if_icmpeq 0x9F */
+	OP(if_icmpeq),
+	OP(if_icmpne),
+	OP(if_icmplt),
+	OP(if_icmpge),
+	OP(if_icmpgt),
+	OP(if_icmple),
+	OP(if_acmpeq),
+	OP(if_acmpne),
+	OP(goto),
+	OP(jsr),
+	OP(ret),
+	OP(tableswitch),
+	OP(lookupswitch),
+	OP(ireturn),
+	OP(lreturn),
+	OP(freturn),
+	OP(dreturn),
+	OP(areturn),
+	OP(return),
+	OP(getstatic),
+	OP(putstatic),
+	OP(getfield),
+	OP(putfield),
 };
 
 #endif

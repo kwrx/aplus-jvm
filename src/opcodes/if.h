@@ -7,7 +7,7 @@ OPCODE(ifeq) {
 	int32_t v = JPOP(i32);
 
 	if(v == 0)
-		PC += off;
+		PC = off;
 }
 
 OPCODE(ifne) {
@@ -17,7 +17,7 @@ OPCODE(ifne) {
 	int32_t v = JPOP(i32);
 
 	if(v != 0)
-		PC += off;
+		PC = off;
 }
 
 OPCODE(iflt) {
@@ -27,7 +27,7 @@ OPCODE(iflt) {
 	int32_t v = JPOP(i32);
 
 	if(v < 0)
-		PC += off;
+		PC = off;
 }
 
 OPCODE(ifge) {
@@ -37,7 +37,7 @@ OPCODE(ifge) {
 	int32_t v = JPOP(i32);
 
 	if(v >= 0)
-		PC += off;
+		PC = off;
 }
 
 OPCODE(ifgt) {
@@ -47,7 +47,7 @@ OPCODE(ifgt) {
 	int32_t v = JPOP(i32);
 
 	if(v > 0)
-		PC += off;
+		PC = off;
 }
 
 OPCODE(ifle) {
@@ -57,5 +57,93 @@ OPCODE(ifle) {
 	int32_t v = JPOP(i32);
 
 	if(v <= 0)
-		PC += off;
+		PC = off;
+}
+
+OPCODE(if_icmpeq) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a == b)
+		PC = off;
+}
+
+OPCODE(if_icmpne) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a != b)
+		PC = off;
+}
+
+OPCODE(if_icmplt) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a < b)
+		PC = off;
+}
+
+OPCODE(if_icmpge) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a >= b)
+		PC = off;
+}
+
+OPCODE(if_icmpgt) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a > b)
+		PC = off;
+}
+
+OPCODE(if_icmple) {
+	int16_t off = PC16;
+	PC += 2;
+
+	int32_t a = JPOP(i32);
+	int32_t b = JPOP(i32);
+
+	if(a <= b)
+		PC = off;
+}
+
+OPCODE(if_acmpeq) {
+	int16_t off = PC16;
+	PC += 2;
+
+	void* a = JPOP(ptr);
+	void* b = JPOP(ptr);
+
+	if(a == b)
+		PC = off;
+}
+
+OPCODE(if_acmpne) {
+	int16_t off = PC16;
+	PC += 2;
+
+	void* a = JPOP(ptr);
+	void* b = JPOP(ptr);
+
+	if(a != b)
+		PC = off;
 }
