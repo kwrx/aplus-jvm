@@ -4,7 +4,7 @@ OPCODE(goto) {
 	int16_t off = PC16;
 	PC += 2;
 
-	PC = off;
+	JGOTO(off);
 }
 
 OPCODE(jsr) {
@@ -12,7 +12,7 @@ OPCODE(jsr) {
 	PC += 2;
 
 	JPUSH(i32, PC);
-	PC = off;
+	JGOTO(off);
 }
 
 OPCODE(ret) {
@@ -48,7 +48,7 @@ OPCODE(tableswitch) {
 		}
 	}
 
-	PC = off;
+	JGOTO(off);
 }
 
 
@@ -73,39 +73,44 @@ OPCODE(lookupswitch) {
 		PC += 4;
 
 		if(R1.i32 == R0.i32) {
-			PC = PC32;
+			JGOTO(PC32);
 			return;
 		}
 		
 		PC += 4;
 	}
 
-	PC = def;
+	JGOTO(def);
 }
 
 
 OPCODE(ireturn) {
-	assert(0 && "Istruction not yet supported");
+	R0.i32 = JPOP(i32);
+	JRETURN;
 }
 
 OPCODE(lreturn) {
-	assert(0 && "Istruction not yet supported");
+	R0.i64 = JPOP(i64);
+	JRETURN;
 }
 
 OPCODE(freturn) {
-	assert(0 && "Istruction not yet supported");
+	R0.f32 = JPOP(f32);
+	JRETURN;
 }
 
 OPCODE(dreturn) {
-	assert(0 && "Istruction not yet supported");
+	R0.f64 = JPOP(f64);
+	JRETURN;
 }
 
 OPCODE(areturn) {
-	assert(0 && "Istruction not yet supported");
+	R0.ptr = JPOP(ptr);
+	JRETURN;
 }
 
 OPCODE(return) {
-	assert(0 && "Istruction not yet supported");
+	JRETURN;
 }
 
 

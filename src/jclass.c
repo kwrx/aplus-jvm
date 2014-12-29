@@ -10,10 +10,9 @@
 
 #include <assert.h>
 
-#include <jvm/jconfig.h>
+
 #define _WITH_CPINFO
-#include <jvm/jclass.h>
-#include <jvm/jassembly.h>
+#include <jvm/jvm.h>
 
 
 #define R8(b)		{ assert(read(j->fd, (void*) (b), 1) == 1); }
@@ -37,14 +36,11 @@ int jclass_cp_to_field(cpvalue_t* v, cpfield_t* c) {
 	assert(v && c);
 
 	c->tag = v->tag;
-	c->class_index = v->value & 0xFFFF;
-	c->typename_index = (v->value >> 16) & 0xFFFF;
+	c->class_index = (v->value >> 16) & 0xFFFF;
+	c->typename_index = v->value & 0xFFFF;
 
 	return 0;
 }
-
-#define jclass_cp_to_method(v, c)		jclass_cp_to_field(v, (cpfield_t*) c)
-#define jclass_cp_to_interface(v, c)	jclass_cp_to_field(v, (cpfield_t*) c)
 
 
 int jclass_cp_to_string(cpvalue_t* v, cpstring_t* c) {
@@ -140,8 +136,8 @@ int jclass_cp_to_typename(cpvalue_t* v, cptypename_t* c) {
 	assert(v && c);
 
 	c->tag = v->tag;
-	c->name_index = v->value & 0xFFFF;
-	c->desc_index = (v->value >> 16) & 0xFFFF;
+	c->name_index = (v->value >> 16) & 0xFFFF;
+	c->desc_index = v->value & 0xFFFF;
 
 	return 0;
 }
@@ -178,16 +174,18 @@ int jclass_default_attribute(char* name) {
 		return JCLASS_ATTR_LOCALVARS;
 	if(strcmp(name, "Deprecated") == 0)
 		return JCLASS_ATTR_DEPRECATED;
-	
+
+#ifdef DEBUG
+	j_printf("attribute %s not found\n", name);
+#endif
 	return JCLASS_ATTR_UNKNOWN;
 }
 
 int jclass_get_utf8_from_cp(jassembly_t* j, cputf8_t* utf, int idx) {
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, idx - 1);
-	
 	assert(v);
-	assert(jclass_cp_to_utf8(v, utf) == 0);
 
+	assert(jclass_cp_to_utf8(v, utf) == 0);
 	return 0;
 }
 
@@ -204,7 +202,10 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 		R16(&idx);
 		R32(&ln);
 
-			
+
+					
+
+	
 		cputf8_t utf;
 		jclass_get_utf8_from_cp(j, &utf, idx);
 
@@ -349,6 +350,113 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 }
 
 
+int jclass_parse_desc(const char* desc, uint8_t* nargs, uint8_t* rettype, char* signature) {
+	assert(desc);
+	assert(nargs && rettype);
+
+
+	if(desc[0] != '(')
+		return -1;
+	desc++;
+	
+
+	while(*desc && *desc != ')') {
+		switch(*desc) {
+			case '[':
+				while(*desc == '[')
+					desc++;
+				desc--;
+			case 'L':
+				desc++;
+				switch(*desc) {
+					case 'B':
+					case 'C':
+					case 'D':
+					case 'F':
+					case 'I':
+					case 'J':
+					case 'S':
+					case 'Z':
+					case 'V':
+						break;
+					default:
+						desc = strchr(desc, ';');
+						assert(desc);
+						break;
+				}
+				break;
+		}
+
+		*signature++ = *desc == ';'
+							? 'L'
+							: *desc;
+		
+		*nargs += 1;
+		desc++;
+	}
+
+
+	if(*desc != ')')
+		return -1;
+	desc++;
+
+	switch(*desc) {
+		case 'B':
+			*rettype = T_BYTE;
+			break;
+		case 'C':
+			*rettype = T_CHAR;
+			break;
+		case 'D':
+			*rettype = T_DOUBLE;
+			break;
+		case 'F':
+			*rettype = T_FLOAT;
+			break;
+		case 'I':
+			*rettype = T_INT;
+			break;
+		case 'J':
+			*rettype = T_LONG;
+			break;
+		case 'L':
+		case '[':
+			*rettype = T_REFERENCE;
+			break;
+		case 'S':
+			*rettype = T_SHORT;
+			break;
+		case 'Z':
+			*rettype = T_BOOLEAN;
+			break;
+		case 'V':
+			*rettype = T_VOID;
+			break;
+		default:
+			j_printf("warning: return type %c is undefined\n", *desc);
+			*rettype = T_VOID;
+	}
+
+	return 0;
+}
+
+
+int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
+	assert(j && method);
+
+	cputf8_t utf_n, utf_d;
+	assert(jclass_get_utf8_from_cp(j, &utf_n, method->name_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_d, method->desc_index) == 0);
+	assert(jclass_parse_desc(utf_d.value, &method->nargs, &method->rettype, method->signature) == 0);
+
+	
+	method->name = utf_n.value;
+	method->code = (attr_code_t*) jcode_find_attribute(j, method->attributes, "Code");
+
+	return 0;
+}
+
+
 int jclass_parse_assembly(jassembly_t* j) {
 	assert(j);
 
@@ -362,16 +470,17 @@ int jclass_parse_assembly(jassembly_t* j) {
 	R16(&j->header.jc_major);
 	R16(&j->header.jc_cp_count);
 
+
 	list_init(j->header.jc_cpinfo);
 	list_init(j->header.jc_fields);
 	list_init(j->header.jc_methods);
 	list_init(j->header.jc_attributes);
 
+
 	for(i = 0; i < j->header.jc_cp_count - 1; i++) {
 		uint8_t tag = 0;
 		uint64_t value = 0;
 		R8(&tag);
-
 
 		switch(cpinfo[tag].cp_len) {
 			case 0:
@@ -392,12 +501,19 @@ int jclass_parse_assembly(jassembly_t* j) {
 				assert(0 && "Invalid TAG");
 		}
 
+		
 		cpvalue_t* cp = (cpvalue_t*) jmalloc(sizeof(cpvalue_t));
 		cp->tag = tag;
 		cp->value = value;
 		cp->data = NULL;
 
 		assert(list_add(j->header.jc_cpinfo, (listval_t) cp) == 0);
+		
+
+		if(tag == JCLASS_TAG_LONG || tag == JCLASS_TAG_DOUBLE) {
+			assert(list_add(j->header.jc_cpinfo, (listval_t) jmalloc(sizeof(cpvalue_t))) == 0);
+			i++;
+		}
 
 		if(tag != JCLASS_TAG_UTF8STRING)
 			continue;
@@ -409,10 +525,12 @@ int jclass_parse_assembly(jassembly_t* j) {
 
 	}
 
+	
 	R16(&j->header.jc_access);
 	R16(&j->header.jc_this);
 	R16(&j->header.jc_super);
 	R16(&j->header.jc_interfaces_count);
+
 
 
 	j->header.jc_interfaces = (uint16_t*) jmalloc(j->header.jc_interfaces_count * sizeof(uint16_t));
@@ -433,13 +551,12 @@ int jclass_parse_assembly(jassembly_t* j) {
 		R16(&field->attr_count);
 
 		list_init(field->attributes);
-		assert(jclass_parse_attributes(j, field->attributes, field->attr_count) == 0);
 
+		assert(jclass_parse_attributes(j, field->attributes, field->attr_count) == 0);
 		assert(list_add(j->header.jc_fields, (listval_t) field) == 0);
 	}
 
 	R16(&j->header.jc_methods_count);
-
 
 	for(i = 0; i < j->header.jc_methods_count; i++) {
 		methodinfo_t* method = (methodinfo_t*) jmalloc(sizeof(methodinfo_t));
@@ -449,9 +566,11 @@ int jclass_parse_assembly(jassembly_t* j) {
 		R16(&method->desc_index);
 		R16(&method->attr_count);
 
-		list_init(method->attributes);
-		assert(jclass_parse_attributes(j, method->attributes, method->attr_count) == 0);
 
+		list_init(method->attributes);
+	
+		assert(jclass_parse_attributes(j, method->attributes, method->attr_count) == 0);
+		assert(jclass_resolve_method(j, method) == 0);
 		assert(list_add(j->header.jc_methods, (listval_t) method) == 0);
 	}
 

@@ -1,9 +1,26 @@
-#ifndef _JCLASS_H
-#define _JCLASS_H
+#ifndef _JVM_H
+#define _JVM_H
 
+#include <setjmp.h>
 #include <stdint.h>
 
+#include "jconfig.h"
 #include "jlist.h"
+
+
+
+
+#define JEXCEPTION_RUNTIME_ERROR					"Runtime error"
+#define JEXCEPTION_INVALID_OPCODE					"Invalid Opcode"
+#define JEXCEPTION_DIVISION_BY_ZERO					"Division by zero"
+#define JEXCEPTION_NEGATIVE_ARRAY_SIZE				"Negative array size"
+#define JEXCEPTION_ARRAY_BOUNDS						"Index out of bounds of array"
+#define JEXCEPTION_NULL_POINTER						"Null pointer"
+#define JEXCEPTION_NULL_REFERENCE					"Null reference"
+#define JEXCEPTION_OUT_OF_MEMORY					"Out of memory"
+
+
+#define JCODE_NULL_REFERENCE						NULL
 
 
 #define JCLASS_MAGIC			0xCAFEBABE
@@ -35,6 +52,9 @@
 #define ACC_ABSTRACT			0x0400
 #define ACC_STRICT				0x0800
 
+
+#define T_VOID					0x0000
+#define T_REFERENCE				0X0001
 #define T_BOOLEAN				0x0004
 #define T_CHAR					0x0005
 #define T_FLOAT					0x0006
@@ -43,6 +63,20 @@
 #define T_SHORT					0x0009
 #define T_INT					0x000A
 #define T_LONG					0x000B
+
+
+#define JCLASS_TAG_UTF8STRING 			1
+#define JCLASS_TAG_UNKNOWN				2
+#define JCLASS_TAG_INTEGER				3
+#define JCLASS_TAG_FLOAT				4
+#define JCLASS_TAG_LONG					5
+#define JCLASS_TAG_DOUBLE				6
+#define JCLASS_TAG_CLASS				7
+#define JCLASS_TAG_STRING				8
+#define JCLASS_TAG_FIELD				9
+#define JCLASS_TAG_METHOD				10
+#define JCLASS_TAG_INTERFACE			11
+#define JCLASS_TAG_TYPENAME				12
 
 
 
@@ -109,18 +143,6 @@ typedef struct cputf8 {
 	char* value;
 } cputf8_t;
 
-
-
-typedef struct fieldinfo {
-	uint16_t access;
-	uint16_t name_index;
-	uint16_t desc_index;
-	uint16_t attr_count;
-
-	list_t* attributes;
-} fieldinfo_t;
-
-typedef fieldinfo_t methodinfo_t;
 
 typedef struct attrinfo {
 	uint16_t name_index;
@@ -198,6 +220,31 @@ typedef struct attr_code {
 } attr_code_t;
 
 
+typedef struct fieldinfo {
+	uint16_t access;
+	uint16_t name_index;
+	uint16_t desc_index;
+	uint16_t attr_count;
+
+	list_t* attributes;
+} fieldinfo_t;
+
+typedef struct methodinfo {
+	uint16_t access;
+	uint16_t name_index;
+	uint16_t desc_index;
+	uint16_t attr_count;
+	
+	char* name;
+	char signature[255];
+	attr_code_t* code;
+	uint8_t nargs;
+	uint8_t rettype;
+
+	list_t* attributes;
+} methodinfo_t;
+
+
 typedef struct linenumber_table {
 	uint16_t pc;
 	uint16_t line;
@@ -231,18 +278,72 @@ typedef struct jclass_header {
 } jclass_header_t;
 
 
-#define JCLASS_TAG_UTF8STRING 			1
-#define JCLASS_TAG_UNKNOWN				2
-#define JCLASS_TAG_INTEGER				3
-#define JCLASS_TAG_FLOAT				4
-#define JCLASS_TAG_LONG					5
-#define JCLASS_TAG_DOUBLE				6
-#define JCLASS_TAG_CLASS				7
-#define JCLASS_TAG_STRING				8
-#define JCLASS_TAG_FIELD				9
-#define JCLASS_TAG_METHOD				10
-#define JCLASS_TAG_INTERFACE			11
-#define JCLASS_TAG_TYPENAME				12
+
+
+
+
+typedef struct jassembly {
+	const char* filename;
+	int fd;
+	
+	jclass_header_t header;
+} jassembly_t;
+
+
+typedef struct jobject {
+	void* ref;
+	int refcount;
+	int lock;
+} jobject_t;
+
+typedef union jvalue {
+	int8_t i8;
+	int16_t i16;
+	int32_t i32;
+	int64_t i64;
+
+	uint8_t u8;
+	uint16_t u16;
+	uint32_t u32;
+	uint64_t u64;
+
+	float f32;
+	double f64;
+	
+	void* ptr;
+} jvalue_t;
+
+
+
+typedef struct jcontext {
+	list_t* assemblies;
+	jassembly_t* current_assembly;
+
+	struct {
+		jvalue_t r0;
+		jvalue_t r1;
+		jvalue_t r2;
+		jvalue_t r3;
+
+		uint32_t pc;
+		uint32_t pb;
+		uint32_t fl;
+	} regs;
+
+
+	uint8_t* code;
+
+	jvalue_t* stack;
+	uint32_t stack_size;
+	uint32_t stack_top;
+
+	jvalue_t* locals;
+	uint32_t locals_count;
+
+
+	jmp_buf retbuf;
+} jcontext_t;
+
 
 #ifdef _WITH_CPINFO
 static cpinfo_t cpinfo[] = {
@@ -261,6 +362,26 @@ static cpinfo_t cpinfo[] = {
 	{ 12, 4, "TypeName Descriptor" }
 };
 #undef _WITH_CPINFO
+#endif
+
+
+#define jclass_cp_to_method(v, c)		jclass_cp_to_field(v, (cpfield_t*) c)
+#define jclass_cp_to_interface(v, c)	jclass_cp_to_field(v, (cpfield_t*) c)
+
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* params, int params_count);
+jvalue_t jcode_function_call(jassembly_t* j, const char* name, jvalue_t* params, int params_count);
+
+methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx);
+
+
+#ifdef __cplusplus
+}
 #endif
 
 

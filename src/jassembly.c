@@ -10,9 +10,7 @@
 
 #include <assert.h>
 
-#include <jvm/jconfig.h>
-#include <jvm/jclass.h>
-#include <jvm/jassembly.h>
+#include <jvm/jvm.h>
 
 
 int jassembly_load(jassembly_t* j, const char* filename) {
@@ -47,6 +45,8 @@ static void print_attributes(jassembly_t* j, list_t* attributes) {
 
 	printf(" )\n");
 }
+
+
 
 int main(int argc, char** argv) {
 
@@ -114,6 +114,10 @@ int main(int argc, char** argv) {
 		print_attributes(&j, j.header.jc_attributes);
 		printf("\n");
 	}
+
+
+	jvalue_t ret = jcode_function_call(&j, "main", NULL, 0);
+	j_printf("Returned %d\n", ret.i32);
 
 
 	return 0;

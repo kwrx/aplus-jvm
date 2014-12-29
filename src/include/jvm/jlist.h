@@ -219,6 +219,9 @@ static inline listval_t list_at_index(list_t* list, int index) {
 	if(index < 0)
 		return (listval_t) NULL;
 
+	if(index > list->size)
+		return (listval_t) NULL;
+
 	for(listval_t value = list_head(list); value; value = list_next(list, value))
 		if(index-- == 0)
 			return value;

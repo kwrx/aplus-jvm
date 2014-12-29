@@ -17,8 +17,8 @@ OPCODE(dup) {
 }
 
 OPCODE(dup_x1) {
-	jvalue_t jv2 = JPOP_JV();
 	jvalue_t jv1 = JPOP_JV();
+	jvalue_t jv2 = JPOP_JV();
 
 	JPUSH_JV(jv1);
 	JPUSH_JV(jv2);
@@ -26,13 +26,14 @@ OPCODE(dup_x1) {
 }
 
 OPCODE(dup_x2) {
-	jvalue_t jv3 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
 	jvalue_t jv1 = JPOP_JV();
+	jvalue_t jv2 = JPOP_JV();
+	jvalue_t jv3 = JPOP_JV();
+	
 
 	JPUSH_JV(jv1);
-	JPUSH_JV(jv3);
 	JPUSH_JV(jv2);
+	JPUSH_JV(jv3);
 	JPUSH_JV(jv1);
 }
 
@@ -42,9 +43,9 @@ OPCODE(dup_x2) {
 
 
 OPCODE(swap) {
-	jvalue_t jv2 = JPOP_JV();
 	jvalue_t jv1 = JPOP_JV();
+	jvalue_t jv2 = JPOP_JV();
 
-	JPUSH_JV(jv1);
 	JPUSH_JV(jv2);
+	JPUSH_JV(jv1);
 }

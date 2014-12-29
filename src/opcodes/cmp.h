@@ -1,8 +1,8 @@
 
 
 OPCODE(lcmp) {
-	int64_t a = JPOP(i64);
 	int64_t b = JPOP(i64);
+	int64_t a = JPOP(i64);
 	int32_t r = 0;
 
 	if(a > b)
@@ -17,8 +17,8 @@ OPCODE(lcmp) {
 }
 
 OPCODE(fcmpl) {
-	float a = JPOP(f32);
 	float b = JPOP(f32);
+	float a = JPOP(f32);
 	int32_t r = 0;
 
 	if(a == NAN || b == NAN)
@@ -36,8 +36,8 @@ OPCODE(fcmpl) {
 }
 
 OPCODE(fcmpg) {
-	float a = JPOP(f32);
 	float b = JPOP(f32);
+	float a = JPOP(f32);
 	int32_t r = 0;
 
 	if(a == NAN || b == NAN)
@@ -54,8 +54,8 @@ OPCODE(fcmpg) {
 }
 
 OPCODE(dcmpl) {
-	double a = JPOP(f64);
 	double b = JPOP(f64);
+	double a = JPOP(f64);
 	int32_t r = 0;
 
 	if(a == NAN || b == NAN)
@@ -73,8 +73,8 @@ OPCODE(dcmpl) {
 }
 
 OPCODE(dcmpg) {
-	double a = JPOP(f64);
 	double b = JPOP(f64);
+	double a = JPOP(f64);
 	int32_t r = 0;
 
 	if(a == NAN || b == NAN)
