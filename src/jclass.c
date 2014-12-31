@@ -200,10 +200,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 		uint16_t idx = 0;
 		uint32_t ln = 0;
 		R16(&idx);
-		R32(&ln);
-
-
-					
+		R32(&ln);			
 
 	
 		cputf8_t utf;
@@ -284,7 +281,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 
 					R16(&cc->classes_count);
 					
-					cc->classes = (innerclass_t*) jmalloc(sizeof(innerclass_t));
+					cc->classes = (innerclass_t*) jmalloc(sizeof(innerclass_t) * cc->classes_count);
 					for(i = 0; i < cc->classes_count; i++) {
 						R16(&cc->classes[i].info_index);
 						R16(&cc->classes[i].super_index);
@@ -302,9 +299,9 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 					cc->name_index = idx;
 					cc->length = ln;
 
-					R16(&cc->lines_count);
+					R16(&cc->lines_count);	
 					
-					cc->table = (linenumber_table_t*) jmalloc(sizeof(linenumber_table_t));
+					cc->table = (linenumber_table_t*) jmalloc(sizeof(linenumber_table_t) * cc->lines_count);
 					for(i = 0; i < cc->lines_count; i++) {
 						R16(&cc->table[i].pc);
 						R16(&cc->table[i].line);
@@ -320,7 +317,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 			
 					R16(&cc->vars_count);
 
-					cc->table = (localvars_table_t*) jmalloc(sizeof(localvars_table_t));
+					cc->table = (localvars_table_t*) jmalloc(sizeof(localvars_table_t) * cc->vars_count);
 					for(i = 0; i < cc->vars_count; i++) {
 						R16(&cc->table[i].length);
 						R16(&cc->table[i].name_index);

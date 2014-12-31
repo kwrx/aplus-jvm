@@ -274,6 +274,7 @@ opcode_t j_opcodes[255] = {
 	_OP(invokedynamic),
 	_OP(new),
 	_OP(newarray),
+	_OP(anewarray),
 };
 
 #endif

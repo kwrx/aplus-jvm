@@ -32,6 +32,8 @@ jvm : $(OFILES)
 	@$(ASM) $(AFLAGS) $< -o $@
 	
 
+install: jvm
+	@$(CP) jvm bin/jvm
 
 clean:
 	-@$(RM) $(OFILES)

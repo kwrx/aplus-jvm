@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 	jassembly_t j;
 	assert(jassembly_load(&j, argv[1]) == 0);
 
-
+#ifdef DEBUG
 	printf("%s (%d)\n", j.filename, j.fd);
 	printf("Magic:\t\t%8X\n", j.header.jc_magic);
 	printf("Minor:\t\t%8d\n", j.header.jc_minor);
@@ -115,6 +115,7 @@ int main(int argc, char** argv) {
 		printf("\n");
 	}
 
+#endif
 
 	jvalue_t ret = jcode_function_call(&j, "main", NULL, 0);
 	j_printf("Returned %d\n", ret.i32);

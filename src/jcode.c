@@ -21,6 +21,32 @@
 
 int j_throw(jcontext_t* j, char* exception) {
 	printf("Exception! %s\n", exception);
+
+	if(!j || !j->code)
+		exit(1);
+
+	attr_linenumbers_t* ln = (attr_linenumbers_t*) jcode_find_attribute(j->current_assembly, j->method->code->attributes, "LineNumberTable");
+	assert(ln);
+
+	int i = 0;
+	while(j->regs.pb >= ln->table[i].pc)
+		i++;
+	i--;
+
+	printf("\tat %s:%d\n", j->method->name, ln->table[i].line);
+
+#if defined(DEBUG)
+	printf("\tat bytecode: [%d+%d] %s\n", j->regs.pb, j->regs.pc - j->regs.pb, j_opcodes[j->code[j->regs.pb]].name);
+
+#if defined(VERBOSE)
+	printf("\nStackdump:\n");
+	printf("Size: %d; Position: %d\n", j->stack_size, j->stack_top);
+	
+	for(i = 0; i < j->stack_size; i++)
+		printf(" [%d] %lld\n", i, j->stack[i].i64);
+#endif
+#endif
+
 	exit(1);
 }
 
@@ -34,11 +60,15 @@ int jcode_context_run(jcontext_t* j) {
 	j->regs.pb = 0;
 
 	while(1) {
-		if(j_opcodes[j->code[j->regs.pc]].handler == NULL)
+		if(j_opcodes[j->code[j->regs.pc]].handler == NULL) {
+#if defined(DEBUG)
+			j_printf("Wrong opcode: %X (%d) at %d\n", j->code[j->regs.pc], j->code[j->regs.pc], j->regs.pc);
+#endif
 			j_throw(j, JEXCEPTION_INVALID_OPCODE);
+		}
 
-#ifdef DEBUG
-		j_printf("[%d] %s\n", j->regs.pc, j_opcodes[j->code[j->regs.pc]].name);
+#if defined(DEBUG) && defined(VERBOSE)
+		j_printf("[%d] (%2X) %s\n", j->regs.pc, j->code[j->regs.pc], j_opcodes[j->code[j->regs.pc]].name);
 #endif
 		
 		j->regs.pb = j->regs.pc;
@@ -124,6 +154,7 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 	context->stack_top = 0;
 
 	context->code = method->code->code;
+	context->method = method;
 
 	int i, p;
 	for(i = 0, p = 0; i < params_count; i++, p++) {

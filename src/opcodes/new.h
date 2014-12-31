@@ -39,3 +39,23 @@ OPCODE(newarray) {
 
 	JPUSH(ptr, R1.ptr);
 }
+
+OPCODE(anewarray) {
+	int16_t idx = PC16;
+	PC += 2;
+
+	R0.i32 = JPOP(i32);
+
+	if(R0.i32 < 0)
+		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
+
+#if HAVE_RUNTIME_POINTERS
+	/* TODO */
+#endif
+
+	R1.ptr = (void*) jmalloc(R0.i32 * sizeof(void*));
+	if(R1.ptr == NULL)
+		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+
+	JPUSH(ptr, R1.ptr);
+}

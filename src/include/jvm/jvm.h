@@ -332,6 +332,7 @@ typedef struct jcontext {
 
 
 	uint8_t* code;
+	methodinfo_t* method;
 
 	jvalue_t* stack;
 	uint32_t stack_size;
@@ -373,6 +374,8 @@ static cpinfo_t cpinfo[] = {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+attrinfo_t* jcode_find_attribute(jassembly_t* j, list_t* attributes, const char* name);
 
 jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* params, int params_count);
 jvalue_t jcode_function_call(jassembly_t* j, const char* name, jvalue_t* params, int params_count);

@@ -19,12 +19,12 @@ CP		:= cp
 MV		:= mv
 
 
-DEFINES	:= -DDEBUG -DTEST -DARCH=\"$(ARCH)\"
+DEFINES	:= -DDEBUG -D_VERBOSE -DTEST -DARCH=\"$(ARCH)\"
 LIBS	:= -lpthread -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wall
 
-CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -masm=intel -nostdlib -std=c99 -mfpmath=sse -msse2 -O3 -g -fno-strict-aliasing
-CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -masm=intel -nostdlib
+CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -std=c99 -mfpmath=sse -msse2 -Ofast -fno-strict-aliasing
+CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c
 AFLAGS	:= $(DEFINES) -f elf
 LFLAGS	:=
 
