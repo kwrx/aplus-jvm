@@ -8,54 +8,48 @@ OPCODE(newarray) {
 	int8_t type = PC8;
 	PC++;
 
-	R0.i32 = JPOP(i32);
+	int32_t count = JPOP(i32);
 
-	if(R0.i32 < 0)
+	if(count < 0)
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
-	switch(type) {
-		case T_BOOLEAN:
-		case T_CHAR:
-		case T_BYTE:
-			R1.ptr = (void*) jmalloc(R0.i32 * sizeof(int8_t));
-			break;
-		case T_FLOAT:
-		case T_INT:
-			R1.ptr = (void*) jmalloc(R0.i32 * sizeof(int32_t));
-			break;
-		case T_DOUBLE:
-		case T_LONG:
-			R1.ptr = (void*) jmalloc(R0.i32 * sizeof(int64_t));
-			break;
-		case T_SHORT:
-			R1.ptr = (void*) jmalloc(R0.i32 * sizeof(int16_t));
-			break;
-		default:
-			j_throw(j, JEXCEPTION_RUNTIME_ERROR);
-	}
 
-	if(R1.ptr == NULL)
+	jarray_t* arr = (jarray_t*) jmalloc(sizeof(jarray_t));
+	if(!__builtin_expect((long int) arr, 0))
 		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
 
-	JPUSH(ptr, R1.ptr);
+
+	arr->data = (jvalue_t*) jmalloc(sizeof(jvalue_t) * count);
+	if(!__builtin_expect((long int) arr->data, 0))
+		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+
+
+	arr->type = type;
+	arr->length = count;
+	JPUSH(ptr, (void*) arr);
 }
 
 OPCODE(anewarray) {
-	int16_t idx = PC16;
+	(void) PC16;
 	PC += 2;
 
-	R0.i32 = JPOP(i32);
+	int32_t count = JPOP(i32);
 
-	if(R0.i32 < 0)
+	if(count < 0)
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
-#if HAVE_RUNTIME_POINTERS
-	/* TODO */
-#endif
 
-	R1.ptr = (void*) jmalloc(R0.i32 * sizeof(void*));
-	if(R1.ptr == NULL)
+	jarray_t* arr = (jarray_t*) jmalloc(sizeof(jarray_t));
+	if(!__builtin_expect((long int) arr, 0))
 		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
 
-	JPUSH(ptr, R1.ptr);
+
+	arr->data = (jvalue_t*) jmalloc(sizeof(jvalue_t) * count);
+	if(!__builtin_expect((long int) arr->data, 0))
+		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+
+
+	arr->type = T_REFERENCE;
+	arr->length = count;
+	JPUSH(ptr, (void*) arr);
 }

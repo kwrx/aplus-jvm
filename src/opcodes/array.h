@@ -1,170 +1,51 @@
 
 
 OPCODE(iaload) {
-	int idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
-
-	if(aref == NULL)
+	int32_t idx = JPOP(i32);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
+	
+	if(!__builtin_expect((long int) aref, 0))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
-	JPUSH(i32, aref[idx]);
+#if HAVE_ARRAY_BOUNDS_CHECKING
+	if(idx >= aref->length)
+		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
+#endif
+
+	JPUSH_JV(aref->data[idx]);
 }
 
-OPCODE(laload) {
-	int idx = JPOP(i32);
-	int64_t* aref = (int64_t*) JPOP(ptr);
+#define j_op_laload	j_op_iaload
+#define j_op_faload	j_op_iaload
+#define j_op_daload	j_op_iaload
+#define j_op_aaload	j_op_iaload
+#define j_op_baload	j_op_iaload
+#define j_op_caload	j_op_iaload
+#define j_op_saload	j_op_iaload
 
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(i64, aref[idx]);
-}
-
-OPCODE(faload) {
-	int idx = JPOP(i32);
-	float* aref = (float*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(f32, aref[idx]);
-}
-
-OPCODE(daload) {
-	int idx = JPOP(i32);
-	double* aref = (double*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(f64, aref[idx]);
-}
-
-OPCODE(aaload) {
-	int idx = JPOP(i32);
-	void** aref = (void**) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(ptr, aref[idx]);
-}
-
-OPCODE(baload) {
-	int idx = JPOP(i32);
-	uint8_t* aref = (uint8_t*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(u8, aref[idx]);
-}
-
-OPCODE(caload) {
-	int idx = JPOP(i32);
-	int8_t* aref = (int8_t*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(i8, aref[idx]);
-}
-
-OPCODE(saload) {
-	int idx = JPOP(i32);
-	int16_t* aref = (int16_t*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	JPUSH(i16, aref[idx]);
-}
 
 
 OPCODE(iastore) {
-	R0.i32 = JPOP(i32);
-	int idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jvalue_t v = JPOP_JV();
+	int32_t idx = JPOP(i32);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 
-	if(aref == NULL)
+	if(!__builtin_expect((long int) aref, 0))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
-	aref[idx] = R0.i32;
+#if HAVE_ARRAY_BOUNDS_CHECKING
+	if(idx >= aref->length)
+		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
+#endif
+
+	aref->data[idx] = v;
 }
 
-OPCODE(lastore) {
-	R0.i64 = JPOP(i64);
-	int idx = JPOP(i32);
-	int64_t* aref = (int64_t*) JPOP(ptr);
+#define j_op_lastore	j_op_iastore
+#define j_op_fastore	j_op_iastore
+#define j_op_dastore	j_op_iastore
+#define j_op_aastore	j_op_iastore
+#define j_op_bastore	j_op_iastore
+#define j_op_castore	j_op_iastore
+#define j_op_sastore	j_op_iastore
 
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.i64;
-}
-
-OPCODE(fastore) {
-	R0.f32 = JPOP(f32);
-	int idx = JPOP(i32);
-	float* aref = (float*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.f32;
-}
-
-OPCODE(dastore) {
-	R0.f64 = JPOP(f64);
-	int idx = JPOP(i32);
-	double* aref = (double*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.f64;
-}
-
-OPCODE(aastore) {
-	R0.ptr = JPOP(ptr);
-	int idx = JPOP(i32);
-	void** aref = (void**) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.ptr;
-}
-
-OPCODE(bastore) {
-	R0.u8 = JPOP(u8);
-	int idx = JPOP(i32);
-	uint8_t* aref = (uint8_t*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.u8;
-}
-
-OPCODE(castore) {
-	R0.i8 = JPOP(i8);
-	int idx = JPOP(i32);
-	int8_t* aref = (int8_t*) JPOP(ptr);
-
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.i8;
-}
-
-OPCODE(sastore) {
-	R0.i16 = JPOP(i16);
-	int idx = JPOP(i32);
-	int16_t* aref = (int16_t*) JPOP(ptr);
-	
-	if(aref == NULL)
-		j_throw(j, JEXCEPTION_NULL_POINTER);
-
-	aref[idx] = R0.i16;
-}

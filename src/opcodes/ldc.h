@@ -7,11 +7,17 @@ OPCODE(ldc) {
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
 	assert(v);
 
-	if(v->tag != JCLASS_TAG_UTF8STRING) {
-		JPUSH(i32, v->value);
-	} else {
-		JPUSH(ptr, (void*) v->data);
+
+	switch(v->tag) {
+		case JCLASS_TAG_STRING:
+			v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, v->value - 1);
+		case JCLASS_TAG_UTF8STRING:
+			JPUSH(ptr, (void*) v->data);
+			break;
+		default:
+			JPUSH(i32, v->value);
 	}
+
 }
 
 OPCODE(ldc_w) {
@@ -21,10 +27,14 @@ OPCODE(ldc_w) {
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
 	assert(v);
 
-	if(v->tag != JCLASS_TAG_UTF8STRING) {
-		JPUSH(i32, v->value);
-	} else {
-		JPUSH(ptr, (void*) v->data);
+	switch(v->tag) {
+		case JCLASS_TAG_STRING:
+			v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, v->value - 1);
+		case JCLASS_TAG_UTF8STRING:
+			JPUSH(ptr, (void*) v->data);
+			break;
+		default:
+			JPUSH(i32, v->value);
 	}
 }
 

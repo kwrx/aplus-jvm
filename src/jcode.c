@@ -60,20 +60,22 @@ int jcode_context_run(jcontext_t* j) {
 	j->regs.pb = 0;
 
 	while(1) {
-		if(j_opcodes[j->code[j->regs.pc]].handler == NULL) {
+		register int opcode = j->code[j->regs.pc];
+
 #if defined(DEBUG)
-			j_printf("Wrong opcode: %X (%d) at %d\n", j->code[j->regs.pc], j->code[j->regs.pc], j->regs.pc);
-#endif
+		if(j_opcodes[opcode].handler == NULL) {
+			j_printf("Wrong opcode: %X (%d) at %d\n", opcode, opcode, j->regs.pc);
 			j_throw(j, JEXCEPTION_INVALID_OPCODE);
 		}
+#endif
 
 #if defined(DEBUG) && defined(VERBOSE)
-		j_printf("[%d] (%2X) %s\n", j->regs.pc, j->code[j->regs.pc], j_opcodes[j->code[j->regs.pc]].name);
+		j_printf("[%d] (%2X) %s\n", j->regs.pc, opcode, j_opcodes[opcode].name);
 #endif
-		
+	
 		j->regs.pb = j->regs.pc;
 		j->regs.pc += 1;
-		j_opcodes[j->code[j->regs.pc - 1]].handler (j);
+		j_opcodes[opcode].handler (j);
 	}
 
 	return 0;
@@ -141,6 +143,82 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 
 	if(params_count > 0)
 		assert(params);
+
+
+	if(method->access & ACC_NATIVE) {
+		jnative_t* native = (jnative_t*) jnative_find_method(method->name);
+		assert(native);
+		
+		if(!__builtin_expect((long int) native, 0))
+			j_throw(NULL, "Native method not found");
+		
+
+		char* s = method->signature;
+		register int i = 0, p = 0;
+		while(s && params_count--) {
+			switch(*s) {
+				case 'B':
+				case 'C':
+				case 'F':
+				case 'I':
+				case 'L':
+				case 'S':
+				case 'Z':
+				case 'V':
+					__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(params[p++].u32));
+					i += 4; 
+					break;
+				case 'D':
+				case 'J':
+					__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(params[p++].u32));
+					__asm__ __volatile__ ("mov dword ptr [esp + edi + 4], esi" : : "D"(i), "S"((int32_t) (params[p++].u64 >> 32)));
+					i += 8;
+					break;
+				case '[': {
+						jarray_t* a = (jarray_t*) params[p++].ptr;
+						register int j;
+
+						
+						switch(a->type) {
+							case T_LONG:
+							case T_DOUBLE:
+								for(j = 0; j < a->length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(a->data[j].u32));
+									__asm__ __volatile__ ("mov dword ptr [esp + edi + 4], esi" : : "D"(i), "S"((int32_t) (a->data[j].u64 >> 32)));
+
+									i += 8;
+								}
+							break;
+
+							default:
+								for(j = 0; j < a->length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(a->data[j].u32));
+									i += 4;
+								}
+						}	
+					}
+					break;		
+				default:
+					j_throw(NULL, "Invalid native method signature");
+			}
+	
+			s++;
+		}
+
+
+		switch(method->rettype) {
+			case T_LONG:
+			case T_DOUBLE:
+				return (jvalue_t) ((uint64_t (*) ()) native->handler) ();
+			default:
+				return (jvalue_t) ((uint32_t (*) ()) native->handler) ();
+		}
+	}
+
+
+
+	if(!__builtin_expect((long int) method->code, 0))
+		j_throw(NULL, "Invalid code for this method");
 
 
 	jcontext_t* context = (jcontext_t*) jmalloc(sizeof(jcontext_t));

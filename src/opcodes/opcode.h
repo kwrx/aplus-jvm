@@ -3,7 +3,10 @@
 
 
 #include <math.h>
+#include "config.h"
 
+
+#define __FASTCALL		__attribute__((fastcall))
 
 
 #define JPUSH(t, v)	\
@@ -22,7 +25,7 @@
 
 
 #define OPCODE(n)	\
-	static inline void j_op_##n (jcontext_t* j)
+	static __FASTCALL inline void j_op_##n (jcontext_t* j)
 
 #define OP(n)		\
 	j_op_##n
@@ -74,15 +77,22 @@
 #include "new.h"
 
 
-typedef void (*opcode_handler_t) (jcontext_t*);
+typedef __FASTCALL void (*opcode_handler_t) (jcontext_t*);
 typedef struct opcode {
+#ifdef DEBUG
 	char* name;
+#endif
 	opcode_handler_t handler;
 } opcode_t;
 
 
+#ifdef DEBUG
 #define _OP(x)	\
 	{ #x, OP(x) }
+#else
+#define _OP(x)	\
+	{ OP(x) }
+#endif
 
 opcode_t j_opcodes[255] = {
 	_OP(nop),

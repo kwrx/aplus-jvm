@@ -30,6 +30,7 @@ int jassembly_load(jassembly_t* j, const char* filename) {
 
 
 #ifdef TEST
+#ifdef DEBUG
 static void print_attributes(jassembly_t* j, list_t* attributes) {
 	assert(j && attributes);
 
@@ -45,12 +46,15 @@ static void print_attributes(jassembly_t* j, list_t* attributes) {
 
 	printf(" )\n");
 }
-
+#endif
 
 
 int main(int argc, char** argv) {
 
 	assert(argc > 1);
+
+
+	jnative_register_function("Print", "L[", T_INT, printf);
 
 	jassembly_t j;
 	assert(jassembly_load(&j, argv[1]) == 0);
@@ -116,6 +120,7 @@ int main(int argc, char** argv) {
 	}
 
 #endif
+
 
 	jvalue_t ret = jcode_function_call(&j, "main", NULL, 0);
 	j_printf("Returned %d\n", ret.i32);

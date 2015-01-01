@@ -19,14 +19,14 @@ CP		:= cp
 MV		:= mv
 
 
-DEFINES	:= -DDEBUG -D_VERBOSE -DTEST -DARCH=\"$(ARCH)\"
+DEFINES	:= -DDEBUG -DVERBOSE -DTEST -DARCH=\"$(ARCH)\"
 LIBS	:= -lpthread -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wall
 
-CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -std=c99 -mfpmath=sse -msse2 -Ofast -fno-strict-aliasing
-CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c
+CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel -std=c99 -mfpmath=sse -msse3 -Ofast -fno-strict-aliasing 
+CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel
 AFLAGS	:= $(DEFINES) -f elf
-LFLAGS	:=
+LFLAGS	:= -s
 
 
 CROSSLIB:= /opt/cross/usr

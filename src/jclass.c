@@ -292,8 +292,14 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 					assert(list_add(attributes, (listval_t) cc) == 0);
 				}
 				break;
-			case JCLASS_ATTR_SYNTHETIC:
-				break;	/* Nothing */
+			case JCLASS_ATTR_SYNTHETIC: {
+					attrinfo_t* cc = (attrinfo_t*) jmalloc(sizeof(attrinfo_t));
+					cc->name_index = idx;
+					cc->length = ln;
+
+					assert(list_add(attributes, (listval_t) cc) == 0);
+				}
+				break;
 			case JCLASS_ATTR_LINENUMBERS: {
 					attr_linenumbers_t* cc = (attr_linenumbers_t*) jmalloc(sizeof(attr_linenumbers_t));
 					cc->name_index = idx;
@@ -381,12 +387,13 @@ int jclass_parse_desc(const char* desc, uint8_t* nargs, uint8_t* rettype, char* 
 						assert(desc);
 						break;
 				}
+				*signature++ = 'L';
 				break;
+			default:
+				*signature++ = *desc;
 		}
 
-		*signature++ = *desc == ';'
-							? 'L'
-							: *desc;
+		
 		
 		*nargs += 1;
 		desc++;
@@ -444,8 +451,15 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 	cputf8_t utf_n, utf_d;
 	assert(jclass_get_utf8_from_cp(j, &utf_n, method->name_index) == 0);
 	assert(jclass_get_utf8_from_cp(j, &utf_d, method->desc_index) == 0);
-	assert(jclass_parse_desc(utf_d.value, &method->nargs, &method->rettype, method->signature) == 0);
 
+	jnative_t* native;
+	if((native = (jnative_t*) jnative_find_method(utf_n.value)) == NULL)
+		assert(jclass_parse_desc(utf_d.value, &method->nargs, &method->rettype, method->signature) == 0);
+	else {
+		method->nargs = strlen(native->signature);
+		method->rettype = native->rettype;
+		strcpy(method->signature, native->signature);
+	}
 	
 	method->name = utf_n.value;
 	method->code = (attr_code_t*) jcode_find_attribute(j, method->attributes, "Code");
@@ -511,6 +525,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 			assert(list_add(j->header.jc_cpinfo, (listval_t) jmalloc(sizeof(cpvalue_t))) == 0);
 			i++;
 		}
+
 
 		if(tag != JCLASS_TAG_UTF8STRING)
 			continue;

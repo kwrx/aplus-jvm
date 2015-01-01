@@ -44,13 +44,18 @@
 #define ACC_PROTECTED			0x0004
 #define ACC_STATIC				0x0008
 #define ACC_FINAL				0x0010
+#define ACC_SUPER				0x0020
 #define ACC_SYNCHRONIZED		0x0020
 #define ACC_VOLATILE			0x0040
+#define ACC_VARARGS				0x0080
 #define ACC_TRANSIENT			0x0080
 #define ACC_NATIVE				0x0100
 #define ACC_INTERFACE			0x0200
 #define ACC_ABSTRACT			0x0400
 #define ACC_STRICT				0x0800
+#define ACC_SYNTHETIC			0x1000
+#define ACC_ANNOTATION			0x2000
+#define ACC_ENUM				0x4000
 
 
 #define T_VOID					0x0000
@@ -237,6 +242,7 @@ typedef struct methodinfo {
 	
 	char* name;
 	char signature[255];
+
 	attr_code_t* code;
 	uint8_t nargs;
 	uint8_t rettype;
@@ -290,12 +296,6 @@ typedef struct jassembly {
 } jassembly_t;
 
 
-typedef struct jobject {
-	void* ref;
-	int refcount;
-	int lock;
-} jobject_t;
-
 typedef union jvalue {
 	int8_t i8;
 	int16_t i16;
@@ -312,6 +312,19 @@ typedef union jvalue {
 	
 	void* ptr;
 } jvalue_t;
+
+typedef struct jobject {
+	void* ref;
+	int refcount;
+	int lock;
+} jobject_t;
+
+
+typedef struct jarray {
+	jvalue_t* data;
+	int32_t length;
+	uint8_t type;
+} jarray_t;
 
 
 
@@ -364,6 +377,22 @@ static cpinfo_t cpinfo[] = {
 };
 #undef _WITH_CPINFO
 #endif
+
+
+typedef jvalue_t (*jnative_handler_t) (int argc, jvalue_t* argv);
+
+typedef struct jnative {
+	char* name;
+	char* signature;
+	int16_t rettype;
+	jnative_handler_t handler;
+} jnative_t;
+
+#define JNATIVE(func)					\
+	jnative_func_##func
+
+#define JNULL	\
+	(jvalue_t) 0
 
 
 #define jclass_cp_to_method(v, c)		jclass_cp_to_field(v, (cpfield_t*) c)
