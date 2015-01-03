@@ -11,7 +11,7 @@ public class Overloading {
 
 	public static void main(String[] args) {
 		int a = sum(10, 10);
-		long b = sum(10, 10);
+		long b = sum(10L, 10L);
 
 		return;
 	}

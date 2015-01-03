@@ -6,7 +6,7 @@ OPCODE(ifeq) {
 
 	int32_t v = JPOP(i32);
 
-	if(v == 0)
+	if(!__builtin_expect(v, 0))
 		JGOTO(off);
 }
 
@@ -16,7 +16,7 @@ OPCODE(ifne) {
 
 	int32_t v = JPOP(i32);
 
-	if(v != 0)
+	if(__builtin_expect(v, 0))
 		JGOTO(off);
 }
 
@@ -66,7 +66,6 @@ OPCODE(if_icmpeq) {
 
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
-
 
 	if(a == b)
 		JGOTO(off);

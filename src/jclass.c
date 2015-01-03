@@ -468,6 +468,49 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 }
 
 
+int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
+	assert(j && cp);
+
+
+	cpclass_t cl;
+	assert(jclass_cp_to_class(cp, &cl) == 0);
+
+
+	cputf8_t utf;
+	assert(jclass_get_utf8_from_cp(j, &utf, cl.name_index) == 0);
+
+	j_printf("ClassName: %s\n", utf.value);
+
+	if(strcmp(j->name, utf.value) == 0)
+		return 0;
+
+	jassembly_t* dep = jmalloc(sizeof(jassembly_t));
+	assert(jassembly_load(dep, utf.value) == 0);
+	assert(list_add(j->deps, (listval_t) dep) == 0);
+
+
+	dep->index = index;
+
+	return 0;
+}
+
+int jclass_resolve_deps(jassembly_t* j) {
+	assert(j);
+
+	int index = 1;
+	list_foreach(value, j->header.jc_cpinfo) {
+		cpvalue_t* cc = (cpvalue_t*) value;
+		
+		if(cc->tag == JCLASS_TAG_CLASS)
+			assert(jclass_resolve_dep(j, cc, index) == 0);
+
+		index++;
+	}
+
+	return 0;
+}
+
+
 int jclass_parse_assembly(jassembly_t* j) {
 	assert(j);
 
@@ -521,20 +564,20 @@ int jclass_parse_assembly(jassembly_t* j) {
 		assert(list_add(j->header.jc_cpinfo, (listval_t) cp) == 0);
 		
 
-		if(tag == JCLASS_TAG_LONG || tag == JCLASS_TAG_DOUBLE) {
-			assert(list_add(j->header.jc_cpinfo, (listval_t) jmalloc(sizeof(cpvalue_t))) == 0);
-			i++;
+		switch(tag) {
+			case JCLASS_TAG_LONG:
+			case JCLASS_TAG_DOUBLE:
+				assert(list_add(j->header.jc_cpinfo, (listval_t) jmalloc(sizeof(cpvalue_t))) == 0);
+				i++;
+				break;
+			case JCLASS_TAG_UTF8STRING:
+				cp->data = (char*) jmalloc(cp->value + 1);
+				memset(cp->data, 0, cp->value + 1);
+				RXX(cp->data, cp->value);
+				break;
+			default:
+				continue;
 		}
-
-
-		if(tag != JCLASS_TAG_UTF8STRING)
-			continue;
-
-
-		cp->data = (char*) jmalloc(cp->value + 1);
-		memset(cp->data, 0, cp->value + 1);
-		RXX(cp->data, cp->value);
-
 	}
 
 	
@@ -543,8 +586,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 	R16(&j->header.jc_super);
 	R16(&j->header.jc_interfaces_count);
 
-
-
+	j->index = j->header.jc_this;
 	j->header.jc_interfaces = (uint16_t*) jmalloc(j->header.jc_interfaces_count * sizeof(uint16_t));
 	
 	
@@ -587,7 +629,9 @@ int jclass_parse_assembly(jassembly_t* j) {
 	}
 
 	R16(&j->header.jc_attributes_count);
+
 	assert(jclass_parse_attributes(j, j->header.jc_attributes, j->header.jc_attributes_count) == 0);
+	assert(jclass_resolve_deps(j) == 0);
 
 	return 0;
 }

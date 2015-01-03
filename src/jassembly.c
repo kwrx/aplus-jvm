@@ -13,12 +13,33 @@
 #include <jvm/jvm.h>
 
 
+static char* __classname(const char* fn) {
+	char* p = (char*) strdup(fn);
+	assert(p);
+
+	int i = strlen(p) - 1;
+	while(i--) {
+		switch(p[i]) {
+			case '.':
+				p[i] = 0;
+				break;
+			case '/':
+				return &p[i + 1];
+		}
+	}
+
+	return (char*) fn;
+}
+
+
 int jassembly_load(jassembly_t* j, const char* filename) {
 	assert(j && filename);
 	memset(j, 0, sizeof(jassembly_t));
 
-	j->filename = filename;
+	j->name = __classname(filename);
 	j->fd = open(filename, O_RDONLY, 0644);
+
+	/* TODO: Search directiories */
 	
 	assert(j->fd > 0);
 	assert(jclass_parse_assembly(j) == 0);
@@ -60,7 +81,7 @@ int main(int argc, char** argv) {
 	assert(jassembly_load(&j, argv[1]) == 0);
 
 #ifdef DEBUG
-	printf("%s (%d)\n", j.filename, j.fd);
+	printf("Name:\t\t%s (%d)\n", j.name, j.fd);
 	printf("Magic:\t\t%8X\n", j.header.jc_magic);
 	printf("Minor:\t\t%8d\n", j.header.jc_minor);
 	printf("Major:\t\t%8d\n", j.header.jc_major);

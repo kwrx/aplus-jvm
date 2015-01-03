@@ -7,6 +7,5 @@ OPCODE(iinc) {
 	int8_t inc = PC8;
 	PC++;
 
-	assert(idx < j->locals_count);
-	j->locals[idx].i64 += inc;
+	j->locals[idx].i32 += inc;
 }

@@ -19,7 +19,6 @@ OPCODE(ret) {
 	uint8_t idx = PC8;
 	PC++;
 
-	assert(idx < j->locals_count);
 	PC = j->locals[idx].i32;
 }
 
@@ -36,19 +35,13 @@ OPCODE(tableswitch) {
 	PC += 4;
 
 	int32_t idx = JPOP(i32);
-	int32_t i = 0;
-	int32_t off = 0;
 
-	if(idx < low || idx > high)
-		off = def;
-	else {
-		for(i = 0; i < (idx - low); i++) {
-			off = PC32;
-			PC += 4;
-		}
+	if(idx < low || idx > high) {
+		JGOTO(def);
+	} else {
+		PC += ((idx - low) * 4);
+		JGOTO(PC32);
 	}
-
-	JGOTO(off);
 }
 
 

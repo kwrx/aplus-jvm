@@ -87,9 +87,26 @@ methodinfo_t* jcode_find_method(jassembly_t* j, const char* name) {
 			methodinfo_t* v = (methodinfo_t*) value;
 
 			cputf8_t utf;
-			jclass_get_utf8_from_cp(j, &utf, v->name_index);
+			assert(jclass_get_utf8_from_cp(j, &utf, v->name_index) == 0);
 			
 			if(strcmp(utf.value, name) == 0)
+				return v;
+		}
+	}
+
+	return NULL;
+}
+
+methodinfo_t* jcode_find_method_and_desc(jassembly_t* j, const char* name, const char* desc) {
+	if(j->header.jc_methods_count) {
+		list_foreach(value, j->header.jc_methods) {
+			methodinfo_t* v = (methodinfo_t*) value;
+
+			cputf8_t utf, utf_d;
+			assert(jclass_get_utf8_from_cp(j, &utf, v->name_index) == 0);
+			assert(jclass_get_utf8_from_cp(j, &utf_d, v->desc_index) == 0);
+			
+			if((strcmp(utf.value, name) == 0) && (strcmp(utf_d.value, desc) == 0))
 				return v;
 		}
 	}
@@ -107,8 +124,6 @@ methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx) {
 	assert(jclass_cp_to_method(v, &mref) == 0);
 
 
-
-
 	v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, mref.typename_index - 1);
 	assert(v);
 
@@ -116,10 +131,11 @@ methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx) {
 	assert(jclass_cp_to_typename(v, &ctype) == 0);
 
 
-	cputf8_t utf;
+	cputf8_t utf, utf_d;
 	assert(jclass_get_utf8_from_cp(j, &utf, ctype.name_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_d, ctype.desc_index) == 0);
 
-	return jcode_find_method(j, utf.value);
+	return jcode_find_method_and_desc(j, utf.value, utf_d.value);
 }
 
 attrinfo_t* jcode_find_attribute(jassembly_t* j, list_t* attributes, const char* name) {
@@ -175,26 +191,45 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 					i += 8;
 					break;
 				case '[': {
-						jarray_t* a = (jarray_t*) params[p++].ptr;
+						void* a = (void*) params[p++].ptr;
 						register int j;
-
+						int32_t length = ((int32_t*) a) [-1];
+						int32_t type = ((int32_t*) a) [-2];
 						
-						switch(a->type) {
+						switch(type) {
 							case T_LONG:
 							case T_DOUBLE:
-								for(j = 0; j < a->length; j++) {
-									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(a->data[j].u32));
-									__asm__ __volatile__ ("mov dword ptr [esp + edi + 4], esi" : : "D"(i), "S"((int32_t) (a->data[j].u64 >> 32)));
+								for(j = 0; j < length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i),  "S"((uint32_t) (((uint64_t*) a) [j])));
+									__asm__ __volatile__ ("mov dword ptr [esp + edi + 4], esi" : : "D"(i), "S"((uint32_t) (((uint64_t*) a) [j] >> 32)));
 
 									i += 8;
 								}
-							break;
-
-							default:
-								for(j = 0; j < a->length; j++) {
-									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(a->data[j].u32));
+								break;
+							case T_INT:
+							case T_FLOAT:
+							case T_REFERENCE:
+								for(j = 0; j < length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"(((uint32_t*) a) [j]));
 									i += 4;
 								}
+								break;
+							case T_BYTE:
+							case T_CHAR:
+							case T_BOOLEAN:	
+								for(j = 0; j < length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"((uint32_t) (((uint8_t*) a) [j])));
+									i += 4;
+								}
+								break;
+							case T_SHORT:
+								for(j = 0; j < length; j++) {
+									__asm__ __volatile__ ("mov dword ptr [esp + edi], esi" : : "D"(i), "S"((uint32_t) (((uint16_t*) a) [j])));
+									i += 4;
+								}
+								break;
+							default:
+								j_throw(NULL, JEXCEPTION_INVALID_TYPE " of array");
 						}	
 					}
 					break;		

@@ -12,6 +12,7 @@
 
 #define JEXCEPTION_RUNTIME_ERROR					"Runtime error"
 #define JEXCEPTION_INVALID_OPCODE					"Invalid Opcode"
+#define JEXCEPTION_INVALID_TYPE						"Invalid type"
 #define JEXCEPTION_DIVISION_BY_ZERO					"Division by zero"
 #define JEXCEPTION_NEGATIVE_ARRAY_SIZE				"Negative array size"
 #define JEXCEPTION_ARRAY_BOUNDS						"Index out of bounds of array"
@@ -58,8 +59,7 @@
 #define ACC_ENUM				0x4000
 
 
-#define T_VOID					0x0000
-#define T_REFERENCE				0X0001
+
 #define T_BOOLEAN				0x0004
 #define T_CHAR					0x0005
 #define T_FLOAT					0x0006
@@ -68,6 +68,8 @@
 #define T_SHORT					0x0009
 #define T_INT					0x000A
 #define T_LONG					0x000B
+#define T_VOID					0x000C
+#define T_REFERENCE				0X000D
 
 
 #define JCLASS_TAG_UTF8STRING 			1
@@ -83,6 +85,7 @@
 #define JCLASS_TAG_INTERFACE			11
 #define JCLASS_TAG_TYPENAME				12
 
+#define JARRAY_MAGIC					0xFFAA4466
 
 
 typedef struct cpinfo {
@@ -289,10 +292,12 @@ typedef struct jclass_header {
 
 
 typedef struct jassembly {
-	const char* filename;
+	const char* name;
 	int fd;
-	
+	int index;
+
 	jclass_header_t header;
+	list_t* deps;
 } jassembly_t;
 
 
@@ -317,19 +322,13 @@ typedef struct jobject {
 	void* ref;
 	int refcount;
 	int lock;
+
+	char* name;
+	char* fullname;
 } jobject_t;
 
 
-typedef struct jarray {
-	jvalue_t* data;
-	int32_t length;
-	uint8_t type;
-} jarray_t;
-
-
-
 typedef struct jcontext {
-	list_t* assemblies;
 	jassembly_t* current_assembly;
 
 	struct {

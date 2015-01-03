@@ -10,10 +10,10 @@
 
 
 #define JPUSH(t, v)	\
-	{ j->stack[j->stack_top++].t = (v); }
+	{ j->stack[j->stack_top].u64 = 0L; j->stack[j->stack_top++].t = (v); }
 
 #define JPUSH_JV(v)	\
-	{ j->stack[j->stack_top++] = (v); }
+	{ j->stack[j->stack_top++].u64 = (v).u64; }
 
 
 #define JPOP(t)		\
@@ -285,6 +285,8 @@ opcode_t j_opcodes[255] = {
 	_OP(new),
 	_OP(newarray),
 	_OP(anewarray),
+	_OP(arraylength),
+	_OP(athrow),
 };
 
 #endif

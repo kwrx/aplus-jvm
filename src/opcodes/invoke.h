@@ -43,3 +43,13 @@ OPCODE(invokeinterface) {
 OPCODE(invokedynamic) {
 	assert(0 && "Not yet supported");
 }
+
+OPCODE(athrow) {
+	jobject_t* obj = (jobject_t*) JPOP(ptr);
+	JPUSH(ptr, (void*) obj);
+	
+	if(!__builtin_expect((long int) obj, 0))
+		j_throw(j, JEXCEPTION_NULL_POINTER);
+
+	j_throw(j, obj->fullname);
+}

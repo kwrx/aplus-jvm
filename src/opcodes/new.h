@@ -14,18 +14,35 @@ OPCODE(newarray) {
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
-	jarray_t* arr = (jarray_t*) jmalloc(sizeof(jarray_t));
-	if(!__builtin_expect((long int) arr, 0))
-		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+	register int sz;
+	switch(type) {
+		case T_BOOLEAN:
+		case T_CHAR:
+		case T_BYTE:
+			sz = sizeof(int8_t);
+			break;
+		case T_SHORT:
+			sz = sizeof(int16_t);
+			break;
+		case T_INT:
+		case T_FLOAT:
+		case T_REFERENCE:
+			sz = sizeof(int32_t);
+			break;
+		case T_LONG:
+		case T_DOUBLE:
+			sz = sizeof(int64_t);
+			break;
+		default:
+			j_throw(j, JEXCEPTION_INVALID_TYPE " of array");
+	}
 
-
-	arr->data = (jvalue_t*) jmalloc(sizeof(jvalue_t) * count);
-	if(!__builtin_expect((long int) arr->data, 0))
-		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
-
-
-	arr->type = type;
-	arr->length = count;
+	
+	int32_t* arr = (int32_t*) jmalloc((sz * count) + (sizeof(int32_t) * 3));
+	*arr++ = (int32_t) JARRAY_MAGIC;
+	*arr++ = (int32_t) type;
+	*arr++ = (int32_t) count;
+	
 	JPUSH(ptr, (void*) arr);
 }
 
@@ -39,17 +56,9 @@ OPCODE(anewarray) {
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
-	jarray_t* arr = (jarray_t*) jmalloc(sizeof(jarray_t));
-	if(!__builtin_expect((long int) arr, 0))
-		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
-
-
-	arr->data = (jvalue_t*) jmalloc(sizeof(jvalue_t) * count);
-	if(!__builtin_expect((long int) arr->data, 0))
-		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
-
-
-	arr->type = T_REFERENCE;
-	arr->length = count;
+	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) << 1));
+	*arr++ = (int32_t) T_REFERENCE;
+	*arr++ = (int32_t) count;
+	
 	JPUSH(ptr, (void*) arr);
 }

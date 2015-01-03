@@ -4,7 +4,6 @@ OPCODE(iload) {
 	uint8_t idx = PC8;
 	PC++;
 
-	assert(idx < j->locals_count);
 	JPUSH_JV(j->locals[idx]);
 }
 
@@ -12,7 +11,6 @@ OPCODE(istore) {
 	uint8_t idx = PC8;
 	PC++;
 
-	assert(idx < j->locals_count);
 	j->locals[idx] = JPOP_JV();
 }
 
@@ -29,42 +27,34 @@ OPCODE(istore) {
 
 
 OPCODE(iload_0) {
-	assert(0 < j->locals_count);
 	JPUSH_JV(j->locals[0]);
 }
 
 OPCODE(iload_1) {
-	assert(1 < j->locals_count);
 	JPUSH_JV(j->locals[1]);
 }
 
 OPCODE(iload_2) {
-	assert(2 < j->locals_count);
 	JPUSH_JV(j->locals[2]);
 }
 
 OPCODE(iload_3) {
-	assert(3 < j->locals_count);
 	JPUSH_JV(j->locals[3]);
 }
 
 OPCODE(istore_0) {
-	assert(0 < j->locals_count);
 	j->locals[0] = JPOP_JV();
 }
 
 OPCODE(istore_1) {
-	assert(1 < j->locals_count);
 	j->locals[1] = JPOP_JV();
 }
 
 OPCODE(istore_2) {
-	assert(2 < j->locals_count);
 	j->locals[2] = JPOP_JV();
 }
 
 OPCODE(istore_3) {
-	assert(3 < j->locals_count);
 	j->locals[3] = JPOP_JV();
 }
 

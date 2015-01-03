@@ -27,6 +27,7 @@ int jnative_register_function(const char* name, const char* signature, int16_t r
 	jnative_t* cc = (jnative_t*) jmalloc(sizeof(jnative_t));
 	cc->name = (char*) strdup(name);
 	cc->signature = (char*) strdup(signature);
+	cc->rettype = rettype;
 	cc->handler = handler; 
 
 	assert(list_add(jnative_handlers, (listval_t) cc) == 0);
