@@ -21,6 +21,6 @@ public class Fib {
 
 /*
 	Result:
-		jvm: 0.001726s		(x24 faster)
+		jvm: 0.001151s		(x20 faster)
 		gij: 0.024xxxs
 */

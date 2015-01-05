@@ -78,6 +78,7 @@
 #include "object.h"
 #include "monitor.h"
 #include "wide.h"
+#include "breakpoint.h"
 
 
 typedef __FASTCALL void (*opcode_handler_t) (jcontext_t*);
@@ -298,9 +299,9 @@ opcode_t j_opcodes[255] = {
 	_OP(multinewarray),
 	_OP(ifnull),
 	_OP(ifnonnull),
-	//_OP(goto_w),
-	//_OP(jsr_w),
-	//_OP(breakpoint),
+	_OP(goto_w),
+	_OP(jsr_w),
+	_OP(breakpoint),
 };
 
 #endif

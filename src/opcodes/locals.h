@@ -1,14 +1,14 @@
 
 
 OPCODE(iload) {
-	int8_t idx = PC8;
+	register int8_t idx = PC8;
 	PC++;
 
 	JPUSH_JV(j->locals[idx]);
 }
 
 OPCODE(istore) {
-	int8_t idx = PC8;
+	register int8_t idx = PC8;
 	PC++;
 
 	j->locals[idx] = JPOP_JV();

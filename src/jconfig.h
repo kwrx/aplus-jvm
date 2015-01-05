@@ -46,6 +46,11 @@ static char* j_directories[] = {
 	"../lib/%s.class",
 	"/usr/lib/%s.class",
 	"/usr/local/lib/%s.class",
+
+#ifdef TEST
+	"bin/lib/%s.class",
+#endif
+
 	NULL
 };
 #endif

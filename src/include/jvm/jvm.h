@@ -319,6 +319,7 @@ typedef struct jclass_header {
 
 typedef struct jassembly {
 	const char* name;
+	const char* path;
 	int fd;
 	int index;
 
@@ -329,8 +330,8 @@ typedef struct jassembly {
 
 
 typedef struct jobject {
-	int refcount;
-	int lock;
+	int32_t refcount;
+	int32_t lock;
 
 	uint64_t id;
 
@@ -355,8 +356,6 @@ typedef struct jcontext {
 		uint32_t pb;
 		uint32_t fl;
 	} regs;
-	
-	uint8_t padding;
 
 	uint8_t* code;
 	methodinfo_t* method;
@@ -367,7 +366,6 @@ typedef struct jcontext {
 
 	jvalue_t* locals;
 	uint32_t locals_count;
-
 
 	jmp_buf retbuf;
 } jcontext_t;
@@ -425,6 +423,10 @@ jvalue_t jcode_function_call(jassembly_t* j, const char* name, jvalue_t* params,
 
 methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx);
 fieldinfo_t* jcode_find_fieldref(jassembly_t* j, list_t* fields, int16_t idx);
+
+
+jobject_t* jobject_clone(jobject_t* obj);
+void jobject_finalize(jobject_t* obj);
 
 
 #ifdef __cplusplus

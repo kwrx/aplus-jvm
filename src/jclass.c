@@ -528,12 +528,10 @@ int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
 	if(strcmp(j->name, utf.value) == 0)
 		return 0;
 
-#ifdef VERBOSE
-	j_printf("%s: %s\n", j->name, utf.value);
-#endif
 
-	jassembly_t* dep = jmalloc(sizeof(jassembly_t));
-	assert(jassembly_load(dep, utf.value) == 0);
+	jassembly_t* dep = NULL;
+
+	assert(jassembly_load(&dep, utf.value) == 0);
 	assert(list_add(j->deps, (listval_t) dep) == 0);
 
 	dep->index = index;
@@ -612,7 +610,9 @@ int jclass_parse_assembly(jassembly_t* j) {
 	list_init(j->header.jc_fields);
 	list_init(j->header.jc_methods);
 	list_init(j->header.jc_attributes);
-	list_init(j->deps);
+
+	if(j->deps == NULL)
+		{ list_init(j->deps); }
 
 
 	for(i = 0; i < j->header.jc_cp_count - 1; i++) {
@@ -718,8 +718,13 @@ int jclass_parse_assembly(jassembly_t* j) {
 	R16(&j->header.jc_attributes_count);
 
 	assert(jclass_parse_attributes(j, j->header.jc_attributes, j->header.jc_attributes_count) == 0);
+	
+	return 0;
+}
+
+int jclass_resolve_assembly(jassembly_t* j) {
 	assert(jclass_resolve_deps(j) == 0);
 	assert(jclass_resolve_super(j) == 0);
-	
+
 	return 0;
 }

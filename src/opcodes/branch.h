@@ -7,9 +7,24 @@ OPCODE(goto) {
 	JGOTO(off);
 }
 
+OPCODE(goto_w) {
+	int32_t off = PC32;
+	PC += 4;
+
+	JGOTO(off);
+}
+
 OPCODE(jsr) {
 	int16_t off = PC16;
 	PC += 2;
+
+	JPUSH(i32, PC);
+	JGOTO(off);
+}
+
+OPCODE(jsr_w) {
+	int32_t off = PC32;
+	PC += 4;
 
 	JPUSH(i32, PC);
 	JGOTO(off);

@@ -15,7 +15,7 @@
 #include "jconfig.h"
 
 
-void* jobject_clone(void* ptr, size_t size) {
+static void* __clone(void* ptr, size_t size) {
 	void* pp = (void*) jmalloc(size);
 	assert(pp);
 
@@ -23,8 +23,13 @@ void* jobject_clone(void* ptr, size_t size) {
 	return pp;
 }
 
-jobject_t* jobject_new(jassembly_t* j, int16_t idx) {
+
+uint64_t jobject_id() {
 	static uint64_t object_id = 0;
+	return object_id++;
+}
+
+jobject_t* jobject_new(jassembly_t* j, int16_t idx) {
 
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, idx - 1);
 	assert(v);
@@ -35,6 +40,7 @@ jobject_t* jobject_new(jassembly_t* j, int16_t idx) {
 	cputf8_t utf;
 	assert(jclass_get_utf8_from_cp(j, &utf, cclass.name_index) == 0);
 
+
 	jassembly_t* j2 = (jassembly_t*) jassembly_find(j, utf.value);
 	assert(j2);
 
@@ -43,18 +49,18 @@ jobject_t* jobject_new(jassembly_t* j, int16_t idx) {
 	obj->lock = 0;
 	obj->fullname = obj->name = (char*) strdup(utf.value);
 	obj->assembly = j2;
-	obj->id = object_id++;
+	obj->id = jobject_id();
 	
 	list_init(obj->fields);
 
 	list_foreach(value, j->header.jc_fields)
-		assert(list_add(obj->fields, (listval_t) jobject_clone((void*) value, sizeof(fieldinfo_t))) == 0);
+		assert(list_add(obj->fields, (listval_t) __clone((void*) value, sizeof(fieldinfo_t))) == 0);
 
 
 	return obj;
 }
 
-int jobject_destroy(jobject_t* obj) {
+void jobject_finalize(jobject_t* obj) {
 	assert(obj);
 
 #if !defined(__GLIBC__)
@@ -64,7 +70,14 @@ int jobject_destroy(jobject_t* obj) {
 	list_destroy(obj->fields);
 	jfree(obj);
 #endif
+}
 
-	return 0;
+jobject_t* jobject_clone(jobject_t* obj) {
+	assert(obj);
+
+	jobject_t* cc = __clone(obj, sizeof(jobject_t));
+	cc->id = jobject_id();
+
+	return cc;
 }
 

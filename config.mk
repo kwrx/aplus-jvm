@@ -23,7 +23,7 @@ DEFINES	:= -DDEBUG -DVERBOSE -DTEST -DARCH=\"$(ARCH)\"
 LIBS	:= -lpthread -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wall
 
-CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel -std=c99 -mfpmath=sse -msse3 -Ofast -fno-strict-aliasing 
+CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel -std=c99 -mfpmath=sse -msse3 -Ofast -fno-strict-aliasing -fno-align-functions
 CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel
 AFLAGS	:= $(DEFINES) -f elf
 LFLAGS	:= -s
