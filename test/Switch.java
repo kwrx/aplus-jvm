@@ -5,19 +5,19 @@ public class Switch {
 		int x = 10;
 		switch(x) {
 			case 0:
-				x -= 1000;
+				Native.Print("case 0\n");
 				break;
 			case 2:
-				x *= 1000;
+				Native.Print("case 2\n");
 				break;
 			case 5:
 			case 6:
 			case 8:
 			case 10:
-				x += 10000;
+				Native.Print("case 10\n");
 				break;
 			default:
-				x /= 2;
+				Native.Print("case default\n");
 				break;
 		}
 	}

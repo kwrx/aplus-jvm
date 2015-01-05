@@ -4,7 +4,6 @@
 #include <setjmp.h>
 #include <stdint.h>
 
-#include "jconfig.h"
 #include "jlist.h"
 
 
@@ -19,6 +18,7 @@
 #define JEXCEPTION_NULL_POINTER						"Null pointer"
 #define JEXCEPTION_NULL_REFERENCE					"Null reference"
 #define JEXCEPTION_OUT_OF_MEMORY					"Out of memory"
+#define JEXCEPTION_CAST_CLASS						"Invalid cast between these classes"
 
 
 #define JCODE_NULL_REFERENCE						NULL
@@ -86,6 +86,25 @@
 #define JCLASS_TAG_TYPENAME				12
 
 #define JARRAY_MAGIC					0xFFAA4466
+
+
+
+typedef union jvalue {
+	int8_t i8;
+	int16_t i16;
+	int32_t i32;
+	int64_t i64;
+
+	uint8_t u8;
+	uint16_t u16;
+	uint32_t u32;
+	uint64_t u64;
+
+	float f32;
+	double f64;
+	
+	void* ptr;
+} jvalue_t;
 
 
 typedef struct cpinfo {
@@ -235,6 +254,12 @@ typedef struct fieldinfo {
 	uint16_t attr_count;
 
 	list_t* attributes;
+
+	char* classname;
+	char* name;
+	uint8_t type;
+
+	jvalue_t value;
 } fieldinfo_t;
 
 typedef struct methodinfo {
@@ -243,6 +268,7 @@ typedef struct methodinfo {
 	uint16_t desc_index;
 	uint16_t attr_count;
 	
+	char* classname;
 	char* name;
 	char signature[255];
 
@@ -298,33 +324,21 @@ typedef struct jassembly {
 
 	jclass_header_t header;
 	list_t* deps;
+	struct jassembly* super;
 } jassembly_t;
 
 
-typedef union jvalue {
-	int8_t i8;
-	int16_t i16;
-	int32_t i32;
-	int64_t i64;
-
-	uint8_t u8;
-	uint16_t u16;
-	uint32_t u32;
-	uint64_t u64;
-
-	float f32;
-	double f64;
-	
-	void* ptr;
-} jvalue_t;
-
 typedef struct jobject {
-	void* ref;
 	int refcount;
 	int lock;
 
-	char* name;
+	uint64_t id;
+
 	char* fullname;
+	char* name;
+
+	list_t* fields;
+	jassembly_t* assembly;
 } jobject_t;
 
 
@@ -341,7 +355,8 @@ typedef struct jcontext {
 		uint32_t pb;
 		uint32_t fl;
 	} regs;
-
+	
+	uint8_t padding;
 
 	uint8_t* code;
 	methodinfo_t* method;
@@ -409,6 +424,7 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 jvalue_t jcode_function_call(jassembly_t* j, const char* name, jvalue_t* params, int params_count);
 
 methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx);
+fieldinfo_t* jcode_find_fieldref(jassembly_t* j, list_t* fields, int16_t idx);
 
 
 #ifdef __cplusplus

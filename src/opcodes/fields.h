@@ -4,27 +4,51 @@ OPCODE(getstatic) {
 	int16_t idx = PC16;
 	PC += 2;
 
-	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
-	assert(v);
+	fieldinfo_t* field = (fieldinfo_t*) jcode_find_fieldref(j->current_assembly, NULL, idx);
+	assert(field);
 
-	JPUSH(u64, v->value);
+	JPUSH_JV(field->value);
 }
 
 OPCODE(putstatic) {
 	int16_t idx = PC16;
 	PC += 2;
 
-	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
-	assert(v);
+	fieldinfo_t* field = (fieldinfo_t*) jcode_find_fieldref(j->current_assembly, NULL, idx);
+	assert(field);
 
-	v->value = JPOP(u64);
+	field->value = JPOP_JV();
 }
 
 
 OPCODE(getfield) {
-	assert(0 && "not yet supported");
+	int16_t idx = PC16;
+	PC += 2;
+
+	jobject_t* obj = (jobject_t*) JPOP(ptr);
+
+	if(!__builtin_expect((long int) obj, 0))
+		j_throw(j, JEXCEPTION_NULL_REFERENCE);
+
+	fieldinfo_t* field = (fieldinfo_t*) jcode_find_fieldref(j->current_assembly, obj->fields, idx);
+	assert(field);
+
+	JPUSH_JV(field->value);
 }
 
 OPCODE(putfield) {
-	assert(0 && "not yet supported");
+	int16_t idx = PC16;
+	PC += 2;
+
+	jvalue_t jval = JPOP_JV();
+	jobject_t* obj = (jobject_t*) JPOP(ptr);
+
+
+	if(!__builtin_expect((long int) obj, 0))
+		j_throw(j, JEXCEPTION_NULL_REFERENCE);
+
+	fieldinfo_t* field = (fieldinfo_t*) jcode_find_fieldref(j->current_assembly, obj->fields, idx);
+	assert(field);
+
+	field->value = jval;
 }

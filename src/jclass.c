@@ -14,6 +14,8 @@
 #define _WITH_CPINFO
 #include <jvm/jvm.h>
 
+#include "jconfig.h"
+
 
 #define R8(b)		{ assert(read(j->fd, (void*) (b), 1) == 1); }
 #define R16(b)		{ assert(read(j->fd, (void*) (b), 2) == 2); *(uint16_t*) (b) = j_bswap16(*(uint16_t*) (b)); }
@@ -355,13 +357,13 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 
 int jclass_parse_desc(const char* desc, uint8_t* nargs, uint8_t* rettype, char* signature) {
 	assert(desc);
-	assert(nargs && rettype);
 
 
 	if(desc[0] != '(')
-		return -1;
+		goto noparams;
 	desc++;
 	
+	assert(nargs && signature);
 
 	while(*desc && *desc != ')') {
 		switch(*desc) {
@@ -403,6 +405,10 @@ int jclass_parse_desc(const char* desc, uint8_t* nargs, uint8_t* rettype, char* 
 	if(*desc != ')')
 		return -1;
 	desc++;
+
+noparams:
+
+	assert(rettype);
 
 	switch(*desc) {
 		case 'B':
@@ -452,17 +458,57 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 	assert(jclass_get_utf8_from_cp(j, &utf_n, method->name_index) == 0);
 	assert(jclass_get_utf8_from_cp(j, &utf_d, method->desc_index) == 0);
 
-	jnative_t* native;
-	if((native = (jnative_t*) jnative_find_method(utf_n.value)) == NULL)
-		assert(jclass_parse_desc(utf_d.value, &method->nargs, &method->rettype, method->signature) == 0);
-	else {
+	
+	if(method->access & ACC_NATIVE) {
+		jnative_t* native = (jnative_t*) jnative_find_method(utf_n.value);
+		assert(native);
+
 		method->nargs = strlen(native->signature);
 		method->rettype = native->rettype;
 		strcpy(method->signature, native->signature);
-	}
+	} else
+		assert(jclass_parse_desc(utf_d.value, &method->nargs, &method->rettype, method->signature) == 0);
 	
-	method->name = utf_n.value;
+
+
+	method->classname = (char*) strdup(j->name);
+	method->name = (char*) strdup(utf_n.value);
 	method->code = (attr_code_t*) jcode_find_attribute(j, method->attributes, "Code");
+
+	return 0;
+}
+
+int jclass_resolve_field(jassembly_t* j, fieldinfo_t* field) {
+	assert(j && field);
+
+	cputf8_t utf_n, utf_d;
+	assert(jclass_get_utf8_from_cp(j, &utf_n, field->name_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_d, field->desc_index) == 0);
+	
+	assert(jclass_parse_desc(utf_d.value, NULL, &field->type, NULL) == 0);
+
+	field->classname = (char*) strdup(j->name);
+	field->name = (char*) strdup(utf_n.value);
+	field->value.u64 = 0UL;
+	
+	attr_cvalue_t* cv = (attr_cvalue_t*) jcode_find_attribute(j, field->attributes, "ConstantValue");
+	if(!cv)
+		return 0;
+
+
+	cpvalue_t* cp = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, cv->cvalue_index - 1);
+	assert(cp);
+
+	if(cp->tag == JCLASS_TAG_STRING)
+		cp = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, cp->value - 1);
+
+	assert(cp);
+
+
+	if(cp->tag == JCLASS_TAG_UTF8STRING)
+		field->value.ptr = cp->data;
+	else
+		field->value.i64 = cp->value;
 
 	return 0;
 }
@@ -471,7 +517,6 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
 	assert(j && cp);
 
-
 	cpclass_t cl;
 	assert(jclass_cp_to_class(cp, &cl) == 0);
 
@@ -479,15 +524,17 @@ int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
 	cputf8_t utf;
 	assert(jclass_get_utf8_from_cp(j, &utf, cl.name_index) == 0);
 
-	j_printf("ClassName: %s\n", utf.value);
-
+	
 	if(strcmp(j->name, utf.value) == 0)
 		return 0;
+
+#ifdef VERBOSE
+	j_printf("%s: %s\n", j->name, utf.value);
+#endif
 
 	jassembly_t* dep = jmalloc(sizeof(jassembly_t));
 	assert(jassembly_load(dep, utf.value) == 0);
 	assert(list_add(j->deps, (listval_t) dep) == 0);
-
 
 	dep->index = index;
 
@@ -510,6 +557,42 @@ int jclass_resolve_deps(jassembly_t* j) {
 	return 0;
 }
 
+int jclass_resolve_super(jassembly_t* j) {
+	if(j->header.jc_super == 0)
+		return 0;
+
+	cpvalue_t* cp = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, j->header.jc_super - 1);
+	assert(cp);
+
+	cpclass_t cl;
+	assert(jclass_cp_to_class(cp, &cl) == 0);
+
+	cputf8_t utf;
+	assert(jclass_get_utf8_from_cp(j, &utf, cl.name_index) == 0);
+
+	j->super = (jassembly_t*) jassembly_find(j, utf.value);
+	assert(j->super);
+	return 0;
+}
+
+
+int jclass_resolve_name(jassembly_t* j) {
+	assert(j);
+
+	cpvalue_t* cp = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, j->header.jc_this - 1);
+	assert(cp);
+
+	cpclass_t cl;
+	assert(jclass_cp_to_class(cp, &cl) == 0);
+
+	cputf8_t utf;
+	assert(jclass_get_utf8_from_cp(j, &utf, cl.name_index) == 0);
+	 
+
+	j->name = (char*) strdup(utf.value);
+	return 0;
+}
+
 
 int jclass_parse_assembly(jassembly_t* j) {
 	assert(j);
@@ -529,6 +612,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 	list_init(j->header.jc_fields);
 	list_init(j->header.jc_methods);
 	list_init(j->header.jc_attributes);
+	list_init(j->deps);
 
 
 	for(i = 0; i < j->header.jc_cp_count - 1; i++) {
@@ -586,9 +670,11 @@ int jclass_parse_assembly(jassembly_t* j) {
 	R16(&j->header.jc_super);
 	R16(&j->header.jc_interfaces_count);
 
+	assert(jclass_resolve_name(j) == 0);
+
 	j->index = j->header.jc_this;
 	j->header.jc_interfaces = (uint16_t*) jmalloc(j->header.jc_interfaces_count * sizeof(uint16_t));
-	
+
 	
 	for(i = 0; i < j->header.jc_interfaces_count; i++)
 		R16(&j->header.jc_interfaces[i]);
@@ -607,6 +693,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 		list_init(field->attributes);
 
 		assert(jclass_parse_attributes(j, field->attributes, field->attr_count) == 0);
+		assert(jclass_resolve_field(j, field) == 0);
 		assert(list_add(j->header.jc_fields, (listval_t) field) == 0);
 	}
 
@@ -632,6 +719,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 
 	assert(jclass_parse_attributes(j, j->header.jc_attributes, j->header.jc_attributes_count) == 0);
 	assert(jclass_resolve_deps(j) == 0);
-
+	assert(jclass_resolve_super(j) == 0);
+	
 	return 0;
 }

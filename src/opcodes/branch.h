@@ -16,7 +16,7 @@ OPCODE(jsr) {
 }
 
 OPCODE(ret) {
-	uint8_t idx = PC8;
+	int8_t idx = PC8;
 	PC++;
 
 	PC = j->locals[idx].i32;

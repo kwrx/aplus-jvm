@@ -1,7 +1,14 @@
 
 
 OPCODE(new) {
+	int16_t idx = PC16;
+	PC += 2;
 
+	jobject_t* obj = (jobject_t*) jobject_new(j->current_assembly, idx);
+	if(!__builtin_expect((long int) obj, 0))
+		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+
+	JPUSH(ptr, (void*) obj);
 }
 
 OPCODE(newarray) {
@@ -56,7 +63,30 @@ OPCODE(anewarray) {
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
-	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) << 1));
+	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) * 3));
+	*arr++ = (int32_t) JARRAY_MAGIC;
+	*arr++ = (int32_t) T_REFERENCE;
+	*arr++ = (int32_t) count;
+	
+	JPUSH(ptr, (void*) arr);
+}
+
+OPCODE(multinewarray) {
+	(void) PC16;
+	PC += 2;
+
+	int8_t rank = PC8;
+	PC++;
+
+	int32_t count = 0;
+	while(rank--)
+		count += JPOP(i32);
+
+	if(count < 0)
+		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
+
+	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) * 3));
+	*arr++ = (int32_t) JARRAY_MAGIC;
 	*arr++ = (int32_t) T_REFERENCE;
 	*arr++ = (int32_t) count;
 	

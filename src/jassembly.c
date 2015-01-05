@@ -12,23 +12,28 @@
 
 #include <jvm/jvm.h>
 
+#define _WITH_JDIRS
+#include "jconfig.h"
 
-static char* __classname(const char* fn) {
-	char* p = (char*) strdup(fn);
-	assert(p);
 
-	int i = strlen(p) - 1;
-	while(i--) {
-		switch(p[i]) {
-			case '.':
-				p[i] = 0;
-				break;
-			case '/':
-				return &p[i + 1];
-		}
+static int jopen(const char* filename, int flags, int mode) {
+	
+	int i;
+	for(i = 0; j_directories[i]; i++) {
+		char* vbuf = jmalloc(256);
+		sprintf(vbuf, j_directories[i], filename);
+
+
+		int fd = open(vbuf, flags, mode);
+		jfree(vbuf);
+
+		if(fd < 0)
+			continue;
+
+		return fd;
 	}
 
-	return (char*) fn;
+	return -1;
 }
 
 
@@ -36,16 +41,30 @@ int jassembly_load(jassembly_t* j, const char* filename) {
 	assert(j && filename);
 	memset(j, 0, sizeof(jassembly_t));
 
-	j->name = __classname(filename);
-	j->fd = open(filename, O_RDONLY, 0644);
 
-	/* TODO: Search directiories */
+	j->fd = jopen(filename, O_RDONLY, 0644);
 	
 	assert(j->fd > 0);
 	assert(jclass_parse_assembly(j) == 0);
 
+
 	close(j->fd);
 	return 0;
+}
+
+
+jassembly_t* jassembly_find(jassembly_t* j, const char* classname) {
+	if(strcmp(j->name, classname) == 0)
+		return j;
+
+	list_foreach(value, j->deps) {
+		jassembly_t* cc = (jassembly_t*) value;
+
+		if(strcmp(cc->name, classname) == 0)
+			return cc;
+	}
+
+	return NULL;
 }
 
 
@@ -113,7 +132,9 @@ int main(int argc, char** argv) {
 			jclass_get_utf8_from_cp(&j, &utf1, v->name_index);
 			jclass_get_utf8_from_cp(&j, &utf2, v->desc_index);
 
-			printf("\t%s\t\t=> %s\n", utf1.value, utf2.value);
+		
+			printf("\t%s\t\t=> %s = %lld (0x%x)\t", utf1.value, utf2.value, v->value.i64, v->value.u32);
+		
 			print_attributes(&j, v->attributes);
 		}
 		printf("\n");

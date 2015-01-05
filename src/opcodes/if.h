@@ -147,3 +147,23 @@ OPCODE(if_acmpne) {
 	if(a != b)
 		JGOTO(off);
 }
+
+OPCODE(ifnull) {
+	int16_t off = PC16;
+	PC += 2;
+
+	void* a = JPOP(ptr);
+
+	if(!a)
+		JGOTO(off);
+}
+
+OPCODE(ifnonnull) {
+	int16_t off = PC16;
+	PC += 2;
+
+	void* a = JPOP(ptr);
+
+	if(a)
+		JGOTO(off);
+}

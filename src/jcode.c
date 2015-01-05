@@ -13,9 +13,12 @@
 #include <assert.h>
 
 #include <jvm/jvm.h>
+#include "jconfig.h"
 
 #define _WITH_OPCODES
 #include "opcodes/opcode.h"
+
+
 
 
 
@@ -114,6 +117,27 @@ methodinfo_t* jcode_find_method_and_desc(jassembly_t* j, const char* name, const
 	return NULL;
 }
 
+methodinfo_t* jcode_find_method_and_desc_and_class(jassembly_t* j, const char* name, const char* desc, const char* classname) {
+
+	j = (jassembly_t*) jassembly_find(j, classname);
+	assert(j);
+
+	
+	list_foreach(value, j->header.jc_methods) {
+		methodinfo_t* v = (methodinfo_t*) value;
+
+		cputf8_t utf, utf_d;
+		assert(jclass_get_utf8_from_cp(j, &utf, v->name_index) == 0);
+		assert(jclass_get_utf8_from_cp(j, &utf_d, v->desc_index) == 0);
+			
+		if((strcmp(utf.value, name) == 0) && (strcmp(utf_d.value, desc) == 0))
+				return v;
+	}
+
+	return NULL;
+}
+
+
 methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx) {
 	assert(j);
 
@@ -131,11 +155,73 @@ methodinfo_t* jcode_find_methodref(jassembly_t* j, int16_t idx) {
 	assert(jclass_cp_to_typename(v, &ctype) == 0);
 
 
-	cputf8_t utf, utf_d;
-	assert(jclass_get_utf8_from_cp(j, &utf, ctype.name_index) == 0);
-	assert(jclass_get_utf8_from_cp(j, &utf_d, ctype.desc_index) == 0);
+	v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, mref.class_index - 1);
+	assert(v);
 
-	return jcode_find_method_and_desc(j, utf.value, utf_d.value);
+	cpclass_t cclass;
+	assert(jclass_cp_to_class(v, &cclass) == 0);
+
+	cputf8_t utf_n, utf_d, utf_c;
+	assert(jclass_get_utf8_from_cp(j, &utf_n, ctype.name_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_d, ctype.desc_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_c, cclass.name_index) == 0);
+
+	return jcode_find_method_and_desc_and_class(j, utf_n.value, utf_d.value, utf_c.value);
+}
+
+fieldinfo_t* jcode_find_fieldref(jassembly_t* j, list_t* fields, int16_t idx) {
+	assert(j);
+
+	cpvalue_t* v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, idx - 1);
+	assert(v);
+
+	cpfield_t mref;
+	assert(jclass_cp_to_method(v, &mref) == 0);
+
+
+	v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, mref.typename_index - 1);
+	assert(v);
+
+	cptypename_t ctype;
+	assert(jclass_cp_to_typename(v, &ctype) == 0);
+
+
+	v = (cpvalue_t*) list_at_index(j->header.jc_cpinfo, mref.class_index - 1);
+	assert(v);
+
+	cpclass_t cclass;
+	assert(jclass_cp_to_class(v, &cclass) == 0);
+
+	cputf8_t utf_n, utf_d, utf_c;
+	assert(jclass_get_utf8_from_cp(j, &utf_n, ctype.name_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_d, ctype.desc_index) == 0);
+	assert(jclass_get_utf8_from_cp(j, &utf_c, cclass.name_index) == 0);
+
+	char* desc = utf_d.value;
+	char* name = utf_n.value;
+	char* classname = utf_c.value;
+
+	if(!fields) {
+		j = (jassembly_t*) jassembly_find(j, classname);
+		assert(j);
+
+		fields = j->header.jc_fields;
+	}
+
+	assert(fields);
+	
+	list_foreach(value, fields) {
+		fieldinfo_t* v = (fieldinfo_t*) value;
+
+		cputf8_t utf, utf_d;
+		assert(jclass_get_utf8_from_cp(j, &utf, v->name_index) == 0);
+		assert(jclass_get_utf8_from_cp(j, &utf_d, v->desc_index) == 0);
+			
+		if((strcmp(utf.value, name) == 0) && (strcmp(utf_d.value, desc) == 0))
+				return v;
+	}
+
+	return NULL;
 }
 
 attrinfo_t* jcode_find_attribute(jassembly_t* j, list_t* attributes, const char* name) {
@@ -283,7 +369,7 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 	}		
 
 #ifdef DEBUG
-	j_printf("%s (args: %d; stack: %d; locals: %d)\n", method->name, method->nargs, method->code->max_stack, method->code->max_locals);
+	j_printf("%s.%s (args: %d; stack: %d; locals: %d)\n", method->classname, method->name, method->nargs, method->code->max_stack, method->code->max_locals);
 #endif
 
 

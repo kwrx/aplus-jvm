@@ -10,7 +10,9 @@
 
 #include <assert.h>
 
+
 #include <jvm/jvm.h>
+#include "jconfig.h"
 
 
 list_t* jnative_handlers;

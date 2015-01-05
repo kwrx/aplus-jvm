@@ -31,6 +31,6 @@ class Bubble {
 
 /*
 	Result:
-		jvm: 4.756s
+		jvm: 3.284s		(x2,2 slower)
 		gij: 1.484s
 */

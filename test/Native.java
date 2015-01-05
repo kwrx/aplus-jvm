@@ -1,9 +1,5 @@
 
 
 public class Native {
-	
-
-	public static void main(String[] args) {
-		
-	}
+	public static native int Print(String message, int... args);
 }
