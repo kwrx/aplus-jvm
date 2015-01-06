@@ -11,6 +11,10 @@ SFILES 	:= $(CFILES) $(CXXFILES) $(AFILES)
 OFILES	:= $(CFILES:.c=.o) $(CXXFILES:.cpp=.o) $(AFILES:.s=.o)
 
 
+PACKAGE	:= jvm
+VERSION	:= 0.1
+
+
 .PHONY: all clean git
 
 all: jvm
@@ -36,13 +40,17 @@ install: jvm
 	@$(CP) jvm bin/jvm
 
 clean:
+	-@$(RM) jvm
 	-@$(RM) $(OFILES)
 
+distclean: clean
+	-@$(RM) $(PACKAGE)-$(VERSION)-$(ARCH).tar.gz
 
-doc:
-	@doxygen docs/Doxyfile
-	-@$(RM) -r usr
-	
+dist: install
+	-@mv bin $(PACKAGE)-$(VERSION)-$(ARCH)
+	-@tar -czf $(PACKAGE)-$(VERSION)-$(ARCH).tar.gz $(PACKAGE)-$(VERSION)-$(ARCH)/*
+	-@mv $(PACKAGE)-$(VERSION)-$(ARCH) bin
+
 git: clean
 	-@git add --all .
 	-@git commit -m "$(COMMIT)"
