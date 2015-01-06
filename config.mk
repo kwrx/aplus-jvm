@@ -19,7 +19,7 @@ CP		:= cp
 MV		:= mv
 
 
-DEFINES	:= -DDEBUG -DVERBOSE -DTEST -DARCH=\"$(ARCH)\"
+DEFINES	:= -D_DEBUG -D_VERBOSE -DTEST -DARCH=\"$(ARCH)\"
 LIBS	:= -lpthread -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wall
 

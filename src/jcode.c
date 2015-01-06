@@ -230,7 +230,7 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 		assert(native);
 		
 		if(!__builtin_expect((long int) native, 0))
-			j_throw(NULL, "Native method not found");
+			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
 		
 
 		char* s = method->signature;
@@ -293,12 +293,12 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 								}
 								break;
 							default:
-								j_throw(NULL, JEXCEPTION_INVALID_TYPE " of array");
+								j_throw(NULL, JEXCEPTION_INVALID_TYPE);
 						}	
 					}
 					break;		
 				default:
-					j_throw(NULL, "Invalid native method signature");
+					j_throw(NULL, JEXCEPTION_LINKAGE);
 			}
 	
 			s++;
@@ -317,7 +317,7 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 
 
 	if(!__builtin_expect((long int) method->code, 0))
-		j_throw(NULL, "Invalid code for this method");
+		j_throw(NULL, JEXCEPTION_ABSTRACT_METHOD);
 
 
 	jcontext_t* j = (jcontext_t*) jmalloc(sizeof(jcontext_t));

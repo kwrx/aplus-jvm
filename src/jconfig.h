@@ -27,10 +27,17 @@
 	__builtin_bswap64(x)
 
 
+#ifndef DEBUG
+#undef assert
+#define assert(x)	{ (void) (x); }
+#endif
+
+
 
 static inline void* jmalloc(size_t size) {
 	void* p = malloc(size);
-	assert(p);
+	if(!__builtin_expect((long int) p, 0))
+		return NULL;
 
 	memset(p, 0, size);
 	return p;

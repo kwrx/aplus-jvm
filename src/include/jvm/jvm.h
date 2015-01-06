@@ -9,16 +9,19 @@
 
 
 
-#define JEXCEPTION_RUNTIME_ERROR					"Runtime error"
-#define JEXCEPTION_INVALID_OPCODE					"Invalid Opcode"
-#define JEXCEPTION_INVALID_TYPE						"Invalid type"
-#define JEXCEPTION_DIVISION_BY_ZERO					"Division by zero"
-#define JEXCEPTION_NEGATIVE_ARRAY_SIZE				"Negative array size"
-#define JEXCEPTION_ARRAY_BOUNDS						"Index out of bounds of array"
-#define JEXCEPTION_NULL_POINTER						"Null pointer"
-#define JEXCEPTION_NULL_REFERENCE					"Null reference"
-#define JEXCEPTION_OUT_OF_MEMORY					"Out of memory"
-#define JEXCEPTION_CAST_CLASS						"Invalid cast between these classes"
+#define JEXCEPTION_RUNTIME_ERROR					"java/lang/RuntimeException"
+#define JEXCEPTION_INVALID_OPCODE					"java/lang/UnsupportedOperationException"
+#define JEXCEPTION_INVALID_TYPE						"java/lang/TypeNotPresentException"
+#define JEXCEPTION_DIVISION_BY_ZERO					"java/lang/ArithmeticException"
+#define JEXCEPTION_NEGATIVE_ARRAY_SIZE				"java/lang/NegativeArraySizeException"
+#define JEXCEPTION_ARRAY_BOUNDS						"java/lang/ArrayIndexOutOfBoundsException"
+#define JEXCEPTION_NULL_POINTER						"java/lang/NullPointerException"
+#define JEXCEPTION_OUT_OF_MEMORY					"java/lang/OutOfMemoryError"
+#define JEXCEPTION_CAST_CLASS						"java/lang/ClassCastException"
+#define JEXCEPTION_NO_SUCH_METHOD					"java/lang/NoSuchMethodError"
+#define JEXCEPTION_ABSTRACT_METHOD					"java/lang/AbstractMethodError"
+#define JEXCEPTION_UNSATISFIED_LINK					"java/lang/UnsatisfiedLinkError"
+#define JEXCEPTION_LINKAGE							"java/lang/LinkageError"
 
 
 #define JCODE_NULL_REFERENCE						NULL

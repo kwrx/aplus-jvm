@@ -119,7 +119,7 @@ OPCODE(invokeinterface) {
 }
 
 OPCODE(invokedynamic) {
-	assert(0 && "Not yet supported");
+	j_throw(j, JEXCEPTION_INVALID_OPCODE);
 }
 
 OPCODE(athrow) {
