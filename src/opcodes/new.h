@@ -21,7 +21,7 @@ OPCODE(newarray) {
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
-	register int sz;
+	register int sz = 1;
 	switch(type) {
 		case T_BOOLEAN:
 		case T_CHAR:

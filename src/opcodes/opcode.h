@@ -43,13 +43,17 @@
 #define R2			j->regs.r2
 #define R3			j->regs.r3
 
-#define JGOTO(x)	\
+#define JGOTO(x)			\
 	{ PC = PB + x; }
 
-#define JRETURN		\
-	{ longjmp(j->retbuf, 1); }
+#define JRETURN				\
+	{ longjmp(j->retbuf, JCODE_EXIT_SUCCESS); }
+
+#define JRETURN_AND_THROW	\
+	{ longjmp(j->retbuf, JCODE_EXIT_EXCEPTION); }
 
 
+#ifdef _WITH_OPCODES
 #include "nop.h"
 #include "const.h"
 #include "ldc.h"
@@ -79,26 +83,25 @@
 #include "monitor.h"
 #include "wide.h"
 #include "breakpoint.h"
-
+#endif
 
 typedef __FASTCALL void (*opcode_handler_t) (jcontext_t*);
 typedef struct opcode {
-#ifdef DEBUG
 	char* name;
-#endif
 	opcode_handler_t handler;
 } opcode_t;
 
 
-#ifdef DEBUG
+#ifdef _WITH_OPCODES
 #define _OP(x)	\
 	{ #x, OP(x) }
 #else
 #define _OP(x)	\
-	{ OP(x) }
+	{ #x, NULL }
 #endif
 
-opcode_t j_opcodes[255] = {
+
+static opcode_t j_opcodes[255] = {
 	_OP(nop),
 	_OP(aconst_null),
 	_OP(iconst_m1),

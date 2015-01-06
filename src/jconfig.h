@@ -14,13 +14,16 @@
 #define j_yield() 				\
 	sched_yield()
 
-#define j_bswap16(x)	\
+#define j_throw(j, e)			\
+	jerr_set_and_throw(j, e)
+
+#define j_bswap16(x)			\
 	__builtin_bswap16(x)
 
-#define j_bswap32(x)	\
+#define j_bswap32(x)			\
 	__builtin_bswap32(x)
 
-#define j_bswap64(x)	\
+#define j_bswap64(x)			\
 	__builtin_bswap64(x)
 
 

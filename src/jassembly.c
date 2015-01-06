@@ -193,8 +193,9 @@ int main(int argc, char** argv) {
 
 
 	jvalue_t ret = jcode_function_call(j, "main", NULL, 0);
-	j_printf("Returned %d\n", ret.i32);
 
+	jerr_check_exceptions(NULL);
+	j_printf("Returned %d\n", ret.i32);
 
 	return 0;
 }

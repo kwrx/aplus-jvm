@@ -21,43 +21,12 @@
 
 
 
-
-int j_throw(jcontext_t* j, char* exception) {
-	printf("Exception! %s\n", exception);
-
-	if(!j || !j->code)
-		exit(1);
-
-	attr_linenumbers_t* ln = (attr_linenumbers_t*) jcode_find_attribute(j->current_assembly, j->method->code->attributes, "LineNumberTable");
-	assert(ln);
-
-	int i = 0;
-	while(j->regs.pb >= ln->table[i].pc)
-		i++;
-	i--;
-
-	printf("\tat %s:%d\n", j->method->name, ln->table[i].line);
-
-#if defined(DEBUG)
-	printf("\tat bytecode: [%d+%d] %s\n", j->regs.pb, j->regs.pc - j->regs.pb, j_opcodes[j->code[j->regs.pb]].name);
-
-#if defined(VERBOSE)
-	printf("\nStackdump:\n");
-	printf("Size: %d; Position: %d\n", j->stack_size, j->stack_top);
-	
-	for(i = 0; i < j->stack_size; i++)
-		printf(" [%d] %lld\n", i, j->stack[i].i64);
-#endif
-#endif
-
-	exit(1);
-}
-
 int jcode_context_run(jcontext_t* j) {
 	assert(j);
 
-	if(setjmp(j->retbuf))
-		return 0;
+	int cr = setjmp(j->retbuf);
+	if(!!__builtin_expect((long int) cr, 0))
+		return cr;
 
 	j->regs.pc = 0;
 	j->regs.pb = 0;
@@ -97,6 +66,9 @@ methodinfo_t* jcode_find_method(jassembly_t* j, const char* name) {
 		}
 	}
 
+	if(j->super)
+		return jcode_find_method(j->super, name);
+
 	return NULL;
 }
 
@@ -113,6 +85,9 @@ methodinfo_t* jcode_find_method_and_desc(jassembly_t* j, const char* name, const
 				return v;
 		}
 	}
+
+	if(j->super)
+		return jcode_find_method_and_desc(j->super, name, desc);
 
 	return NULL;
 }
@@ -133,6 +108,9 @@ methodinfo_t* jcode_find_method_and_desc_and_class(jassembly_t* j, const char* n
 		if((strcmp(utf.value, name) == 0) && (strcmp(utf_d.value, desc) == 0))
 				return v;
 	}
+
+	if(j->super)
+		return jcode_find_method_and_desc(j->super, name, desc);
 
 	return NULL;
 }
@@ -240,8 +218,8 @@ attrinfo_t* jcode_find_attribute(jassembly_t* j, list_t* attributes, const char*
 }
 
 
-jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* params, int params_count) {
-	assert(j && method);
+jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* params, int params_count) {
+	assert(jx && method);
 
 	if(params_count > 0)
 		assert(params);
@@ -342,23 +320,23 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 		j_throw(NULL, "Invalid code for this method");
 
 
-	jcontext_t* context = (jcontext_t*) jmalloc(sizeof(jcontext_t));
-	context->current_assembly = j;
+	jcontext_t* j = (jcontext_t*) jmalloc(sizeof(jcontext_t));
+	j->current_assembly = jx;
 
-	context->locals = (jvalue_t*) jmalloc(sizeof(jvalue_t) * method->code->max_locals);
-	context->locals_count = method->code->max_locals;
+	j->locals = (jvalue_t*) jmalloc(sizeof(jvalue_t) * method->code->max_locals);
+	j->locals_count = method->code->max_locals;
 
-	context->stack = (jvalue_t*) jmalloc(sizeof(jvalue_t) * method->code->max_stack);
-	context->stack_size = method->code->max_stack;
-	context->stack_top = 0;
+	j->stack = (jvalue_t*) jmalloc(sizeof(jvalue_t) * method->code->max_stack);
+	j->stack_size = method->code->max_stack;
+	j->stack_top = 0;
 
-	context->code = method->code->code;
-	context->method = method;
+	j->code = method->code->code;
+	j->method = method;
 
 	int i, p;
 	for(i = 0, p = 0; i < params_count; i++, p++) {
 
-		context->locals[p] = params[i];
+		j->locals[p] = params[i];
 
 		switch(method->signature[i]) {
 			case 'J':
@@ -373,14 +351,14 @@ jvalue_t jcode_method_invoke(jassembly_t* j, methodinfo_t* method, jvalue_t* par
 #endif
 
 
-	jcode_context_run(context);
-	jvalue_t retval = context->regs.r0;
+	jcode_context_run(j);
+	jvalue_t retval = j->regs.r0;
 
-
+	
 #if !defined(__GLIBC__)
-	jfree(context->locals);
-	jfree(context->stack);
-	jfree(context);
+	jfree(j->locals);
+	jfree(j->stack);
+	jfree(j);
 #endif
 
 	return retval;

@@ -23,6 +23,12 @@
 
 #define JCODE_NULL_REFERENCE						NULL
 
+#define JCODE_EXIT_SUCCESS							1
+#define JCODE_EXIT_EXCEPTION						2
+
+#define JERR_HANDLED								0
+#define JERR_UNHANDLED								-1
+
 
 #define JCLASS_MAGIC			0xCAFEBABE
 
