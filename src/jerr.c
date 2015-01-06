@@ -67,8 +67,28 @@ int jerr_throw(jcontext_t* j) {
 
 		exit(-1);
 	} else {
-		/* Check for catch (TODO) */
-		
+		int i;
+		for(i = 0; i < j->method->code->exception_table_length; i++) {
+			if(j->regs.pb >= j->method->code->exceptions[i].start_pc && j->regs.pb <= j->method->code->exceptions[i].end_pc) {
+
+				cpvalue_t* cp = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, j->method->code->exceptions[i].catch_type - 1);
+				assert(cp);
+
+				cpclass_t cl;
+				assert(jclass_cp_to_class(cp, &cl) == 0);
+
+				cputf8_t utf;
+				assert(jclass_get_utf8_from_cp(j->current_assembly, &utf, cl.name_index) == 0);
+
+
+				if(strcmp(utf.value, jerr_msg) == 0) {
+					PC = PB = j->method->code->exceptions[i].handler_pc;
+
+					jerr_clear_exception();
+					return JERR_HANDLED;
+				}
+			}
+		}
 	}
 
 	return JERR_UNHANDLED;

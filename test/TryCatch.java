@@ -1,16 +1,16 @@
 
 
 public class TryCatch {
-	public static void Test3() {
-		try {
-			throw new Exception("Hello World");
-		} catch(Exception e) {
-			
-		}
+	public static void Test3() throws Exception {
+		throw new Exception("Hello World");
 	}
 
 	public static void Test2() {
-		Test3();
+		try {
+			Test3();	
+		} catch(Exception e) {
+			
+		}
 	}
 
 	public static void Test1() {
