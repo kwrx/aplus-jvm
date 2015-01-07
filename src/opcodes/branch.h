@@ -69,11 +69,7 @@ OPCODE(lookupswitch) {
 	int32_t npairs = PC32;
 	PC += 4;
 
-	
 	R0 = JPOP_JV();
-
-	assert(npairs >= 0);
-	assert(def >= 0);
 
 	int32_t i = 0;
 	for(i = 0; i < npairs; i++) {

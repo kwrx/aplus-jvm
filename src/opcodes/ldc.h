@@ -5,7 +5,7 @@ OPCODE(ldc) {
 	PC++;
 
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
-	assert(v);
+	jcheck(v);
 
 
 	switch(v->tag) {
@@ -25,7 +25,7 @@ OPCODE(ldc_w) {
 	PC += 2;
 
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
-	assert(v);
+	jcheck(v);
 
 	switch(v->tag) {
 		case JCLASS_TAG_STRING:
@@ -43,7 +43,7 @@ OPCODE(ldc2_w) {
 	PC += 2;
 
 	cpvalue_t* v = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, idx - 1);
-	assert(v);
+	jcheck(v);
 
 	JPUSH(i64, v->value);
 }

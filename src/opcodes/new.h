@@ -5,7 +5,7 @@ OPCODE(new) {
 	PC += 2;
 
 	jobject_t* obj = (jobject_t*) jobject_new(j->current_assembly, idx);
-	if(!__builtin_expect((long int) obj, 0))
+	if(unlikely(!obj))
 		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
 
 	JPUSH(ptr, (void*) obj);
@@ -17,7 +17,7 @@ OPCODE(newarray) {
 
 	int32_t count = JPOP(i32);
 
-	if(count < 0)
+	if(unlikely(count < 0))
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
@@ -59,7 +59,7 @@ OPCODE(anewarray) {
 
 	int32_t count = JPOP(i32);
 
-	if(count < 0)
+	if(unlikely(count < 0))
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 
@@ -82,7 +82,7 @@ OPCODE(multinewarray) {
 	while(rank--)
 		count += JPOP(i32);
 
-	if(count < 0)
+	if(unlikely(count < 0))
 		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
 
 	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) * 3));

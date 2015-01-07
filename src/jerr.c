@@ -8,7 +8,6 @@
 #include <float.h>
 #include <math.h>
 
-#include <assert.h>
 
 
 #include <jvm/jvm.h>
@@ -45,7 +44,7 @@ int jerr_throw(jcontext_t* j) {
 
 		if(jerr_ctx && jerr_ctx->code) {
 			attr_linenumbers_t* ln = (attr_linenumbers_t*) jcode_find_attribute(jerr_ctx->current_assembly, jerr_ctx->method->code->attributes, "LineNumberTable");
-			assert(ln);
+			jcheck(ln);
 
 			int i = 0;
 			while(jerr_ctx->regs.pb >= ln->table[i].pc)
@@ -72,13 +71,13 @@ int jerr_throw(jcontext_t* j) {
 			if(j->regs.pb >= j->method->code->exceptions[i].start_pc && j->regs.pb <= j->method->code->exceptions[i].end_pc) {
 
 				cpvalue_t* cp = (cpvalue_t*) list_at_index(j->current_assembly->header.jc_cpinfo, j->method->code->exceptions[i].catch_type - 1);
-				assert(cp);
+				jcheck(cp);
 
 				cpclass_t cl;
-				assert(jclass_cp_to_class(cp, &cl) == 0);
+				jcheck(jclass_cp_to_class(cp, &cl) == 0);
 
 				cputf8_t utf;
-				assert(jclass_get_utf8_from_cp(j->current_assembly, &utf, cl.name_index) == 0);
+				jcheck(jclass_get_utf8_from_cp(j->current_assembly, &utf, cl.name_index) == 0);
 
 
 				if(strcmp(utf.value, jerr_msg) == 0) {
@@ -104,7 +103,7 @@ int jerr_set_and_throw(jcontext_t* j, char* errormsg) {
 }
 
 void jerr_check_exceptions(jcontext_t* j) {
-	if(jerr_has_exception()) {
+	if(unlikely(jerr_msg)) {
 		if(jerr_throw(j) == JERR_HANDLED)
 			return;
 

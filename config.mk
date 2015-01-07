@@ -20,10 +20,11 @@ MV		:= mv
 
 
 DEFINES	:= -D_DEBUG -D_VERBOSE -DTEST -DARCH=\"$(ARCH)\"
+FLAGS	:= -fno-strict-aliasing -funroll-all-loops -fno-inline
 LIBS	:= -lpthread -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wall
 
-CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel -std=c99 -mfpmath=sse -msse3 -Ofast -fno-strict-aliasing -fno-align-functions
+CFLAGS	:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel -std=c99 -mfpmath=sse -msse3 -Ofast $(FLAGS)
 CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s -masm=intel
 AFLAGS	:= $(DEFINES) -f elf
 LFLAGS	:= -s

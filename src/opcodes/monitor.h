@@ -3,7 +3,7 @@
 OPCODE(monitorenter) {
 	jobject_t* obj = (jobject_t*) JPOP(ptr);
 
-	if(!__builtin_expect((long int) obj, 0))
+	if(unlikely(!obj))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
@@ -16,7 +16,7 @@ OPCODE(monitorenter) {
 OPCODE(monitorexit) {
 	jobject_t* obj = (jobject_t*) JPOP(ptr);
 
-	if(!__builtin_expect((long int) obj, 0))
+	if(unlikely(!obj))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 	
 

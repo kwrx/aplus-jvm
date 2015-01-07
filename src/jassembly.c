@@ -8,8 +8,6 @@
 #include <float.h>
 #include <math.h>
 
-#include <assert.h>
-
 #include <jvm/jvm.h>
 
 #define _WITH_JDIRS
@@ -45,7 +43,7 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 	if(assemblies_loaded == NULL)
 		{ list_init(assemblies_loaded); }
 
-	assert(j && filename);
+	jcheck(j && filename);
 
 
 	list_foreach(value, assemblies_loaded) {
@@ -58,14 +56,14 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 	}
 
 	(*j) = (jassembly_t*) jmalloc(sizeof(jassembly_t));
-	assert(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
+	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
 
 	(*j)->fd = jopen(filename, O_RDONLY, 0644);
 	(*j)->path = (char*) strdup(filename);
 
-	assert((*j)->fd > 0);
-	assert(jclass_parse_assembly((*j)) == 0);
-	assert(jclass_resolve_assembly((*j)) == 0);
+	jcheck((*j)->fd > 0);
+	jcheck(jclass_parse_assembly((*j)) == 0);
+	jcheck(jclass_resolve_assembly((*j)) == 0);
 
 
 	close((*j)->fd);
@@ -92,7 +90,7 @@ jassembly_t* jassembly_find(jassembly_t* j, const char* classname) {
 #ifdef TEST
 #ifdef DEBUG
 static void print_attributes(jassembly_t* j, list_t* attributes) {
-	assert(j && attributes);
+	jcheck(j && attributes);
 
 	printf("(");
 
@@ -111,13 +109,13 @@ static void print_attributes(jassembly_t* j, list_t* attributes) {
 
 int main(int argc, char** argv) {
 
-	assert(argc > 1);
+	jcheck(argc > 1);
 
 
 	jinit();
 
 	jassembly_t* j = NULL;
-	assert(jassembly_load(&j, argv[1]) == 0);
+	jcheck(jassembly_load(&j, argv[1]) == 0);
 
 
 #ifdef DEBUG

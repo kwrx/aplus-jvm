@@ -8,7 +8,6 @@
 #include <float.h>
 #include <math.h>
 
-#include <assert.h>
 
 
 #include <jvm/jvm.h>
@@ -20,7 +19,7 @@ list_t* jnative_handlers;
 
 int jnative_register_function(const char* name, const char* signature, int16_t rettype, jnative_handler_t handler) {
 
-	assert(name && handler);
+	jcheck(name && handler);
 
 	if(!jnative_handlers) {
 		list_init(jnative_handlers);
@@ -32,12 +31,12 @@ int jnative_register_function(const char* name, const char* signature, int16_t r
 	cc->rettype = rettype;
 	cc->handler = handler; 
 
-	assert(list_add(jnative_handlers, (listval_t) cc) == 0);
+	jcheck(list_add(jnative_handlers, (listval_t) cc) == 0);
 	return 0;
 }
 
 int jnative_unregister_function(const char* name) {
-	assert(name);
+	jcheck(name);
 
 	if(!jnative_handlers) {
 		list_init(jnative_handlers);
@@ -64,7 +63,7 @@ int jnative_unregister_function(const char* name) {
 }
 
 jnative_t* jnative_find_method(const char* name) {
-	assert(name);
+	jcheck(name);
 
 	if(!jnative_handlers) {
 		list_init(jnative_handlers);

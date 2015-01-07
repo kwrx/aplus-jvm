@@ -3,7 +3,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <time.h>
 #include <sys/times.h>
 #include <sched.h>
@@ -26,11 +25,24 @@
 #define j_bswap64(x)			\
 	__builtin_bswap64(x)
 
+#define j_error(s)							\
+	{										\
+		printf("jvm: ERROR -> %s\n", s);	\
+		exit(-1);							\
+	}
 
-#ifndef DEBUG
-#undef assert
-#define assert(x)	{ (void) (x); }
-#endif
+#define likely(x)			__builtin_expect((long int) !!(x), 1)
+#define unlikely(x)			__builtin_expect((long int) !!(x), 0)
+
+#define jcheck(x)																						\
+	{																									\
+		if(unlikely(!(x))) {																			\
+			printf("jvm: checking failed on condition (\"%s\") in %s:%d\n", #x, __FILE__, __LINE__);	\
+			exit(-1);																					\
+		}																								\
+	}
+
+
 
 
 

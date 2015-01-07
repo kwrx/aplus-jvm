@@ -8,8 +8,6 @@
 #include <float.h>
 #include <math.h>
 
-#include <assert.h>
-
 
 #include <jvm/jvm.h>
 #include "jconfig.h"

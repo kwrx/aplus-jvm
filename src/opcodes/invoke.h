@@ -6,9 +6,6 @@ OPCODE(invokevirtual) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	assert(method);
-
-	
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
@@ -35,8 +32,6 @@ OPCODE(invokespecial) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	assert(method);
-	
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
@@ -62,7 +57,7 @@ OPCODE(invokestatic) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	assert(method);
+
 
 	if(method->nargs == 0)
 		R0 = jcode_method_invoke(j->current_assembly, method, NULL, 0);
@@ -95,9 +90,6 @@ OPCODE(invokeinterface) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	assert(method);
-
-	
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
@@ -126,7 +118,7 @@ OPCODE(athrow) {
 	jobject_t* obj = (jobject_t*) JPOP(ptr);
 	JPUSH(ptr, (void*) obj);
 	
-	if(!__builtin_expect((long int) obj, 0))
+	if(unlikely(!obj))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 	j_throw(j, obj->fullname);
