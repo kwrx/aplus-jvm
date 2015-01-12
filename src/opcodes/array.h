@@ -2,14 +2,14 @@
 
 OPCODE(iaload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -18,14 +18,14 @@ OPCODE(iaload) {
 
 OPCODE(laload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -34,14 +34,14 @@ OPCODE(laload) {
 
 OPCODE(faload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -50,14 +50,14 @@ OPCODE(faload) {
 
 OPCODE(daload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -66,14 +66,14 @@ OPCODE(daload) {
 
 OPCODE(aaload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -82,14 +82,14 @@ OPCODE(aaload) {
 
 OPCODE(baload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -99,14 +99,14 @@ OPCODE(baload) {
 
 OPCODE(caload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -115,14 +115,14 @@ OPCODE(caload) {
 
 OPCODE(saload) {
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -135,14 +135,14 @@ OPCODE(saload) {
 OPCODE(iastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -152,14 +152,14 @@ OPCODE(iastore) {
 OPCODE(lastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -169,14 +169,14 @@ OPCODE(lastore) {
 OPCODE(fastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -186,14 +186,14 @@ OPCODE(fastore) {
 OPCODE(dastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -203,13 +203,13 @@ OPCODE(dastore) {
 OPCODE(aastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -219,14 +219,14 @@ OPCODE(aastore) {
 OPCODE(bastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -236,14 +236,14 @@ OPCODE(bastore) {
 OPCODE(castore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -253,14 +253,14 @@ OPCODE(castore) {
 OPCODE(sastore) {
 	jvalue_t v = JPOP_JV();
 	int32_t idx = JPOP(i32);
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 	
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
 
 #if HAVE_ARRAY_BOUNDS_CHECKING
-	if(unlikely(idx >= aref[-1]))
+	if(unlikely(idx >= JARRAY_LENGTH(aref)))
 		j_throw(j, JEXCEPTION_ARRAY_BOUNDS);
 #endif
 
@@ -268,11 +268,11 @@ OPCODE(sastore) {
 }
 
 OPCODE(arraylength) {
-	int32_t* aref = (int32_t*) JPOP(ptr);
+	jarray_t* aref = (jarray_t*) JPOP(ptr);
 
 	if(unlikely(!aref))
 		j_throw(j, JEXCEPTION_NULL_POINTER);
 
-	JPUSH(i32, aref[-1]);
+	JPUSH(i32, JARRAY_LENGTH(aref));
 }
 

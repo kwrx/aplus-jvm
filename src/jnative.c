@@ -13,11 +13,11 @@
 #include <jvm/jvm.h>
 #include "jconfig.h"
 
-
+static jcontext_t* __current_ctx = NULL;
 list_t* jnative_handlers;
 
 
-int jnative_register_function(const char* name, const char* signature, int16_t rettype, jnative_handler_t handler) {
+int jnative_register_function(const char* classname, const char* name, const char* signature, int16_t rettype, void* handler) {
 
 	jcheck(name && handler);
 
@@ -25,7 +25,11 @@ int jnative_register_function(const char* name, const char* signature, int16_t r
 		list_init(jnative_handlers);
 	}
 
+	if(strcmp(signature, "V"))
+		signature = (char*) strdup("");
+
 	jnative_t* cc = (jnative_t*) jmalloc(sizeof(jnative_t));
+	cc->classname = (char*) strdup(classname);
 	cc->name = (char*) strdup(name);
 	cc->signature = (char*) strdup(signature);
 	cc->rettype = rettype;
@@ -35,7 +39,7 @@ int jnative_register_function(const char* name, const char* signature, int16_t r
 	return 0;
 }
 
-int jnative_unregister_function(const char* name) {
+int jnative_unregister_function(const char* classname, const char* name) {
 	jcheck(name);
 
 	if(!jnative_handlers) {
@@ -50,7 +54,7 @@ int jnative_unregister_function(const char* name) {
 	list_foreach(value, jnative_handlers) {
 		jnative_t* cc = (jnative_t*) value;
 
-		if(strcmp(cc->name, name) == 0) {
+		if((strcmp(cc->name, name) == 0) && (strcmp(cc->classname, classname) == 0)) {
 			to_remove = cc;
 			break;
 		}
@@ -62,7 +66,7 @@ int jnative_unregister_function(const char* name) {
 	return 0;
 }
 
-jnative_t* jnative_find_method(const char* name) {
+jnative_t* jnative_find_method(const char* classname, const char* name) {
 	jcheck(name);
 
 	if(!jnative_handlers) {
@@ -75,9 +79,19 @@ jnative_t* jnative_find_method(const char* name) {
 	list_foreach(value, jnative_handlers) {
 		jnative_t* cc = (jnative_t*) value;
 
-		if(strcmp(cc->name, name) == 0)
+		if((strcmp(cc->name, name) == 0) && (strcmp(cc->classname, classname) == 0))
 			return cc;
 	}
 
 	return NULL;
+}
+
+
+void jnative_set_context(jcontext_t* j) {
+	__current_ctx = j;
+}
+
+jcontext_t* jnative_get_context() {
+	jcheck(__current_ctx);
+	return __current_ctx;
 }

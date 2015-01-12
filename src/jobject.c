@@ -51,7 +51,24 @@ jobject_t* jobject_new(jassembly_t* j, int16_t idx) {
 	
 	list_init(obj->fields);
 
-	list_foreach(value, j->header.jc_fields)
+	list_foreach(value, j2->header.jc_fields)
+		jcheck(list_add(obj->fields, (listval_t) __clone((void*) value, sizeof(fieldinfo_t))) == 0);
+
+
+	return obj;
+}
+
+jobject_t* jobject_new_from_assembly(jassembly_t* j, jassembly_t* cc) {
+	jobject_t* obj = (jobject_t*) jmalloc(sizeof(jobject_t));
+	obj->refcount = 0;
+	obj->lock = 0;
+	obj->fullname = obj->name = (char*) strdup(cc->name);
+	obj->assembly = cc;
+	obj->id = jobject_id();
+	
+	list_init(obj->fields);
+
+	list_foreach(value, cc->header.jc_fields)
 		jcheck(list_add(obj->fields, (listval_t) __clone((void*) value, sizeof(fieldinfo_t))) == 0);
 
 
@@ -77,5 +94,34 @@ jobject_t* jobject_clone(jobject_t* obj) {
 	cc->id = jobject_id();
 
 	return cc;
+}
+
+
+fieldinfo_t* jobject_get_field(jobject_t* obj, const char* name, uint8_t type) {
+	jcheck(obj && name);
+	jcheck(obj->fields);
+
+	list_foreach(value, obj->fields) {
+		if(
+			(strcmp(((fieldinfo_t*) value)->name, name) == 0) && 
+			(((fieldinfo_t*) value)->type == type)
+		) return (fieldinfo_t*) value;
+	}
+
+	return NULL;
+}
+
+jvalue_t jobject_get_fieldvalue(jobject_t* obj, const char* name, uint8_t type) {
+	fieldinfo_t* v = NULL;	
+	if(likely(v = jobject_get_field(obj, name, type)))
+		return v->value;
+
+	return (jvalue_t) 0LL;
+}
+
+void jobject_set_fieldvalue(jobject_t* obj, const char* name, uint8_t type, jvalue_t value) {
+	fieldinfo_t* v = NULL;	
+	if(likely(v = jobject_get_field(obj, name, type)))
+		v->value = value;
 }
 

@@ -174,6 +174,10 @@ int jclass_default_attribute(char* name) {
 		return JCLASS_ATTR_LOCALVARS;
 	if(strcmp(name, "Deprecated") == 0)
 		return JCLASS_ATTR_DEPRECATED;
+	if(strcmp(name, "Signature") == 0)
+		return JCLASS_ATTR_SIGNATURE;
+	if(strcmp(name, "StackMapTable") == 0)
+		return JCLASS_ATTR_STACKMAPTABLE;
 
 #ifdef DEBUG
 	j_printf("attribute %s not found\n", name);
@@ -292,6 +296,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 					jcheck(list_add(attributes, (listval_t) cc) == 0);
 				}
 				break;
+			case JCLASS_ATTR_DEPRECATED:
 			case JCLASS_ATTR_SYNTHETIC: {
 					attrinfo_t* cc = (attrinfo_t*) jmalloc(sizeof(attrinfo_t));
 					cc->name_index = idx;
@@ -325,6 +330,7 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 
 					cc->table = (localvars_table_t*) jmalloc(sizeof(localvars_table_t) * cc->vars_count);
 					for(i = 0; i < cc->vars_count; i++) {
+						R16(&cc->table[i].pc);
 						R16(&cc->table[i].length);
 						R16(&cc->table[i].name_index);
 						R16(&cc->table[i].desc_index);
@@ -334,18 +340,39 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 					jcheck(list_add(attributes, (listval_t) cc) == 0);
 				}
 				break;
-			case JCLASS_ATTR_DEPRECATED: {
-#ifdef DEBUG
-					cputf8_t utf;
-					jclass_get_utf8_from_cp(j, &utf, idx);
+			case JCLASS_ATTR_SIGNATURE: {
+					attr_sign_t* cc = (attr_sign_t*) jmalloc(sizeof(attr_sign_t));
+					cc->name_index = idx;
+					cc->length = ln;
 
-					j_printf("member %s is deprecated\n", utf.value);
-#endif
+					R16(&cc->sign_index);
+
+					jcheck(list_add(attributes, (listval_t) cc) == 0);
+				}
+				break;
+			case JCLASS_ATTR_STACKMAPTABLE: {
+					attr_stackmap_t* cc = (attr_stackmap_t*) jmalloc(sizeof(attr_stackmap_t));
+					cc->name_index = idx;
+					cc->length = ln;
+		
+					R16(&cc->frames_count);
+
+					cc->frames = (void*) jmalloc(cc->length - 2);
+					RXX(cc->frames, (cc->length - 2));
+
+					jcheck(list_add(attributes, (listval_t) cc) == 0);
 				}
 				break;
 			case JCLASS_ATTR_UNKNOWN:
-			default:
-				j_error("Invalid default attribute");
+			default: {
+				attrinfo_t* cc = (attrinfo_t*) jmalloc(sizeof(attrinfo_t) + ln);
+				cc->name_index = idx;
+				cc->length = ln;
+
+				RXX(((void*) ((uint32_t) cc + 6)), ln);
+
+				jcheck(list_add(attributes, (listval_t) cc) == 0);
+			}
 		}
 	}
 
@@ -458,10 +485,13 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 
 	
 	if(method->access & ACC_NATIVE) {
-		jnative_t* native = (jnative_t*) jnative_find_method(utf_n.value);
-		if(unlikely(!native))
+		jnative_t* native = (jnative_t*) jnative_find_method(j->name, utf_n.value);
+		if(unlikely(!native)) {
+#ifdef DEBUG
+			j_printf("native method %s.%s not found\n", j->name, utf_n.value);
+#endif			
 			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
-
+		}
 		method->nargs = strlen(native->signature);
 		method->rettype = native->rettype;
 		strcpy(method->signature, native->signature);
@@ -527,10 +557,20 @@ int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
 	if(strcmp(j->name, utf.value) == 0)
 		return 0;
 
+	if(unlikely(utf.value[0] == '['))
+		return 0;		/* Array references */
+
+	
 
 	jassembly_t* dep = NULL;
 
-	jcheck(jassembly_load(&dep, utf.value) == 0);
+	if(unlikely(jassembly_load(&dep, utf.value) != 0)) {
+#ifdef DEBUG
+		j_printf("could not resolve \"%s\" from %s\n", utf.value, j->name);
+#endif
+		return 0;
+	}
+
 	jcheck(list_add(j->deps, (listval_t) dep) == 0);
 
 	dep->index = index;
@@ -567,6 +607,7 @@ int jclass_resolve_super(jassembly_t* j) {
 	cputf8_t utf;
 	jcheck(jclass_get_utf8_from_cp(j, &utf, cl.name_index) == 0);
 
+	
 	j->super = (jassembly_t*) jassembly_find(j, utf.value);
 	jcheck(j->super);
 	return 0;

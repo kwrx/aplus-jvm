@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #define _GNU_SOURCE
 #include <float.h>
@@ -18,10 +19,12 @@ list_t* assemblies_loaded = NULL;
 
 
 static int jopen(const char* filename, int flags, int mode) {
+
 	
+	char* vbuf;
 	int i;
 	for(i = 0; j_directories[i]; i++) {
-		char* vbuf = jmalloc(256);
+		vbuf = (char*) jmalloc(256);
 		sprintf(vbuf, j_directories[i], filename);
 
 
@@ -56,24 +59,34 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 	}
 
 	(*j) = (jassembly_t*) jmalloc(sizeof(jassembly_t));
-	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
 
 	(*j)->fd = jopen(filename, O_RDONLY, 0644);
 	(*j)->path = (char*) strdup(filename);
 
-	jcheck((*j)->fd > 0);
+	if(unlikely((*j)->fd < 0)) {
+		j_printf("could not open \"%s\": %s\n", filename, strerror(errno));
+		return -1;
+	}
+
+	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
+
 	jcheck(jclass_parse_assembly((*j)) == 0);
+	jcheck(close((*j)->fd) == 0);
 	jcheck(jclass_resolve_assembly((*j)) == 0);
 
-
-	close((*j)->fd);
+	
 	return 0;
 }
 
 
 jassembly_t* jassembly_find(jassembly_t* j, const char* classname) {
+	jcheck(j && classname);
+
 	if(strcmp(j->name, classname) == 0)
 		return j;
+
+	if(list_empty(j->deps))
+		return NULL;
 
 	list_foreach(value, j->deps) {
 		jassembly_t* cc = (jassembly_t*) value;
@@ -85,6 +98,25 @@ jassembly_t* jassembly_find(jassembly_t* j, const char* classname) {
 	return NULL;
 }
 
+
+int jassembly_change(jcontext_t* j, const char* classname) {
+	jcheck(j && classname);
+
+	j->last_assembly = j->current_assembly;
+	j->current_assembly = jassembly_find(j->current_assembly, classname);
+
+	jcheck(j->current_assembly);
+	return 0;
+}
+
+int jassembly_restore(jcontext_t* j) {
+	jcheck(j);
+
+	if(j->last_assembly)
+		j->current_assembly = j->last_assembly;
+
+	return 0;
+}
 
 
 #ifdef TEST

@@ -6,11 +6,17 @@ OPCODE(invokevirtual) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
+	jassembly_change(j, method->classname);
+
+
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
+
+	if(unlikely(method->access & ACC_NATIVE))
+		jnative_set_context(j);
 
 	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
 
@@ -21,6 +27,7 @@ OPCODE(invokevirtual) {
 
 
 	jerr_check_exceptions(j);
+	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -32,11 +39,17 @@ OPCODE(invokespecial) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
+	jassembly_change(j, method->classname);
+
+
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
+
+	if(unlikely(method->access & ACC_NATIVE))
+		jnative_set_context(j);
 
 	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
 
@@ -46,6 +59,7 @@ OPCODE(invokespecial) {
 
 
 	jerr_check_exceptions(j);
+	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -57,6 +71,7 @@ OPCODE(invokestatic) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
+	jassembly_change(j, method->classname);
 
 
 	if(method->nargs == 0)
@@ -68,6 +83,10 @@ OPCODE(invokestatic) {
 		for(; i >= 0; i--)
 			params[i] = JPOP_JV();
 
+	
+		if(unlikely(method->access & ACC_NATIVE))
+			jnative_set_context(j);
+
 		R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs);
 
 #if !defined(__GLIBC__)
@@ -76,6 +95,7 @@ OPCODE(invokestatic) {
 	}
 
 	jerr_check_exceptions(j);
+	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -90,11 +110,18 @@ OPCODE(invokeinterface) {
 
 
 	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
+	jassembly_change(j, method->classname);
+
+
 	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
+
+
+	if(unlikely(method->access & ACC_NATIVE))
+		jnative_set_context(j);
 
 	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
 
@@ -105,6 +132,7 @@ OPCODE(invokeinterface) {
 
 
 	jerr_check_exceptions(j);
+	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);

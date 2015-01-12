@@ -22,6 +22,7 @@
 #define JEXCEPTION_ABSTRACT_METHOD					"java/lang/AbstractMethodError"
 #define JEXCEPTION_UNSATISFIED_LINK					"java/lang/UnsatisfiedLinkError"
 #define JEXCEPTION_LINKAGE							"java/lang/LinkageError"
+#define JEXCEPTION_ARRAY_STORE						"java/lang/ArrayStoreException"
 
 
 #define JCODE_NULL_REFERENCE						NULL
@@ -35,16 +36,18 @@
 
 #define JCLASS_MAGIC			0xCAFEBABE
 
-#define JCLASS_ATTR_UNKNOWN		(-1)
-#define JCLASS_ATTR_CONSTVALUE	0
-#define JCLASS_ATTR_SOURCEFILE	1
-#define JCLASS_ATTR_CODE		2
-#define JCLASS_ATTR_EXCEPTIONS	3
-#define JCLASS_ATTR_INNERCLASS	4
-#define JCLASS_ATTR_SYNTHETIC	5
-#define JCLASS_ATTR_LINENUMBERS	6
-#define JCLASS_ATTR_LOCALVARS	7
-#define JCLASS_ATTR_DEPRECATED	8
+#define JCLASS_ATTR_UNKNOWN					(-1)
+#define JCLASS_ATTR_CONSTVALUE				0
+#define JCLASS_ATTR_SOURCEFILE				1
+#define JCLASS_ATTR_CODE					2
+#define JCLASS_ATTR_EXCEPTIONS				3
+#define JCLASS_ATTR_INNERCLASS				4
+#define JCLASS_ATTR_SYNTHETIC				5
+#define JCLASS_ATTR_LINENUMBERS				6
+#define JCLASS_ATTR_LOCALVARS				7
+#define JCLASS_ATTR_DEPRECATED				8
+#define JCLASS_ATTR_SIGNATURE				9
+#define JCLASS_ATTR_STACKMAPTABLE			10
 
 
 
@@ -94,7 +97,7 @@
 #define JCLASS_TAG_INTERFACE			11
 #define JCLASS_TAG_TYPENAME				12
 
-#define JARRAY_MAGIC					0xFFAA4466
+#define JARRAY_MAGICVALUE				0xFFAA4466
 
 
 
@@ -214,6 +217,7 @@ typedef struct attr_iclass {
 } attr_iclass_t;
 
 typedef struct localvars_table {
+	uint16_t pc;
 	uint16_t length;
 	uint16_t name_index;
 	uint16_t desc_index;
@@ -255,6 +259,19 @@ typedef struct attr_code {
 	exception_table_t* exceptions;
 } attr_code_t;
 
+typedef struct attr_sign {
+	uint16_t name_index;
+	uint32_t length;
+	uint16_t sign_index;
+} attr_sign_t;
+
+
+typedef struct attr_stackmap {
+	uint16_t name_index;
+	uint32_t length;
+	uint16_t frames_count;
+	void* frames;
+} attr_stackmap_t;
 
 typedef struct fieldinfo {
 	uint16_t access;
@@ -332,6 +349,9 @@ typedef struct jassembly {
 	int fd;
 	int index;
 
+	void* signers;
+	void* protection_domain;
+
 	jclass_header_t header;
 	list_t* deps;
 	struct jassembly* super;
@@ -347,13 +367,21 @@ typedef struct jobject {
 	char* fullname;
 	char* name;
 
+
 	list_t* fields;
 	jassembly_t* assembly;
 } jobject_t;
 
+typedef int32_t jarray_t;
+
+#define JARRAY_LENGTH(a)	(((int32_t*) a) [-1])
+#define JARRAY_TYPE(a)		(((int32_t*) a) [-2])
+#define JARRAY_MAGIC(a)		(((int32_t*) a) [-3])
+
 
 typedef struct jcontext {
 	jassembly_t* current_assembly;
+	jassembly_t* last_assembly;
 
 	struct {
 		jvalue_t r0;
@@ -400,17 +428,17 @@ static cpinfo_t cpinfo[] = {
 #endif
 
 
-typedef jvalue_t (*jnative_handler_t) (int argc, jvalue_t* argv);
 
 typedef struct jnative {
+	char* classname;
 	char* name;
 	char* signature;
 	int16_t rettype;
-	jnative_handler_t handler;
+	void* handler;
 } jnative_t;
 
-#define JNATIVE(func)					\
-	jnative_func_##func
+#define JNATIVE(func, d)					\
+	jnative_func_##func##_##d
 
 #define JNULL	\
 	(jvalue_t) 0
@@ -436,6 +464,10 @@ fieldinfo_t* jcode_find_fieldref(jassembly_t* j, list_t* fields, int16_t idx);
 
 jobject_t* jobject_clone(jobject_t* obj);
 void jobject_finalize(jobject_t* obj);
+
+int jnative_register_function(const char* classname, const char* name, const char* signature, int16_t rettype, void* handler);
+int jnative_unregister_function(const char* classname, const char* name);
+jnative_t* jnative_find_method(const char* classname, const char* name);
 
 
 #ifdef __cplusplus

@@ -18,8 +18,6 @@
 #include "opcodes/opcode.h"
 
 
-
-
 int jcode_context_run(jcontext_t* j) {
 	jcheck(j);
 
@@ -224,10 +222,13 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 
 
 	if(method->access & ACC_NATIVE) {
-		jnative_t* native = (jnative_t*) jnative_find_method(method->name);
-		if(unlikely(!native))
+		jnative_t* native = (jnative_t*) jnative_find_method(method->classname, method->name);
+		if(unlikely(!native)) {
+#ifdef DEBUG
+			j_printf("native method %s.%s not found\n", method->classname, method->name);
+#endif		
 			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
-		
+		}
 
 		char* s = method->signature;
 		register int i = 0, p = 0;
@@ -299,6 +300,7 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 	
 			s++;
 		}
+
 
 
 		switch(method->rettype) {
