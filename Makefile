@@ -57,6 +57,5 @@ git: clean
 	-@git add --all .
 	-@git commit -m "$(COMMIT)"
 	-@git push origin master
-	-@$(RM) -r usr
 	
 	
