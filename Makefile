@@ -11,17 +11,22 @@ SFILES 	:= $(CFILES) $(CXXFILES) $(AFILES)
 OFILES	:= $(CFILES:.c=.o) $(CXXFILES:.cpp=.o) $(AFILES:.s=.o)
 
 
-PACKAGE	:= jvm
+PACKAGE	:= libjvm
 VERSION	:= 0.1
 
+OUTPUT	:= $(PACKAGE).a
+TESTOUT	:= jvm
 
 .PHONY: all clean git
 
-all: jvm
-
-jvm : $(OFILES)
+all: $(TESTOUT)
+$(TESTOUT): $(OUTPUT)
 	@echo "  LD      " $@
-	@$(LD) $(LFLAGS) -o $@ $(OFILES) $(LIBS)
+	@$(LD) -o $@ $(OFILES)
+
+$(OUTPUT): $(OFILES)
+	@echo "  AR      " $@
+	@$(AR) -rcs $@ $(OFILES)
 
 .c.o:
 	@echo "  CC      " $(notdir $<)
@@ -36,11 +41,8 @@ jvm : $(OFILES)
 	@$(ASM) $(AFLAGS) $< -o $@
 	
 
-install: jvm
-	@$(CP) jvm bin/jvm
-
 clean:
-	-@$(RM) jvm
+	-@$(RM) $(OUTPUT)
 	-@$(RM) $(OFILES)
 
 distclean: clean

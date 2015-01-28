@@ -7,8 +7,9 @@
 #include <sys/times.h>
 #include <sched.h>
 
+
 #define j_printf(s, a...)		\
-	printf("[%f] (%s) " s, (double)clock() / CLOCKS_PER_SEC, __func__, a);
+	printf("[%f] (%s) " s, (float) clock() / CLOCKS_PER_SEC, __func__, a);
 
 #define j_yield() 				\
 	sched_yield()
@@ -131,7 +132,6 @@ static char* j_directories[] = {
 	NULL
 };
 #endif
-
 
 
 #endif

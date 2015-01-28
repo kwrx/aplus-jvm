@@ -18,6 +18,6 @@ public class OOP {
 	}
 
 	public void Print() {
-		Native.Print("Program: %d\n", this.X);
+		//Native.Print("Program: %d\n", this.X);
 	}
 }

@@ -21,11 +21,12 @@ int jnative_register_function(const char* classname, const char* name, const cha
 
 	jcheck(name && handler);
 
+
 	if(!jnative_handlers) {
 		list_init(jnative_handlers);
 	}
 
-	if(strcmp(signature, "V"))
+	if(strcmp(signature, "V") == 0)
 		signature = (char*) strdup("");
 
 	jnative_t* cc = (jnative_t*) jmalloc(sizeof(jnative_t));
@@ -33,7 +34,8 @@ int jnative_register_function(const char* classname, const char* name, const cha
 	cc->name = (char*) strdup(name);
 	cc->signature = (char*) strdup(signature);
 	cc->rettype = rettype;
-	cc->handler = handler; 
+	cc->handler = handler;
+
 
 	jcheck(list_add(jnative_handlers, (listval_t) cc) == 0);
 	return 0;

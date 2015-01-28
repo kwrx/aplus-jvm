@@ -5,9 +5,11 @@
 #include <math.h>
 #include "config.h"
 
-
+#ifdef __i386__
 #define __FASTCALL		__attribute__((fastcall))
-
+#else
+#define __FASTCALL
+#endif
 
 #define JPUSH(t, v)	\
 	{ j->stack[j->stack_top].u64 = 0L; j->stack[j->stack_top++].t = (v); }

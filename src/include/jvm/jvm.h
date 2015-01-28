@@ -346,8 +346,12 @@ typedef struct jclass_header {
 typedef struct jassembly {
 	const char* name;
 	const char* path;
-	int fd;
 	int index;
+
+
+	void* buffer;
+	size_t size;
+	off_t position;
 
 	void* signers;
 	void* protection_domain;
@@ -468,6 +472,10 @@ void jobject_finalize(jobject_t* obj);
 int jnative_register_function(const char* classname, const char* name, const char* signature, int16_t rettype, void* handler);
 int jnative_unregister_function(const char* classname, const char* name);
 jnative_t* jnative_find_method(const char* classname, const char* name);
+
+
+/* Arch */
+jvalue_t native_call(methodinfo_t*, jnative_t*, jvalue_t*, int);
 
 
 #ifdef __cplusplus

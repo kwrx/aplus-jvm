@@ -15,12 +15,22 @@
 #include "jconfig.h"
 
 
-#define R8(b)		{ jcheck(read(j->fd, (void*) (b), 1) == 1); }
-#define R16(b)		{ jcheck(read(j->fd, (void*) (b), 2) == 2); *(uint16_t*) (b) = j_bswap16(*(uint16_t*) (b)); }
-#define R32(b)		{ jcheck(read(j->fd, (void*) (b), 4) == 4); *(uint32_t*) (b) = j_bswap32(*(uint32_t*) (b)); }
-#define R64(b)		{ jcheck(read(j->fd, (void*) (b), 8) == 8); *(uint64_t*) (b) = j_bswap64(*(uint64_t*) (b)); }
-#define RXX(b, s)	{ jcheck(read(j->fd, (void*) (b), s) == s); }
+#define R8(b)		{ jcheck(__read(j, (void*) (b), 1) == 1); }
+#define R16(b)		{ jcheck(__read(j, (void*) (b), 2) == 2); *(uint16_t*) (b) = j_bswap16(*(uint16_t*) (b)); }
+#define R32(b)		{ jcheck(__read(j, (void*) (b), 4) == 4); *(uint32_t*) (b) = j_bswap32(*(uint32_t*) (b)); }
+#define R64(b)		{ jcheck(__read(j, (void*) (b), 8) == 8); *(uint64_t*) (b) = j_bswap64(*(uint64_t*) (b)); }
+#define RXX(b, s)	{ jcheck(__read(j, (void*) (b), s) == s); }
 
+
+static inline int __read(jassembly_t* j, void* buffer, size_t size) {
+	if(unlikely(j->position + size > j->size))
+		return 0;
+
+	memcpy(buffer, (void*) ((uint32_t) j->buffer + j->position), size);
+	j->position += size;
+
+	return size;
+}
 
 
 int jclass_cp_to_class(cpvalue_t* v, cpclass_t* c) {
@@ -383,10 +393,10 @@ int jclass_parse_attributes(jassembly_t* j, list_t* attributes, int attr_count) 
 int jclass_parse_desc(const char* desc, uint8_t* nargs, uint8_t* rettype, char* signature) {
 	jcheck(desc);
 
-
 	if(desc[0] != '(')
 		goto noparams;
 	desc++;
+
 	
 	jcheck(nargs && signature);
 
@@ -492,6 +502,7 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 #endif			
 			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
 		}
+
 		method->nargs = strlen(native->signature);
 		method->rettype = native->rettype;
 		strcpy(method->signature, native->signature);

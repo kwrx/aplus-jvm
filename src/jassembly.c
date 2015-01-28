@@ -41,6 +41,37 @@ static int jopen(const char* filename, int flags, int mode) {
 }
 
 
+int jassembly_load_memory(jassembly_t** j, const char* filename, void* buffer, size_t size) {
+	if(assemblies_loaded == NULL)
+		{ list_init(assemblies_loaded); }
+
+	jcheck(j && filename);
+
+
+	list_foreach(value, assemblies_loaded) {
+		jassembly_t* jv = (jassembly_t*) value;
+
+		if(strcmp(jv->path, filename) == 0) {
+			(*j) = jv;
+			return 0;
+		}
+	}
+
+	(*j) = (jassembly_t*) jmalloc(sizeof(jassembly_t));
+	(*j)->path = (char*) strdup(filename);
+	(*j)->buffer = buffer;
+	(*j)->size = size;
+	
+
+	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
+
+	jcheck(jclass_parse_assembly((*j)) == 0);
+	jcheck(jclass_resolve_assembly((*j)) == 0);
+
+	
+	return 0;
+}
+
 int jassembly_load(jassembly_t** j, const char* filename) {
 
 	if(assemblies_loaded == NULL)
@@ -58,24 +89,31 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 		}
 	}
 
-	(*j) = (jassembly_t*) jmalloc(sizeof(jassembly_t));
+	
 
-	(*j)->fd = jopen(filename, O_RDONLY, 0644);
-	(*j)->path = (char*) strdup(filename);
-
-	if(unlikely((*j)->fd < 0)) {
+	int fd = jopen(filename, O_RDONLY, 0644);
+	if(unlikely(fd < 0)) {
 		j_printf("could not open \"%s\": %s\n", filename, strerror(errno));
 		return -1;
 	}
 
-	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
 
-	jcheck(jclass_parse_assembly((*j)) == 0);
-	jcheck(close((*j)->fd) == 0);
-	jcheck(jclass_resolve_assembly((*j)) == 0);
+	lseek(fd, 0, SEEK_END);
+	size_t size = lseek(fd, 0, SEEK_CUR);
+	lseek(fd, 0, SEEK_SET);
 
-	
-	return 0;
+
+	void* buffer = (void*) jmalloc(size);
+	if(unlikely(!buffer)) {
+		j_printf("could not allocate memory for \"%s\": %s\n", filename, strerror(errno));
+		return -1;
+	}
+
+
+	jcheck(read(fd, buffer, size) == size);
+	jcheck(close(fd) == 0);
+
+	return jassembly_load_memory(j, filename, buffer, size);
 }
 
 
@@ -158,7 +196,7 @@ int main(int argc, char** argv) {
 	}
 	printf("\n");
 
-	printf("Name:\t\t%s (%d)\n", j->name, j->fd);
+	printf("Name:\t\t%s\n", j->name);
 	printf("Magic:\t\t%8X\n", j->header.jc_magic);
 	printf("Minor:\t\t%8d\n", j->header.jc_minor);
 	printf("Major:\t\t%8d\n", j->header.jc_major);
