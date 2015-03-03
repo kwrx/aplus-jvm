@@ -8,7 +8,6 @@
 
 
 
-
 #define JEXCEPTION_RUNTIME_ERROR					"java/lang/RuntimeException"
 #define JEXCEPTION_INVALID_OPCODE					"java/lang/UnsupportedOperationException"
 #define JEXCEPTION_INVALID_TYPE						"java/lang/TypeNotPresentException"
@@ -347,7 +346,6 @@ typedef struct jassembly {
 	const char* name;
 	const char* path;
 	int index;
-
 
 	void* buffer;
 	size_t size;

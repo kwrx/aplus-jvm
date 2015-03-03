@@ -40,6 +40,15 @@ int jinit() {
 
 
 __attribute__((weak))
-void sched_yield() {
-	return ;
+#ifdef __aplus__
+void
+#else
+int
+#endif
+sched_yield() {
+	return 
+#ifndef __aplus__
+		0
+#endif
+	;
 }

@@ -21,9 +21,11 @@
 int jcode_context_run(jcontext_t* j) {
 	jcheck(j);
 
+#ifndef __JAS__
 	int cr = setjmp(j->retbuf);
 	if(unlikely(cr))
 		return cr;
+#endif
 
 	j->regs.pc = 0;
 	j->regs.pb = 0;
@@ -252,6 +254,8 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 	j->code = method->code->code;
 	j->method = method;
 
+
+	
 	int i, p;
 	for(i = 0, p = 0; i < params_count; i++, p++) {
 

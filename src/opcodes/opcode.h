@@ -40,10 +40,12 @@
 #define PC32		j_bswap32(*(uint32_t*) (&j->code[j->regs.pc]))
 #define PC64		j_bswap64(*(uint64_t*) (&j->code[j->regs.pc]))
 
+
 #define R0			j->regs.r0
 #define R1			j->regs.r1
 #define R2			j->regs.r2
 #define R3			j->regs.r3
+
 
 #define JGOTO(x)			\
 	{ PC = PB + x; }

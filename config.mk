@@ -3,8 +3,8 @@ PATH	:= /opt/cross/usr/bin:$(PATH)
 
 TOP		:= $(PWD)
 
-ARCH	:= arm
-TARGET	:= arm-none-eabi
+ARCH	:= i386
+TARGET	:= i686-aplus
 PREFIX	:= $(TOP)/bin
 
 
@@ -19,7 +19,11 @@ CP		:= cp
 MV		:= mv
 
 
-DEFINES	:= -D_DEBUG -D_VERBOSE -D_TEST -DARCH=\"$(ARCH)\" -D__$(ARCH)__
+DEFINES	:= -DTEST -DARCH=\"$(ARCH)\" -D__$(ARCH)__
+ifeq ($(BUILD),debug)
+DEFINES += -DDEBUG -DVERBOSE
+endif
+
 FLAGS	:= -fno-strict-aliasing -funroll-all-loops -fno-inline
 LIBS	:= -lc -lm -lgcc
 WARN	:= -Wno-implicit-function-declaration -Wno-unused-result -Wno-format -Wall
@@ -30,7 +34,7 @@ CXXFLAGS:= $(DEFINES) $(WARN) -I $(TOP)/src/include -c -s
 AFLAGS	:= $(DEFINES) -f elf
 LFLAGS	:= 
 
-ifeq ($(ARCH),i686)
+ifeq ($(ARCH),i386)
 CFLAGS	+= -masm=intel -mfpmath=sse -msse3
 endif
 
