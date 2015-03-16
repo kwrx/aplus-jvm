@@ -8,7 +8,7 @@ OPCODE(monitorenter) {
 
 
 	while(obj->lock)
-		j_yield();
+		jyield();
 
 	obj->lock = 1;
 }

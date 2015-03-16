@@ -11,34 +11,12 @@
 
 #include <jvm/jvm.h>
 
-#define _WITH_JDIRS
+
 #include "jconfig.h"
 
 
 list_t* assemblies_loaded = NULL;
 
-
-static int jopen(const char* filename, int flags, int mode) {
-
-	
-	char* vbuf;
-	int i;
-	for(i = 0; j_directories[i]; i++) {
-		vbuf = (char*) jmalloc(256);
-		sprintf(vbuf, j_directories[i], filename);
-
-
-		int fd = open(vbuf, flags, mode);
-		jfree(vbuf);
-
-		if(fd < 0)
-			continue;
-
-		return fd;
-	}
-
-	return -1;
-}
 
 
 int jassembly_load_memory(jassembly_t** j, const char* filename, void* buffer, size_t size) {
@@ -91,27 +69,27 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 
 	
 
-	int fd = jopen(filename, O_RDONLY, 0644);
+	int fd = jopen(filename);
 	if(unlikely(fd < 0)) {
-		j_printf("could not open \"%s\": %s\n", filename, strerror(errno));
+		jprintf("could not open \"%s\": %s\n", filename, strerror(errno));
 		return -1;
 	}
 
 
-	lseek(fd, 0, SEEK_END);
-	size_t size = lseek(fd, 0, SEEK_CUR);
-	lseek(fd, 0, SEEK_SET);
+	jseek(fd, 0, SEEK_END);
+	size_t size = jseek(fd, 0, SEEK_CUR);
+	jseek(fd, 0, SEEK_SET);
 
 
 	void* buffer = (void*) jmalloc(size);
 	if(unlikely(!buffer)) {
-		j_printf("could not allocate memory for \"%s\": %s\n", filename, strerror(errno));
+		jprintf("could not allocate memory for \"%s\": %s\n", filename, strerror(errno));
 		return -1;
 	}
 
 
-	jcheck(read(fd, buffer, size) == size);
-	jcheck(close(fd) == 0);
+	jcheck(jread(fd, buffer, size) == size);
+	jcheck(jclose(fd) == 0);
 
 	return jassembly_load_memory(j, filename, buffer, size);
 }
@@ -190,80 +168,20 @@ int main(int argc, char** argv) {
 
 #ifdef DEBUG
 
-	printf("Loaded %d assemblies:\n", assemblies_loaded->size);
+	jprintf("Loaded %d assemblies:\n", assemblies_loaded->size);
 	list_foreach(value, assemblies_loaded) {
-		printf("\t%s\n", ((jassembly_t*) value)->name);
+		jprintf("\t%s\n", ((jassembly_t*) value)->name);
 	}
-	printf("\n");
-
-	printf("Name:\t\t%s\n", j->name);
-	printf("Magic:\t\t%8X\n", j->header.jc_magic);
-	printf("Minor:\t\t%8d\n", j->header.jc_minor);
-	printf("Major:\t\t%8d\n", j->header.jc_major);
-	printf("Access:\t\t%8d\n", j->header.jc_access);
-	printf("This:\t\t%8d\n", j->header.jc_this);
-	printf("Super:\t\t%8d\n", j->header.jc_super);
-	printf("Interfaces:\t%8d\n", j->header.jc_interfaces_count);
-	printf("Fields:\t\t%8d\n", j->header.jc_fields_count);
-	printf("Methods:\t%8d\n", j->header.jc_methods_count);
-	printf("Attributes:\t%8d\n", j->header.jc_attributes_count);
-	printf("Cpinfo:\t\t%8d\n", j->header.jc_cp_count);
-	printf("\n");
-	
-	int i;
-
-	if(j->header.jc_interfaces_count) {
-		printf("Interfaces:\n");
-		for(i = 0; i < j->header.jc_interfaces_count; i++)
-			printf("\t[%d] => %d\n", i, j->header.jc_interfaces[i]);
-		printf("\n");
-	}
-
-
-	if(j->header.jc_fields_count) {
-		printf("Fields:\n");
-		list_foreach(value, j->header.jc_fields) {
-			fieldinfo_t* v = (fieldinfo_t*) value;
-			cputf8_t utf1, utf2;
-			jclass_get_utf8_from_cp(j, &utf1, v->name_index);
-			jclass_get_utf8_from_cp(j, &utf2, v->desc_index);
-
-		
-			printf("\t%s\t\t=> %s = %lld (0x%x)\t", utf1.value, utf2.value, v->value.i64, v->value.u32);
-		
-			print_attributes(j, v->attributes);
-		}
-		printf("\n");
-	}
-
-
-	if(j->header.jc_methods_count) {
-		printf("Methods:\n");
-		list_foreach(value, j->header.jc_methods) {
-			methodinfo_t* v = (methodinfo_t*) value;
-			cputf8_t utf1, utf2;
-			jclass_get_utf8_from_cp(j, &utf1, v->name_index);
-			jclass_get_utf8_from_cp(j, &utf2, v->desc_index);
-
-			printf("\t%s\t\t=> %s\t", utf1.value, utf2.value);
-			print_attributes(j, v->attributes);
-		}
-		printf("\n");
-	}
-
-	if(j->header.jc_attributes_count) {
-		printf("Attributes:\n\t");
-		print_attributes(j, j->header.jc_attributes);
-		printf("\n");
-	}
+	jprintf("\n");
 
 #endif
 
 
 	jvalue_t ret = jcode_function_call(j, "main", NULL, 0);
-
 	jerr_check_exceptions(NULL);
-	j_printf("Returned %lld\n", ret.i64);
+
+
+	jprintf("Returned %lld\n", ret.i64);
 
 	return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef _JCONFIG_H
 #define _JCONFIG_H
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -8,11 +9,8 @@
 #include <sched.h>
 
 
-#define j_printf(s, a...)		\
-	printf("[%f] (%s) " s, (float) clock() / CLOCKS_PER_SEC, __func__, a);
 
-#define j_yield() 				\
-	sched_yield()
+
 
 #define j_throw(j, e)			\
 	jerr_set_and_throw(j, e)
@@ -26,39 +24,48 @@
 #define j_bswap64(x)			\
 	__builtin_bswap64(x)
 
-#define j_error(s)							\
-	{										\
-		printf("jvm: ERROR -> %s\n", s);	\
-		exit(-1);							\
-	}
-
 #define likely(x)			__builtin_expect((long int) !!(x), 1)
 #define unlikely(x)			__builtin_expect((long int) !!(x), 0)
+
+
+
+
+
+#define jerror(s)							\
+	{										\
+		jprintf("jvm: ERROR -> %s\n", s);	\
+		jexit(-1);							\
+	}
+
+
 
 #define jcheck(x)																						\
 	{																									\
 		if(unlikely(!(x))) {																			\
-			printf("jvm: checking failed on condition (\"%s\") in %s:%d\n", #x, __FILE__, __LINE__);	\
-			abort();																					\
+			jprintf("jvm: checking failed on condition (\"%s\") in %s:%d\n", #x, __FILE__, __LINE__);	\
+			jexit(-1);																					\
 		}																								\
 	}
 
 
 
 
+extern void* jmalloc(size_t size);
+extern void jfree(void* ptr);
 
-static inline void* jmalloc(size_t size) {
-	void* p = malloc(size);
-	if(unlikely(!p))
-		return NULL;
+extern void jyield();
+extern void jexit(int status);
 
-	memset(p, 0, size);
-	return p;
-}
+extern int jprintf(char* str, ...);
 
-static inline void jfree(void* ptr) {
-	free(ptr);
-}
+int jopen(const char* filename);
+int jclose(int fd);
+int jread(int fd, void* b, int size);
+int jwrite(int fd, void* b, int size);
+int jseek(int fd, int p, int dir);
+
+
+
 
 static inline void** jarray_from_list(list_t* lst) {
 	jcheck(lst);

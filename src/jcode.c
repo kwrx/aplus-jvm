@@ -35,13 +35,13 @@ int jcode_context_run(jcontext_t* j) {
 
 #if defined(DEBUG)
 		if(unlikely(j_opcodes[opcode].handler == NULL)) {
-			j_printf("Wrong opcode: %X (%d) at %d\n", opcode, opcode, j->regs.pc);
+			jprintf("Wrong opcode: %X (%d) at %d\n", opcode, opcode, j->regs.pc);
 			j_throw(j, JEXCEPTION_INVALID_OPCODE);
 		}
 #endif
 
 #if defined(DEBUG) && defined(VERBOSE)
-		j_printf("[%d] (%2X) %s\n", j->regs.pc, opcode, j_opcodes[opcode].name);
+		jprintf("[%d] (%2X) %s\n", j->regs.pc, opcode, j_opcodes[opcode].name);
 #endif
 	
 		j->regs.pb = j->regs.pc;
@@ -227,7 +227,7 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 		jnative_t* native = (jnative_t*) jnative_find_method(method->classname, method->name);
 		if(unlikely(!native)) {
 #ifdef DEBUG
-			j_printf("native method %s.%s not found\n", method->classname, method->name);
+			jprintf("native method %s.%s not found\n", method->classname, method->name);
 #endif		
 			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
 		}
@@ -270,7 +270,7 @@ jvalue_t jcode_method_invoke(jassembly_t* jx, methodinfo_t* method, jvalue_t* pa
 	}		
 
 #ifdef DEBUG
-	j_printf("%s.%s (args: %d; stack: %d; locals: %d)\n", method->classname, method->name, method->nargs, method->code->max_stack, method->code->max_locals);
+	jprintf("%s.%s (args: %d; stack: %d; locals: %d)\n", method->classname, method->name, method->nargs, method->code->max_stack, method->code->max_locals);
 #endif
 
 

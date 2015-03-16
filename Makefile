@@ -16,10 +16,11 @@ VERSION	:= 0.1
 
 OUTPUT	:= $(PACKAGE).a
 TESTOUT	:= jvm
+JPK		:= src/jpk.c
 
 .PHONY: all clean git
 
-all: $(TESTOUT)
+all: $(JPK)
 $(TESTOUT): $(OUTPUT)
 	@echo "  LD      " $@
 	@$(LD) -o $@ $(OFILES)
@@ -40,6 +41,10 @@ $(OUTPUT): $(OFILES)
 	@echo "  ASM     " $(notdir $<)
 	@$(ASM) $(AFLAGS) $< -o $@
 	
+
+$(JPK): $(TESTOUT)
+	@echo "  HOSTCC  " jpk
+	@gcc -D__JPK__ -std=c99 -I src/include -O2 $(JPK) -o jpk -Wno-unused-result
 
 clean:
 	-@$(RM) $(OUTPUT)

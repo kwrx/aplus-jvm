@@ -7,6 +7,8 @@ ARCH	:= i386
 TARGET	:= i686-aplus
 PREFIX	:= $(TOP)/bin
 
+PLATFORM:= UNIX
+
 
 CC		:= $(TARGET)-gcc
 CXX		:= $(TARGET)-g++
@@ -19,7 +21,7 @@ CP		:= cp
 MV		:= mv
 
 
-DEFINES	:= -DTEST -DARCH=\"$(ARCH)\" -D__$(ARCH)__
+DEFINES	:= -DTEST -DARCH=\"$(ARCH)\" -D__$(ARCH)__ -DCONFIG_$(PLATFORM)
 ifeq ($(BUILD),debug)
 DEFINES += -DDEBUG -DVERBOSE
 endif

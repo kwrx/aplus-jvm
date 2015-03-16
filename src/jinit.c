@@ -20,35 +20,24 @@
 
 
 
-
-int JNATIVE(Print, L) (char* s) {
-	return printf("Native.Print: %s\n", s);
+#ifdef DEBUG
+int JNATIVE(Test, L) (char* s) {
+	jprintf("Native call test: %s\n", s);
 }
+#endif
 
 int jinit() {
-
 
 	#define R(cname, name, desc, ret)	\
 		jnative_register_function(cname, #name, #desc, ret, JNATIVE(name, desc))
 
-	R("Native", Print, L, T_INT);
-	
+#ifdef DEBUG
+	R("Debug", Test, L, T_INT);
+#endif
+
+
 	#undef R
 
 	return 0;
 }
 
-
-__attribute__((weak))
-#ifdef __aplus__
-void
-#else
-int
-#endif
-sched_yield() {
-	return 
-#ifndef __aplus__
-		0
-#endif
-	;
-}

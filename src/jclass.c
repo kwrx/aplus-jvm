@@ -478,7 +478,7 @@ noparams:
 			*rettype = T_VOID;
 			break;
 		default:
-			j_printf("warning: return type %c is undefined\n", *desc);
+			jprintf("warning: return type %c is undefined\n", *desc);
 			*rettype = T_VOID;
 	}
 
@@ -498,7 +498,7 @@ int jclass_resolve_method(jassembly_t* j, methodinfo_t* method) {
 		jnative_t* native = (jnative_t*) jnative_find_method(j->name, utf_n.value);
 		if(unlikely(!native)) {
 #ifdef DEBUG
-			j_printf("native method %s.%s not found\n", j->name, utf_n.value);
+			jprintf("native method %s.%s not found\n", j->name, utf_n.value);
 #endif			
 			j_throw(NULL, JEXCEPTION_UNSATISFIED_LINK);
 		}
@@ -577,7 +577,7 @@ int jclass_resolve_dep(jassembly_t* j, cpvalue_t* cp, int index) {
 
 	if(unlikely(jassembly_load(&dep, utf.value) != 0)) {
 #ifdef DEBUG
-		j_printf("could not resolve \"%s\" from %s\n", utf.value, j->name);
+		jprintf("could not resolve \"%s\" from %s\n", utf.value, j->name);
 #endif
 		return 0;
 	}
@@ -687,7 +687,7 @@ int jclass_parse_assembly(jassembly_t* j) {
 				R64(&value);
 				break;
 			default:
-				j_error("Invalid TAG");
+				jerror("Invalid TAG");
 		}
 
 		

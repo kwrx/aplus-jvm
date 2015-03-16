@@ -23,7 +23,7 @@ static jcontext_t* jerr_ctx = NULL;
 
 void jerr_set_exception(jcontext_t* j, char* errormsg) {
 	while(jerr_msg != NULL && jerr_ctx != NULL)
-		j_yield();
+		jyield();
 
 	jerr_msg = errormsg;
 	jerr_ctx = j;
@@ -40,7 +40,7 @@ int jerr_has_exception() {
 
 int jerr_throw(jcontext_t* j) {
 	if(j == NULL) {
-		printf("Unhandled exception: %s\n", jerr_msg);
+		jprintf("Unhandled exception: %s\n", jerr_msg);
 
 		if(jerr_ctx && jerr_ctx->code) {
 			attr_linenumbers_t* ln = (attr_linenumbers_t*) jcode_find_attribute(jerr_ctx->current_assembly, jerr_ctx->method->code->attributes, "LineNumberTable");
@@ -51,15 +51,15 @@ int jerr_throw(jcontext_t* j) {
 				i++;
 			i--;
 
-			printf("\tat %s.%s():%d\n", jerr_ctx->current_assembly->name, jerr_ctx->method->name, ln->table[i].line);
-			printf("\tat bytecode: [%d+%d] %s\n", jerr_ctx->regs.pb, jerr_ctx->regs.pc - jerr_ctx->regs.pb, j_opcodes[jerr_ctx->code[jerr_ctx->regs.pb]].name);
+			jprintf("\tat %s.%s():%d\n", jerr_ctx->current_assembly->name, jerr_ctx->method->name, ln->table[i].line);
+			jprintf("\tat bytecode: [%d+%d] %s\n", jerr_ctx->regs.pb, jerr_ctx->regs.pc - jerr_ctx->regs.pb, j_opcodes[jerr_ctx->code[jerr_ctx->regs.pb]].name);
 		
 #if defined(VERBOSE)
-			printf("\nStackdump:\n");
-			printf("Size: %d; Position: %d\n", jerr_ctx->stack_size, jerr_ctx->stack_top);
+			jprintf("\nStackdump:\n");
+			jprintf("Size: %d; Position: %d\n", jerr_ctx->stack_size, jerr_ctx->stack_top);
 	
 			for(i = 0; i < jerr_ctx->stack_size; i++)
-				printf(" [%d] %lld\n", i, jerr_ctx->stack[i].i64);
+				jprintf(" [%d] %lld\n", i, jerr_ctx->stack[i].i64);
 #endif
 
 		}
