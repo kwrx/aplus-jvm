@@ -354,6 +354,8 @@ typedef struct jassembly {
 	void* signers;
 	void* protection_domain;
 
+	uint8_t resolved;
+
 	jclass_header_t header;
 	list_t* deps;
 	struct jassembly* super;
@@ -448,7 +450,6 @@ typedef struct jnative {
 
 #define jclass_cp_to_method(v, c)		jclass_cp_to_field(v, (cpfield_t*) c)
 #define jclass_cp_to_interface(v, c)	jclass_cp_to_field(v, (cpfield_t*) c)
-
 
 
 #ifdef __cplusplus

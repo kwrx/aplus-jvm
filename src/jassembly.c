@@ -25,7 +25,6 @@ int jassembly_load_memory(jassembly_t** j, const char* filename, void* buffer, s
 
 	jcheck(j && filename);
 
-
 	list_foreach(value, assemblies_loaded) {
 		jassembly_t* jv = (jassembly_t*) value;
 
@@ -39,13 +38,11 @@ int jassembly_load_memory(jassembly_t** j, const char* filename, void* buffer, s
 	(*j)->path = (char*) strdup(filename);
 	(*j)->buffer = buffer;
 	(*j)->size = size;
+	(*j)->resolved = 0;
 	
 
 	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
-
 	jcheck(jclass_parse_assembly((*j)) == 0);
-	jcheck(jclass_resolve_assembly((*j)) == 0);
-
 	
 	return 0;
 }
@@ -135,26 +132,20 @@ int jassembly_restore(jcontext_t* j) {
 }
 
 
-#ifdef TEST
-#ifdef DEBUG
-static void print_attributes(jassembly_t* j, list_t* attributes) {
-	jcheck(j && attributes);
+int jassembly_resolve_all() {
+	list_foreach(value, assemblies_loaded) {
+		jassembly_t* jv = (jassembly_t*) value;
 
-	printf("(");
-
-	list_foreach(value, attributes) {
-		attrinfo_t* v = (attrinfo_t*) value;
-		cputf8_t utf1;
-		jclass_get_utf8_from_cp(j, &utf1, v->name_index);
-		
-		printf(" %s", utf1.value);
+		if(!jv->resolved)
+			jcheck(jclass_resolve_assembly(jv) == 0); 
 	}
 
-	printf(" )\n");
+	return 0;
 }
-#endif
 
 
+
+#ifdef TEST
 int main(int argc, char** argv) {
 
 	jcheck(argc > 1);
@@ -164,6 +155,10 @@ int main(int argc, char** argv) {
 
 	jassembly_t* j = NULL;
 	jcheck(jassembly_load(&j, argv[1]) == 0);
+
+
+	jcheck(jpk_load("rt.jpk") == 0);
+	jcheck(jassembly_resolve_all() == 0);
 
 
 #ifdef DEBUG

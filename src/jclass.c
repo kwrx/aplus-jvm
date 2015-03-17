@@ -777,5 +777,7 @@ int jclass_resolve_assembly(jassembly_t* j) {
 	jcheck(jclass_resolve_deps(j) == 0);
 	jcheck(jclass_resolve_super(j) == 0);
 
+	j->resolved = 1;
+
 	return 0;
 }

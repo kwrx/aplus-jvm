@@ -12,6 +12,13 @@
 #include <jvm/jvm.h>
 #include "jconfig.h"
 
+typedef struct {
+	const char filename[256];
+	uint32_t size;
+	uint32_t offset;
+} jpk_node_t;
+
+
 
 #ifdef __JPK__
 
@@ -22,18 +29,14 @@ typedef struct {
 	char** inputs;
 	int inputs_count;
 	
-	uint64_t offset;
+	uint32_t offset;
 	list_t* files;
-} jpk_t;
-
-typedef struct {
-	const char filename[32];
-	uint64_t size;
-	uint64_t offset;
-} jpk_node_t;
+} jpk_ctx_t;
 
 
-int jpk_add_file(jpk_t* jpk, const char* filename) {
+
+
+int jpk_add_file(jpk_ctx_t* jpk, const char* filename) {
 	int fd = open(filename, O_RDONLY, 0644);
 	if(fd < 0)
 		return -1;
@@ -45,7 +48,7 @@ int jpk_add_file(jpk_t* jpk, const char* filename) {
 	strcpy((char*) node->filename, filename);
 	
 	lseek(fd, 0, SEEK_END);
-	node->size = (uint64_t) lseek(fd, 0, SEEK_CUR);
+	node->size = (uint32_t) lseek(fd, 0, SEEK_CUR);
 	lseek(fd, 0, SEEK_SET);
 
 	node->offset = jpk->offset;
@@ -65,7 +68,7 @@ int main(int argc, char** argv) {
 
 	/* jpk [output] [input1, ...] */
 
-	jpk_t jpk;
+	jpk_ctx_t jpk;
 	jpk.filename = argv[1];
 	jpk.inputs = &argv[2];
 	jpk.inputs_count = argc - 2;
@@ -125,5 +128,45 @@ int main(int argc, char** argv) {
 	return 0;
 }
 
+#else
+
+int jpk_load_memory(void* buffer, size_t size) {
+	jcheck(buffer && size);
+
+	if(strncmp((const char*) buffer, "JPK", 3) != 0)
+		return -1;
+
+	uint32_t* hdr = (uint32_t*) buffer;
+	int nodes_count = hdr[1];
+	int offset_data = hdr[2];
+
+
+	jpk_node_t* nodes = (jpk_node_t*) &hdr[3];
+	for(int i = 0; i < nodes_count; i++) {
+		jassembly_t* jv;
+		jcheck(jassembly_load_memory(&jv, nodes[i].filename, (void*) ((uint32_t) hdr + offset_data + (int) nodes[i].offset), (size_t) nodes[i].size) == 0);
+	}
+
+	return 0;
+}
+
+int jpk_load(const char* filename) {
+	jcheck(filename);
+
+	int fd = jopen(filename);
+	if(fd <= 0)
+		return -1;
+
+	jseek(fd, 0, SEEK_END);
+	size_t size = jseek(fd, 0, SEEK_CUR);
+	jseek(fd, 0, SEEK_SET);
+
+	void* buffer = (void*) jmalloc(size);
+	jcheck(jread(fd, buffer, size) == size);
+	jcheck(jclose(fd) == 0);
+
+
+	return jpk_load_memory(buffer, size);
+}
 
 #endif

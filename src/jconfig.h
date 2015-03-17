@@ -123,22 +123,7 @@ static inline void** jarray_from_ptr(void* ptr, size_t membersize, size_t count)
 }
 
 
-#ifdef _WITH_JDIRS
-static char* j_directories[] = {
-	"%s",
-	"%s.class",
-	"lib/%s.class",
-	"../lib/%s.class",
-	"/usr/lib/%s.class",
-	"/usr/local/lib/%s.class",
 
-#ifdef TEST
-	"bin/lib/%s.class",
-#endif
-
-	NULL
-};
-#endif
 
 
 #endif
