@@ -21,11 +21,9 @@
 int jcode_context_run(jcontext_t* j) {
 	jcheck(j);
 
-#ifndef __JAS__
 	int cr = setjmp(j->retbuf);
 	if(unlikely(cr))
 		return cr;
-#endif
 
 	j->regs.pc = 0;
 	j->regs.pb = 0;

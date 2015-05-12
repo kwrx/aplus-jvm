@@ -1,12 +1,8 @@
 
-#ifdef CONFIG_UNIX
+#ifdef CONFIG_OS
 
-#ifndef __unix__
-#warning "__unix__ undefined"
-#endif
 
-#include <unistd.h>
-#include <fcntl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,61 +14,62 @@
 
 __weak
 int jprintf(char* str, ...) {
-	va_list f;
-	va_start(f, str);
-	int r = vprintf(str, f);
-	va_end(f);
-
-	return r;
+	return 0;
 }
 
 
 __weak
 void jyield() {
-	sched_yield();
+	return;
 }
 
 __weak
 void jexit(int status) {
-	exit(status);
+	for(;;);
 }
 
 
 __weak
 void* jmalloc(size_t size) {
-	return calloc(size, 1);
+	static uint32_t ptr = 0x400000;
+
+	void* ret = (void*) ptr;
+	memset(ret, 0, size);
+
+	ptr += size;
+	return ret;
 }
 
 __weak
 void jfree(void* ptr) {
-	free(ptr);
+	return;
 }
 
 
 
 __weak
 int jopen(const char* filename) {
-	return open(filename, O_RDWR, 0644);
+	return -1;
 }
 
 __weak
 int jclose(int fd) {
-	return close(fd);
+	return -1;
 }
 
 __weak
 int jread(int fd, void* b, int size) {
-	return read(fd, b, size);
+	return 0;
 }
 
 __weak
 int jwrite(int fd, void* b, int size) {
-	return write(fd, b, size);
+	return 0;
 }
 
 __weak
 int jseek(int fd, int pos, int dir) {
-	return lseek(fd, pos, dir);
+	return 0;
 }
 
 #endif

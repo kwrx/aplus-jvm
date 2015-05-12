@@ -6,10 +6,17 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#ifndef __JPK__
+extern void* jmalloc(size_t size);
+extern void jfree(void* ptr);
 
-
+#define __list_malloc(x)		jmalloc(x)
+#define __list_free(x)			jfree(x)
+#else
 #define __list_malloc(x)		malloc(x)
 #define __list_free(x)			free(x)
+#endif
+
 #define __list_lock(x)			((void) 0)
 #define __list_unlock(x)		((void) 0)
 #define __list_lock_t			int

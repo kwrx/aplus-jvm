@@ -12,6 +12,7 @@
 #include <jvm/jvm.h>
 #include "jconfig.h"
 
+
 typedef struct {
 	const char filename[256];
 	uint32_t size;
@@ -133,6 +134,10 @@ int main(int argc, char** argv) {
 int jpk_load_memory(void* buffer, size_t size) {
 	jcheck(buffer && size);
 
+#ifdef DEBUG
+	jprintf("jpk: loading package from 0x%x (%d Bytes)\n", buffer, size);
+#endif
+
 	if(strncmp((const char*) buffer, "JPK", 3) != 0)
 		return -1;
 
@@ -140,11 +145,16 @@ int jpk_load_memory(void* buffer, size_t size) {
 	int nodes_count = hdr[1];
 	int offset_data = hdr[2];
 
+#ifdef DEBUG
+	jprintf("jpk: nodes %d; offset 0x%x\n", nodes_count, offset_data);
+#endif
 
 	jpk_node_t* nodes = (jpk_node_t*) &hdr[3];
 	for(int i = 0; i < nodes_count; i++) {
-		jassembly_t* jv;
-		jcheck(jassembly_load_memory(&jv, nodes[i].filename, (void*) ((uint32_t) hdr + offset_data + (int) nodes[i].offset), (size_t) nodes[i].size) == 0);
+#ifdef DEBUG
+	jprintf("jpk: loading %s (%x, %d Bytes)\n", nodes[i].filename, nodes[i].offset, nodes[i].size);
+#endif
+		jcheck(jassembly_load_memory(NULL, nodes[i].filename, (void*) ((uint32_t) hdr + offset_data + (int) nodes[i].offset), (size_t) nodes[i].size) == 0);
 	}
 
 	return 0;

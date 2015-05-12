@@ -44,7 +44,7 @@ $(OUTPUT): $(OFILES)
 
 $(JPK): $(TESTOUT)
 	@echo "  HOSTCC  " jpk
-	@gcc -D__JPK__ -std=c99 -I src/include -O2 $(JPK) -o jpk -Wno-unused-result
+	@$(HOSTCC) -D__JPK__ -std=c99 -I src/include -O2 $(JPK) -o jpk -Wno-unused-result
 
 clean:
 	-@$(RM) $(OUTPUT)

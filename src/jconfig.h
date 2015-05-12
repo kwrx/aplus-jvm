@@ -10,6 +10,7 @@
 
 
 
+#define __weak				__attribute__ ((weak))
 
 
 #define j_throw(j, e)			\

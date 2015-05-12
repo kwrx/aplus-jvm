@@ -23,26 +23,31 @@ int jassembly_load_memory(jassembly_t** j, const char* filename, void* buffer, s
 	if(assemblies_loaded == NULL)
 		{ list_init(assemblies_loaded); }
 
-	jcheck(j && filename);
+	jcheck(filename);
 
 	list_foreach(value, assemblies_loaded) {
 		jassembly_t* jv = (jassembly_t*) value;
 
 		if(strcmp(jv->path, filename) == 0) {
-			(*j) = jv;
+			if(j)
+				(*j) = jv;
 			return 0;
 		}
 	}
 
-	(*j) = (jassembly_t*) jmalloc(sizeof(jassembly_t));
-	(*j)->path = (char*) strdup(filename);
-	(*j)->buffer = buffer;
-	(*j)->size = size;
-	(*j)->resolved = 0;
+	 
+	jassembly_t* jv = (jassembly_t*) jmalloc(sizeof(jassembly_t));
+	jv->path = (char*) strdup(filename);
+	jv->buffer = buffer;
+	jv->size = size;
+	jv->resolved = 0;
 	
 
-	jcheck(list_add(assemblies_loaded, (listval_t) (*j)) == 0);
-	jcheck(jclass_parse_assembly((*j)) == 0);
+	jcheck(list_add(assemblies_loaded, (listval_t) jv) == 0);
+	jcheck(jclass_parse_assembly(jv) == 0);
+
+	if(j)
+		(*j) = jv;
 	
 	return 0;
 }
@@ -93,15 +98,25 @@ int jassembly_load(jassembly_t** j, const char* filename) {
 
 
 jassembly_t* jassembly_find(jassembly_t* j, const char* classname) {
-	jcheck(j && classname);
+	jcheck(classname);
+
+	if((unlikely(!j)))
+		j = (jassembly_t*) list_tail(assemblies_loaded);
+	
+	jcheck(j);
 
 	if(strcmp(j->name, classname) == 0)
 		return j;
 
-	if(list_empty(j->deps))
-		return NULL;
 
 	list_foreach(value, j->deps) {
+		jassembly_t* cc = (jassembly_t*) value;
+
+		if(strcmp(cc->name, classname) == 0)
+			return cc;
+	}
+
+	list_foreach(value, assemblies_loaded) {
 		jassembly_t* cc = (jassembly_t*) value;
 
 		if(strcmp(cc->name, classname) == 0)

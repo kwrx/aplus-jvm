@@ -190,7 +190,7 @@ int jclass_default_attribute(char* name) {
 		return JCLASS_ATTR_STACKMAPTABLE;
 
 #ifdef DEBUG
-	j_printf("attribute %s not found\n", name);
+	jprintf("attribute %s not found\n", name);
 #endif
 	return JCLASS_ATTR_UNKNOWN;
 }

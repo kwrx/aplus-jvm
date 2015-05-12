@@ -16,6 +16,8 @@ ASM		:= nasm
 LD		:= $(CC)
 OBJCPY	:= $(TARGET)-objcopy
 
+HOSTCC	:= gcc
+
 ZIP		:= gzip -f
 CP		:= cp
 MV		:= mv

@@ -1,12 +1,8 @@
 
-#ifdef CONFIG_UNIX
+#ifdef CONFIG_ANSI
 
-#ifndef __unix__
-#warning "__unix__ undefined"
-#endif
 
-#include <unistd.h>
-#include <fcntl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +10,6 @@
 
 #include <jvm/jvm.h>
 #include "../../jconfig.h"
-
 
 __weak
 int jprintf(char* str, ...) {
@@ -26,10 +21,9 @@ int jprintf(char* str, ...) {
 	return r;
 }
 
-
 __weak
 void jyield() {
-	sched_yield();
+	return;
 }
 
 __weak
@@ -49,30 +43,30 @@ void jfree(void* ptr) {
 }
 
 
-
 __weak
 int jopen(const char* filename) {
-	return open(filename, O_RDWR, 0644);
+	return (int) fopen(filename, "rb");
 }
 
 __weak
 int jclose(int fd) {
-	return close(fd);
+	return fclose((FILE*) fd);
 }
 
 __weak
 int jread(int fd, void* b, int size) {
-	return read(fd, b, size);
+	return fread(b, 1, size, (FILE*) fd);
 }
 
 __weak
 int jwrite(int fd, void* b, int size) {
-	return write(fd, b, size);
+	return fwrite(b, 1, size, (FILE*) fd);
 }
 
 __weak
 int jseek(int fd, int pos, int dir) {
-	return lseek(fd, pos, dir);
+	fseek((FILE*) fd, pos, dir);
+	return ftell((FILE*) fd);
 }
 
 #endif
