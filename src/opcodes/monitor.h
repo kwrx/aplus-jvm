@@ -1,23 +1,23 @@
 
 
 OPCODE(monitorenter) {
-	jobject_t* obj = (jobject_t*) JPOP(ptr);
+	java_object_t* obj = (java_object_t*) JPOP(ptr);
 
 	if(unlikely(!obj))
-		j_throw(j, JEXCEPTION_NULL_POINTER);
+		ATHROW("java/lang/NullPointerException");
 
 
 	while(obj->lock)
-		jyield();
+		avm->yield();
 
 	obj->lock = 1;
 }
 
 OPCODE(monitorexit) {
-	jobject_t* obj = (jobject_t*) JPOP(ptr);
+	java_object_t* obj = (java_object_t*) JPOP(ptr);
 
 	if(unlikely(!obj))
-		j_throw(j, JEXCEPTION_NULL_POINTER);
+		ATHROW("java/lang/NullPointerException");
 	
 
 	obj->lock = 0;

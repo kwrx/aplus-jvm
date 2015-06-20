@@ -1,5 +1,6 @@
 
 
+
 public class TryCatch {
 	public static void Test3() throws Exception {
 		throw new Exception("Hello World");
@@ -9,7 +10,7 @@ public class TryCatch {
 		try {
 			Test3();	
 		} catch(Exception e) {
-			
+			return;
 		}
 	}
 

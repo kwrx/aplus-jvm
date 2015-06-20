@@ -34,7 +34,7 @@ OPCODE(ret) {
 	int8_t idx = PC8;
 	PC++;
 
-	PC = j->locals[idx].i32;
+	PC = j->frame.locals[idx].i32;
 }
 
 OPCODE(tableswitch) {
@@ -69,14 +69,14 @@ OPCODE(lookupswitch) {
 	int32_t npairs = PC32;
 	PC += 4;
 
-	R0 = JPOP_JV();
+	int32_t R0 = JPOP(i32);
 
 	int32_t i = 0;
 	for(i = 0; i < npairs; i++) {
-		R1.i32 = PC32;
+		int32_t R1 = PC32;
 		PC += 4;
 
-		if(R1.i32 == R0.i32) {
+		if(R0 == R1) {
 			JGOTO(PC32);
 			return;
 		}
@@ -89,27 +89,27 @@ OPCODE(lookupswitch) {
 
 
 OPCODE(ireturn) {
-	R0.i32 = JPOP(i32);
+	j->frame.retval.i32 = JPOP(i32);
 	JRETURN;
 }
 
 OPCODE(lreturn) {
-	R0.i64 = JPOP(i64);
+	j->frame.retval.i64 = JPOP(i64);
 	JRETURN;
 }
 
 OPCODE(freturn) {
-	R0.f32 = JPOP(f32);
+	j->frame.retval.f32 = JPOP(f32);
 	JRETURN;
 }
 
 OPCODE(dreturn) {
-	R0.f64 = JPOP(f64);
+	j->frame.retval.f64 = JPOP(f64);
 	JRETURN;
 }
 
 OPCODE(areturn) {
-	R0.ptr = JPOP(ptr);
+	j->frame.retval.ptr = JPOP(ptr);
 	JRETURN;
 }
 

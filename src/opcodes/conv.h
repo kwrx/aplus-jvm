@@ -62,12 +62,12 @@ OPCODE(d2f) {
 
 OPCODE(i2b) {
 	int32_t i = JPOP(i32);
-	JPUSH(u8, (uint8_t) (i & 0xFF));
+	JPUSH(i8, (uint8_t) (i & 0xFF));
 }
 
 OPCODE(i2c) {
 	int32_t i = JPOP(i32);
-	JPUSH(i8, (int8_t) (i & 0xFF));
+	JPUSH(u16, (uint16_t) (i & 0xFFFF));
 }
 
 OPCODE(i2s) {

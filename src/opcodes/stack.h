@@ -10,15 +10,15 @@ OPCODE(pop2) {
 }
 
 OPCODE(dup) {
-	jvalue_t jv = JPOP_JV();
+	j_value jv = JPOP_JV();
 	
 	JPUSH_JV(jv);
 	JPUSH_JV(jv);
 }
 
 OPCODE(dup_x1) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
 
 	JPUSH_JV(jv1);
 	JPUSH_JV(jv2);
@@ -26,9 +26,9 @@ OPCODE(dup_x1) {
 }
 
 OPCODE(dup_x2) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
-	jvalue_t jv3 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
+	j_value jv3 = JPOP_JV();
 	
 
 	JPUSH_JV(jv1);
@@ -38,8 +38,8 @@ OPCODE(dup_x2) {
 }
 
 OPCODE(dup2) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
 
 	JPUSH_JV(jv2);
 	JPUSH_JV(jv1);
@@ -48,9 +48,9 @@ OPCODE(dup2) {
 }
 
 OPCODE(dup2_x1) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
-	jvalue_t jv3 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
+	j_value jv3 = JPOP_JV();
 
 	JPUSH_JV(jv2);
 	JPUSH_JV(jv1);
@@ -60,10 +60,10 @@ OPCODE(dup2_x1) {
 }
 
 OPCODE(dup2_x2) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
-	jvalue_t jv3 = JPOP_JV();
-	jvalue_t jv4 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
+	j_value jv3 = JPOP_JV();
+	j_value jv4 = JPOP_JV();
 
 	JPUSH_JV(jv2);
 	JPUSH_JV(jv1);
@@ -74,8 +74,8 @@ OPCODE(dup2_x2) {
 }
 
 OPCODE(swap) {
-	jvalue_t jv1 = JPOP_JV();
-	jvalue_t jv2 = JPOP_JV();
+	j_value jv1 = JPOP_JV();
+	j_value jv2 = JPOP_JV();
 
 	JPUSH_JV(jv2);
 	JPUSH_JV(jv1);

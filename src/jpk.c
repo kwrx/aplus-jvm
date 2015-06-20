@@ -1,27 +1,22 @@
-#include <stdint.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
-
-#define _GNU_SOURCE
-#include <float.h>
-#include <math.h>
-
-
-#include <jvm/jvm.h>
-#include "jconfig.h"
-
+#include <avm.h>
+#include "ops.h"
 
 typedef struct {
 	const char filename[256];
-	uint32_t size;
-	uint32_t offset;
+	u4 size;
+	u4 offset;
 } jpk_node_t;
 
 
 
 #ifdef __JPK__
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 typedef struct {
 	const char* filename;
@@ -31,13 +26,13 @@ typedef struct {
 	int inputs_count;
 	
 	uint32_t offset;
-	list_t* files;
+	jpk_node_t** files;
 } jpk_ctx_t;
 
 
 
 
-int jpk_add_file(jpk_ctx_t* jpk, const char* filename) {
+int jpk_add_file(jpk_ctx_t* jpk, const char* filename, int i) {
 	int fd = open(filename, O_RDONLY, 0644);
 	if(fd < 0)
 		return -1;
@@ -46,7 +41,9 @@ int jpk_add_file(jpk_ctx_t* jpk, const char* filename) {
 	if(!node)
 		return -1;
 
+
 	strcpy((char*) node->filename, filename);
+	
 	
 	lseek(fd, 0, SEEK_END);
 	node->size = (uint32_t) lseek(fd, 0, SEEK_CUR);
@@ -56,8 +53,11 @@ int jpk_add_file(jpk_ctx_t* jpk, const char* filename) {
 	jpk->offset += node->size;
 
 
-	list_add(jpk->files, (listval_t) node);
+	jpk->files[i] = node;
 	close(fd);
+
+
+	//printf("\t> \"%s\" (%d Bytes)\n", node->filename, node->size);
 
 	return 0;
 }
@@ -78,17 +78,19 @@ int main(int argc, char** argv) {
 	if(jpk.fd < 0)
 		exit(printf("jpk: cannot open output file\n"));
 
-	list_init(jpk.files);
+
+	jpk.files = (jpk_node_t**) calloc(sizeof(jpk_node_t*), jpk.inputs_count);
 	
-	for(int i = 0; i < jpk.inputs_count; i++)
-		jpk_add_file(&jpk, jpk.inputs[i]);
+	int i;
+	for(i = 0; i < jpk.inputs_count; i++)
+		jpk_add_file(&jpk, jpk.inputs[i], i);
 	
 
-	#define W1(x)		{ __t = x; write(jpk.fd, (void*) &__t, 1); }
-	#define W2(x)		{ __t = x; write(jpk.fd, (void*) &__t, 2); }
-	#define W4(x)		{ __t = x; write(jpk.fd, (void*) &__t, 4); }
-	#define W8(x)		{ __t = x; write(jpk.fd, (void*) &__t, 8); }
-	#define WX(x, y)	{ write(jpk.fd, (void*) x, y); }
+	#define W1(x)		{ __t = x; (void) write(jpk.fd, (void*) &__t, 1); }
+	#define W2(x)		{ __t = x; (void) write(jpk.fd, (void*) &__t, 2); }
+	#define W4(x)		{ __t = x; (void) write(jpk.fd, (void*) &__t, 4); }
+	#define W8(x)		{ __t = x; (void) write(jpk.fd, (void*) &__t, 8); }
+	#define WX(x, y)	{ (void) write(jpk.fd, (void*) x, y); }
 
 	uint64_t __t;
 
@@ -101,20 +103,19 @@ int main(int argc, char** argv) {
 	W1(0);
 
 	/* Total nodes */
-	W4(list_size(jpk.files));
+	W4(jpk.inputs_count);
 
 	/* Offset data */
-	W4(list_size(jpk.files) * sizeof(jpk_node_t) + 12);
+	W4(jpk.inputs_count * sizeof(jpk_node_t) + 12);
 
 	/* Nodes */
-	list_foreach(v, jpk.files)
-		WX(v, sizeof(jpk_node_t));
+	for(i = 0; i < jpk.inputs_count; i++)
+		WX(jpk.files[i], sizeof(jpk_node_t));
 	
 	/* Data */
-	list_foreach(v, jpk.files) {
-		jpk_node_t* node = (jpk_node_t*) v;
+	for(i = 0; i < jpk.inputs_count; i++) {
 
-		int fd = open(node->filename, O_RDONLY, 0644);
+		int fd = open(jpk.files[i]->filename, O_RDONLY, 0644);
 		char buf[64];
 		int r = 0;
 		while((r = read(fd, buf, sizeof(buf))))
@@ -131,52 +132,54 @@ int main(int argc, char** argv) {
 
 #else
 
-int jpk_load_memory(void* buffer, size_t size) {
-	jcheck(buffer && size);
 
-#ifdef DEBUG
-	jprintf("jpk: loading package from 0x%x (%d Bytes)\n", buffer, size);
+#if !FREESTANDING
+#include <fcntl.h>
+#include <string.h>
 #endif
 
-	if(strncmp((const char*) buffer, "JPK", 3) != 0)
-		return -1;
+int jpk_load(void* buffer, size_t size) {
 
-	uint32_t* hdr = (uint32_t*) buffer;
+	if(strncmp((const char*) buffer, "JPK", 3) != 0)
+		return J_ERR;
+
+	u4* hdr = (u4*) buffer;
 	int nodes_count = hdr[1];
 	int offset_data = hdr[2];
 
-#ifdef DEBUG
-	jprintf("jpk: nodes %d; offset 0x%x\n", nodes_count, offset_data);
-#endif
 
+	int i;
 	jpk_node_t* nodes = (jpk_node_t*) &hdr[3];
-	for(int i = 0; i < nodes_count; i++) {
-#ifdef DEBUG
-	jprintf("jpk: loading %s (%x, %d Bytes)\n", nodes[i].filename, nodes[i].offset, nodes[i].size);
-#endif
-		jcheck(jassembly_load_memory(NULL, nodes[i].filename, (void*) ((uint32_t) hdr + offset_data + (int) nodes[i].offset), (size_t) nodes[i].size) == 0);
+	for(i = 0; i < nodes_count; i++)
+		if(java_assembly_load(NULL, (void*) ((long) hdr + offset_data + (long) nodes[i].offset), (u4) nodes[i].size, nodes[i].filename) != J_OK)
+			LOGF("Cannot load %s from JPK Archive", nodes[i].filename);
+	
+
+	return J_OK;
+}
+
+int jpk_open(const char* filename) {
+
+	int fd = avm->open(filename, O_RDONLY, 0644);
+	if(fd < 0)
+		return J_ERR;
+
+	int size = avm->lseek(fd, 0, SEEK_END);
+	avm->lseek(fd, 0, SEEK_SET);
+
+	void* buffer = (void*) avm->calloc(1, size);
+	if(avm->read(fd, buffer, size) != size) {
+		LOGF("I/O Read error of %s", filename);
+
+		avm->free(buffer);
+		return J_ERR;
 	}
 
-	return 0;
-}
-
-int jpk_load(const char* filename) {
-	jcheck(filename);
-
-	int fd = jopen(filename);
-	if(fd <= 0)
-		return -1;
-
-	jseek(fd, 0, SEEK_END);
-	size_t size = jseek(fd, 0, SEEK_CUR);
-	jseek(fd, 0, SEEK_SET);
-
-	void* buffer = (void*) jmalloc(size);
-	jcheck(jread(fd, buffer, size) == size);
-	jcheck(jclose(fd) == 0);
+	avm->close(fd);
 
 
-	return jpk_load_memory(buffer, size);
+	return jpk_load(buffer, size);
 }
 
 #endif
+

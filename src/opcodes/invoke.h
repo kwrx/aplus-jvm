@@ -5,29 +5,21 @@ OPCODE(invokevirtual) {
 	PC += 2;
 
 
-	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	jassembly_change(j, method->classname);
+	java_method_t* method;
+	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
+		ATHROW("java/lang/NoSuchMethodError");
 
 
-	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
+	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
 
-	if(unlikely(method->access & ACC_NATIVE))
-		jnative_set_context(j);
 
-	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
+	j_value R0 = java_method_invoke(j, method->assembly, method, params, method->nargs + 1);
+	avm->free(params);
 
-
-#if !defined(__GLIBC__)
-	jfree(params);
-#endif
-
-
-	jerr_check_exceptions(j);
-	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -38,28 +30,21 @@ OPCODE(invokespecial) {
 	PC += 2;
 
 
-	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	jassembly_change(j, method->classname);
+	java_method_t* method;
+	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
+		ATHROW("java/lang/NoSuchMethodError");
+	
 
-
-	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
+	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
 
-	if(unlikely(method->access & ACC_NATIVE))
-		jnative_set_context(j);
 
-	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
+	j_value R0 = java_method_invoke(j, method->assembly, method, params, method->nargs + 1);
+	avm->free(params);
 
-#if !defined(__GLIBC__)
-	jfree(params);
-#endif
-
-
-	jerr_check_exceptions(j);
-	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -70,32 +55,27 @@ OPCODE(invokestatic) {
 	PC += 2;
 
 
-	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	jassembly_change(j, method->classname);
+	java_method_t* method;
+	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
+		ATHROW("java/lang/NoSuchMethodError");
 
 
-	if(method->nargs == 0)
-		R0 = jcode_method_invoke(j->current_assembly, method, NULL, 0);
-	else {
-		jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * method->nargs);
+	j_value R0;
+
+	if(method->nargs) {
+		j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
 
 		int i = method->nargs - 1;
 		for(; i >= 0; i--)
 			params[i] = JPOP_JV();
 
-	
-		if(unlikely(method->access & ACC_NATIVE))
-			jnative_set_context(j);
 
-		R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs);
+		R0 = java_method_invoke(j, method->assembly, method, params, method->nargs);
+		avm->free(params);
 
-#if !defined(__GLIBC__)
-		jfree(params);
-#endif
-	}
+	} else
+		R0 = java_method_invoke(j, method->assembly, method, NULL, 0);
 
-	jerr_check_exceptions(j);
-	jassembly_restore(j);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
@@ -105,49 +85,36 @@ OPCODE(invokeinterface) {
 	int16_t idx = PC16;
 	PC += 2;
 
-	(void) PC16;
-	PC += 2;
+
+	java_method_t* method;
+	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
+		ATHROW("java/lang/NoSuchMethodError");
 
 
-	methodinfo_t* method = jcode_find_methodref(j->current_assembly, idx);
-	jassembly_change(j, method->classname);
-
-
-	jvalue_t* params = (jvalue_t*) jmalloc(sizeof(jvalue_t) * (method->nargs + 1));
+	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
 		params[i] = JPOP_JV();
 
 
-	if(unlikely(method->access & ACC_NATIVE))
-		jnative_set_context(j);
-
-	R0 = jcode_method_invoke(j->current_assembly, method, params, method->nargs + 1);
-
-
-#if !defined(__GLIBC__)
-	jfree(params);
-#endif
-
-
-	jerr_check_exceptions(j);
-	jassembly_restore(j);
+	j_value R0 = java_method_invoke(j, method->assembly, method, params, method->nargs + 1);
+	avm->free(params);
 
 	if(method->rettype != T_VOID)
 		JPUSH_JV(R0);
 }
 
 OPCODE(invokedynamic) {
-	j_throw(j, JEXCEPTION_INVALID_OPCODE);
+	ATHROW("java/lang/UnsupportedOperationException");
 }
 
 OPCODE(athrow) {
-	jobject_t* obj = (jobject_t*) JPOP(ptr);
+	java_object_t* obj = (java_object_t*) JPOP(ptr);
 	JPUSH(ptr, (void*) obj);
 	
 	if(unlikely(!obj))
-		j_throw(j, JEXCEPTION_NULL_POINTER);
+		ATHROW("java/lang/NullPointerException");
 
-	j_throw(j, obj->fullname);
+	athrow(j, obj->name);
 }

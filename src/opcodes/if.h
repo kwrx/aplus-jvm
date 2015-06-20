@@ -6,7 +6,7 @@ OPCODE(ifeq) {
 
 	int32_t v = JPOP(i32);
 
-	if(!__builtin_expect(v, 0))
+	if(likely(!v))
 		JGOTO(off);
 }
 
@@ -16,7 +16,7 @@ OPCODE(ifne) {
 
 	int32_t v = JPOP(i32);
 
-	if(__builtin_expect(v, 0))
+	if(likely(v))
 		JGOTO(off);
 }
 
@@ -26,7 +26,7 @@ OPCODE(iflt) {
 
 	int32_t v = JPOP(i32);
 
-	if(v < 0)
+	if(likely(v < 0))
 		JGOTO(off);
 }
 
@@ -36,7 +36,7 @@ OPCODE(ifge) {
 
 	int32_t v = JPOP(i32);
 
-	if(v >= 0)
+	if(likely(v >= 0))
 		JGOTO(off);
 }
 
@@ -46,7 +46,7 @@ OPCODE(ifgt) {
 
 	int32_t v = JPOP(i32);
 
-	if(v > 0)
+	if(likely(v > 0))
 		JGOTO(off);
 }
 
@@ -56,7 +56,7 @@ OPCODE(ifle) {
 
 	int32_t v = JPOP(i32);
 
-	if(v <= 0)
+	if(likely(v <= 0))
 		JGOTO(off);
 }
 
@@ -67,7 +67,7 @@ OPCODE(if_icmpeq) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a == b)
+	if(likely(a == b))
 		JGOTO(off);
 }
 
@@ -78,7 +78,7 @@ OPCODE(if_icmpne) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a != b)
+	if(likely(a != b))
 		JGOTO(off);
 }
 
@@ -89,7 +89,7 @@ OPCODE(if_icmplt) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a < b)
+	if(likely(a < b))
 		JGOTO(off);
 }
 
@@ -100,7 +100,7 @@ OPCODE(if_icmpge) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a >= b)
+	if(likely(a >= b))
 		JGOTO(off);
 }
 
@@ -111,7 +111,7 @@ OPCODE(if_icmpgt) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a > b)
+	if(likely(a > b))
 		JGOTO(off);
 }
 
@@ -122,7 +122,7 @@ OPCODE(if_icmple) {
 	int32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	if(a <= b)
+	if(likely(a <= b))
 		JGOTO(off);
 }
 
@@ -133,7 +133,7 @@ OPCODE(if_acmpeq) {
 	void* b = JPOP(ptr);
 	void* a = JPOP(ptr);
 
-	if(a == b)
+	if(likely(a == b))
 		JGOTO(off);
 }
 
@@ -144,7 +144,7 @@ OPCODE(if_acmpne) {
 	void* b = JPOP(ptr);
 	void* a = JPOP(ptr);
 
-	if(a != b)
+	if(likely(a != b))
 		JGOTO(off);
 }
 
@@ -154,7 +154,7 @@ OPCODE(ifnull) {
 
 	void* a = JPOP(ptr);
 
-	if(!a)
+	if(likely(!a))
 		JGOTO(off);
 }
 
@@ -164,6 +164,6 @@ OPCODE(ifnonnull) {
 
 	void* a = JPOP(ptr);
 
-	if(a)
+	if(likely(a))
 		JGOTO(off);
 }

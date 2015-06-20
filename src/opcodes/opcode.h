@@ -2,59 +2,67 @@
 #define _OPCODE_H
 
 
-#include <math.h>
-#include "config.h"
+#include <stdint.h>
+#include <avm.h>
+#include "../ops.h"
 
-#ifdef __i386__
+#if !FREESTANDING
+#include <string.h>
+#include <math.h>
+#endif
+
+#if defined(__i386__)
 #define __FASTCALL		__attribute__((fastcall))
 #else
 #define __FASTCALL
 #endif
 
 #define JPUSH(t, v)	\
-	{ j->stack[j->stack_top].u64 = 0L; j->stack[j->stack_top++].t = (v); }
+	{ j->frame.stack[j->frame.regs.sp].i64 = 0LL; j->frame.stack[j->frame.regs.sp++].t = (v); }
 
 #define JPUSH_JV(v)	\
-	{ j->stack[j->stack_top++].u64 = (v).u64; }
+	{ j->frame.stack[j->frame.regs.sp++].i64 = (v).i64; }
 
 
 #define JPOP(t)		\
-	j->stack[--j->stack_top].t
+	j->frame.stack[--j->frame.regs.sp].t
 
 #define JPOP_JV()	\
-	j->stack[--j->stack_top]
+	j->frame.stack[--j->frame.regs.sp]
 
 
 
 #define OPCODE(n)	\
-	static __FASTCALL inline void j_op_##n (jcontext_t* j)
+	static __FASTCALL inline void j_op_##n (java_context_t* j)
 
 #define OP(n)		\
 	j_op_##n
 
 
-#define PB			j->regs.pb
-#define PC			j->regs.pc
-#define PC8			j->code[j->regs.pc]
-#define PC16		j_bswap16(*(uint16_t*) (&j->code[j->regs.pc]))
-#define PC32		j_bswap32(*(uint32_t*) (&j->code[j->regs.pc]))
-#define PC64		j_bswap64(*(uint64_t*) (&j->code[j->regs.pc]))
+#define PB			j->frame.regs.pb
+#define PC			j->frame.regs.pc
+#define SB			j->frame.regs.sb
+#define SP			j->frame.regs.sp
 
+#define PC8			j->frame.code[j->frame.regs.pc]
+#define PC16		SWAP(*(u2*) (&j->frame.code[j->frame.regs.pc]), 16)
+#define PC32		SWAP(*(u4*) (&j->frame.code[j->frame.regs.pc]), 32)
+#define PC64		SWAP(*(u8*) (&j->frame.code[j->frame.regs.pc]), 64)
 
-#define R0			j->regs.r0
-#define R1			j->regs.r1
-#define R2			j->regs.r2
-#define R3			j->regs.r3
 
 
 #define JGOTO(x)			\
 	{ PC = PB + x; }
 
 #define JRETURN				\
-	{ longjmp(j->retbuf, JCODE_EXIT_SUCCESS); }
+	{ j->flags = JAVACTX_FLAG_RETURN; }
 
-#define JRETURN_AND_THROW	\
-	{ longjmp(j->retbuf, JCODE_EXIT_EXCEPTION); }
+
+#define ATHROW(x)				\
+	{							\
+		athrow(j, x);			\
+		return;					\
+	}
 
 
 #ifdef _WITH_OPCODES
@@ -89,7 +97,7 @@
 #include "breakpoint.h"
 #endif
 
-typedef __FASTCALL void (*opcode_handler_t) (jcontext_t*);
+typedef __FASTCALL void (*opcode_handler_t) (java_context_t*);
 typedef struct opcode {
 	char* name;
 	opcode_handler_t handler;

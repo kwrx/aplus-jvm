@@ -4,9 +4,9 @@ OPCODE(new) {
 	int16_t idx = PC16;
 	PC += 2;
 
-	jobject_t* obj = (jobject_t*) jobject_new(j->current_assembly, idx);
-	if(unlikely(!obj))
-		j_throw(j, JEXCEPTION_OUT_OF_MEMORY);
+	java_object_t* obj;
+	if(java_object_new_from_idx(&obj, j->assembly, idx) != J_OK)
+		ATHROW("java/lang/OutOfMemoryError");
 
 	JPUSH(ptr, (void*) obj);
 }
@@ -18,17 +18,17 @@ OPCODE(newarray) {
 	int32_t count = JPOP(i32);
 
 	if(unlikely(count < 0))
-		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
+		ATHROW("java/lang/NegativeArraySizeException");
 
 
 	register int sz = 1;
 	switch(type) {
 		case T_BOOLEAN:
-		case T_CHAR:
 		case T_BYTE:
 			sz = sizeof(int8_t);
 			break;
 		case T_SHORT:
+		case T_CHAR:
 			sz = sizeof(int16_t);
 			break;
 		case T_INT:
@@ -41,16 +41,16 @@ OPCODE(newarray) {
 			sz = sizeof(int64_t);
 			break;
 		default:
-			j_throw(j, JEXCEPTION_INVALID_TYPE);
+			ATHROW("java/lang/TypeNotPresentException");
 	}
 
 	
-	int32_t* arr = (int32_t*) jmalloc((sz * count) + (sizeof(int32_t) * 3));
-	*arr++ = (int32_t) JARRAY_MAGICVALUE;
-	*arr++ = (int32_t) type;
-	*arr++ = (int32_t) count;
+	java_array_t* arr = (java_array_t*) avm->calloc(1, (sz * count) + sizeof(java_array_t));
+	arr->magic = JAVA_ARRAY_MAGIC;
+	arr->type = type;
+	arr->length = count;
 	
-	JPUSH(ptr, (void*) arr);
+	JPUSH(ptr, (void*) arr->data);
 }
 
 OPCODE(anewarray) {
@@ -60,15 +60,15 @@ OPCODE(anewarray) {
 	int32_t count = JPOP(i32);
 
 	if(unlikely(count < 0))
-		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
+		ATHROW("java/lang/NegativeArraySizeException");
 
 
-	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) * 3));
-	*arr++ = (int32_t) JARRAY_MAGICVALUE;
-	*arr++ = (int32_t) T_REFERENCE;
-	*arr++ = (int32_t) count;
+	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
+	arr->magic = JAVA_ARRAY_MAGIC;
+	arr->type = T_REFERENCE;
+	arr->length = count;
 	
-	JPUSH(ptr, (void*) arr);
+	JPUSH(ptr, (void*) arr->data);
 }
 
 OPCODE(multinewarray) {
@@ -83,12 +83,12 @@ OPCODE(multinewarray) {
 		count += JPOP(i32);
 
 	if(unlikely(count < 0))
-		j_throw(j, JEXCEPTION_NEGATIVE_ARRAY_SIZE);
+		ATHROW("java/lang/NegativeArraySizeException");
 
-	int32_t* arr = (int32_t*) jmalloc((sizeof(void*) * count) + (sizeof(int32_t) * 3));
-	*arr++ = (int32_t) JARRAY_MAGICVALUE;
-	*arr++ = (int32_t) T_REFERENCE;
-	*arr++ = (int32_t) count;
+	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
+	arr->magic = JAVA_ARRAY_MAGIC;
+	arr->type = T_REFERENCE;
+	arr->length = count;
 	
-	JPUSH(ptr, (void*) arr);
+	JPUSH(ptr, (void*) arr->data);
 }

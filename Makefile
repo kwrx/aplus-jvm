@@ -1,66 +1,60 @@
+OUTPUT	:= bin/avm
+RUNTIME	:= bin/rt.jpk
+JPK		:= bin/jpk
 
-include config.mk
+CC		:= gcc
+LD		:= gcc
+JCC		:= gcj
+
+FIND	:= /usr/bin/find
+
+WARN	:= -Wall -Wno-unused-result
+OPT		:= -Ofast -mfpmath=sse
+
+INCDIR	:= src/include
+LIBS	:= -lffi
 
 
-CFILES 	:= $(shell find $(TOP)/src -type f -name "*.c")
-CXXFILES:= $(shell find $(TOP)/src -type f -name "*.cpp")
-AFILES	:= $(shell find $(TOP)/src -type f -name "*.s")
-HFILES	:= $(shell find $(TOP)/src -type f -name "*.h")
+CFILES	:= $(shell $(FIND) src -type f -name "*.c")
+TFILES	:= $(shell $(FIND) test -type f -name "*.java")
+JFILES	:= $(shell $(FIND) lib -type f -name "*.java")
 
-SFILES 	:= $(CFILES) $(CXXFILES) $(AFILES)
-OFILES	:= $(CFILES:.c=.o) $(CXXFILES:.cpp=.o) $(AFILES:.s=.o)
+OFILES	:= $(CFILES:.c=.o)
+TCFILES	:= $(TFILES:.java=.class)
+JCFILES	:= $(JFILES:.java=.class)
 
 
-PACKAGE	:= libjvm
-VERSION	:= 0.1
+.SUFFIXES: .java .class
 
-OUTPUT	:= $(PACKAGE).a
-TESTOUT	:= jvm
-JPK		:= src/jpk.c
-
-.PHONY: all clean git
-
-all: $(JPK)
-$(TESTOUT): $(OUTPUT)
-	@echo "  LD      " $@
-	@$(LD) -o $@ $(OFILES)
-
-$(OUTPUT): $(OFILES)
-	@echo "  AR      " $@
-	@$(AR) -rcs $@ $(OFILES)
-
+all: $(OUTPUT) $(RUNTIME) lib test
 .c.o:
-	@echo "  CC      " $(notdir $<)
-	@$(CC) $(CFLAGS) $< -o $@
-
-.cpp.o:
-	@echo "  CXX     " $(notdir $<)
-	@$(CXX) $(CXXFLAGS) $< -o $@
-
-.s.o:
-	@echo "  ASM     " $(notdir $<)
-	@$(ASM) $(AFLAGS) $< -o $@
+	@echo "  CC   " $<
+	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -pipe -fomit-frame-pointer -include config.h
 	
+$(OUTPUT): $(OFILES)
+	@echo "  LD   " $@
+	@$(LD) -o $@ $(OFILES) $(LIBS)
+	
+test: $(TCFILES)
+lib: $(JCFILES)
+.java.class:
+	@echo "  JAVA " $<
+	@$(JCC) --classpath=lib -C $<
 
-$(JPK): $(TESTOUT)
-	@echo "  HOSTCC  " jpk
-	@$(HOSTCC) -D__JPK__ -std=c99 -I src/include -O2 $(JPK) -o jpk -Wno-unused-result
 
+$(RUNTIME): $(JPK) $(JCFILES)
+	@echo "  JPK  " $(RUNTIME)
+	@$(JPK) $(RUNTIME) $(JCFILES)
+$(JPK): src/jpk.c
+	@echo "  CC   " $(JPK)
+	@$(CC) -O2 -o $(JPK) src/jpk.c -I $(INCDIR) $(WARN) -D__JPK__ -include config.h
+	
+	
 clean:
-	-@$(RM) $(OUTPUT)
-	-@$(RM) $(OFILES)
+	@$(RM) $(OFILES)
+	@$(RM) $(JCFILES)
+	@$(RM) $(TCFILES)
+	@$(RM) $(OUTPUT)
+	@$(RM) $(RUNTIME)
+	@$(RM) $(JPK)
 
-distclean: clean
-	-@$(RM) $(PACKAGE)-$(VERSION)-$(ARCH).tar.gz
-
-dist: install
-	-@mv bin $(PACKAGE)-$(VERSION)-$(ARCH)
-	-@tar -czf $(PACKAGE)-$(VERSION)-$(ARCH).tar.gz $(PACKAGE)-$(VERSION)-$(ARCH)/*
-	-@mv $(PACKAGE)-$(VERSION)-$(ARCH) bin
-
-git: clean
-	-@git add --all .
-	-@git commit -m "$(COMMIT)"
-	-@git push origin master
-	
-	

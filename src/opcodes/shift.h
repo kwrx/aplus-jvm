@@ -31,15 +31,15 @@ OPCODE(lshr) {
 
 
 OPCODE(iushr) {
-	uint32_t b = JPOP(u32);
+	uint32_t b = JPOP(i32);
 	int32_t a = JPOP(i32);
 
-	JPUSH(u32, a >> b);
+	JPUSH(i32, a >> b);
 }
 
 OPCODE(lushr) {
-	uint64_t b = JPOP(u64);
+	uint64_t b = JPOP(i64);
 	int32_t a = JPOP(i32);
 
-	JPUSH(u64, a >> b);
+	JPUSH(i64, a >> b);
 }

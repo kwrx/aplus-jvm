@@ -8,5 +8,5 @@ OPCODE(iinc) {
 	PC++;
 
 
-	j->locals[idx].i32 += inc;
+	j->frame.locals[idx].i32 += inc;
 }

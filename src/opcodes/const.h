@@ -1,7 +1,7 @@
 
 
 OPCODE(aconst_null) {
-	JPUSH(ptr, JCODE_NULL_REFERENCE);
+	JPUSH(ptr, NULL);
 }
 
 OPCODE(iconst_m1) {

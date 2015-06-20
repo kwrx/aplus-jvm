@@ -12,7 +12,6 @@ OPCODE(lcmp) {
 	else
 		r = 0;
 
-	j->regs.fl = r;
 	JPUSH(i32, r);
 }
 
@@ -31,7 +30,6 @@ OPCODE(fcmpl) {
 		r = 0;
 
 
-	j->regs.fl = r;
 	JPUSH(i32, r);
 }
 
@@ -49,7 +47,6 @@ OPCODE(fcmpg) {
 	else
 		r = 0;
 
-	j->regs.fl = r;
 	JPUSH(i32, r);
 }
 
@@ -68,7 +65,6 @@ OPCODE(dcmpl) {
 		r = 0;
 
 
-	j->regs.fl = r;
 	JPUSH(i32, r);
 }
 
@@ -87,6 +83,5 @@ OPCODE(dcmpg) {
 		r = 0;
 
 
-	j->regs.fl = r;
 	JPUSH(i32, r);
 }

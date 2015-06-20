@@ -9,7 +9,7 @@ OPCODE(wide) {
 				int16_t idx = PC16;
 				PC += 2;
 
-				JPUSH_JV(j->locals[idx]);
+				JPUSH_JV(j->frame.locals[idx]);
 			} 
 			break;
 		
@@ -17,14 +17,14 @@ OPCODE(wide) {
 				int16_t idx = PC16;
 				PC += 2;
 
-				j->locals[idx] = JPOP_JV();
+				j->frame.locals[idx] = JPOP_JV();
 			}
 			break;
 		case 0xA9: {				/* ret */
 				int16_t idx = PC16;
 				PC += 2;
 
-				PC = j->locals[idx].i32;
+				PC = j->frame.locals[idx].i32;
 			}
 			break;
 		case 0x84: {				/* iinc */
@@ -34,7 +34,7 @@ OPCODE(wide) {
 				int16_t inc = PC16;
 				PC += 2;
 
-				j->locals[idx].i32 += inc;
+				j->frame.locals[idx].i32 += inc;
 			}
 			break;
 	}

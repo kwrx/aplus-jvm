@@ -1,6 +1,0 @@
-#ifndef _OPCODES_CONFIG_H
-#define _OPCODES_CONFIG_H
-
-#define HAVE_ARRAY_BOUNDS_CHECKING		1
-
-#endif
