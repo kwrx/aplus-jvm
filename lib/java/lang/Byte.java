@@ -5,7 +5,7 @@ public final class Byte extends Number {
 	public static final byte MAX_VALUE = 127;
 	public static final byte MIN_VALUE = -127;
 	public static final int SIZE = 8;
-	public static final Object TYPE;
+	public static final Object TYPE = null;
 
 
 	protected byte Value;
@@ -75,7 +75,7 @@ public final class Byte extends Number {
 	}
 
 	public static Byte ParseByte(String s) throws NumberFormatException {
-		return this.ParseByte(s, -1);
+		return Byte.ParseByte(s, -1);
 	}
 
 	

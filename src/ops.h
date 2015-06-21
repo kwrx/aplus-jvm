@@ -64,4 +64,25 @@ void java_native_flush(void);
 
 void java_object_flush(void);
 
+
+#if FREESTANDING
+void* memcpy(void* s1, const void* s2, size_t size);
+char* strcpy(char* s1, const char* s2);
+size_t strlen(const char* s);
+char* strdup(const char* s);
+int strcmp(const char* s1, const char* s2);
+int strncmp(const char* s1, const char* s2, size_t n);
+double fmod(double x, double y);
+
+
+#define SEEK_SET		0
+#define SEEK_CUR		1
+#define SEEK_END		2
+
+#define O_RDONLY		0
+#define O_BINARY		0
+
+#endif
+
+
 #endif

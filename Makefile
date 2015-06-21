@@ -8,7 +8,7 @@ JCC		:= gcj
 
 FIND	:= /usr/bin/find
 
-WARN	:= -Wall -Wno-unused-result
+WARN	:= -Wall -Wno-unused-result -Wno-unused-variable
 OPT		:= -Ofast -mfpmath=sse
 
 INCDIR	:= src/include

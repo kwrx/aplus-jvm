@@ -34,12 +34,12 @@ static struct avm_ops __ops = {
 
 static void* calloc_stub(int size, int nmemb) {
 	extern int end;
-	static long p = &end;
+	static long p = (long) &end;
 	
-	register int k = p;
+	register long k = p;
 	p += size * nmemb;
 	
-	return k;
+	return (void*) k;
 }
 
 static void free_stub(void* ptr) {
@@ -82,9 +82,9 @@ struct avm_ops* avm = &__ops;
 
 #if FREESTANDING
 __weak
-void* memcpy(void* s1, const void* s2, int size) {
+void* memcpy(void* s1, const void* s2, size_t size) {
 	register char* p1 = s1;
-	register char* p2 = s2;
+	register const char* p2 = s2;
 	
 	while(size--)
 		*p1++ = *p2++;
@@ -100,7 +100,7 @@ char* strcpy(char* s1, const char* s2) {
 	return s;
 }
 __weak
-int strlen(const char* s) {
+size_t strlen(const char* s) {
 	register int p = 0;
 	while(*s++)
 		p++;
@@ -111,8 +111,34 @@ int strlen(const char* s) {
 __weak
 char* strdup(const char* s) {
 	char* p = avm->calloc(1, strlen(s));
-	strcpy(p, s, strlen(s));
+	strcpy(p, s);
 	
 	return p;
 }
+
+__weak
+int strcmp(const char* s1, const char* s2) {
+	for(; *s1 == *s2; s1++, s2++)
+		if(*s1 == 0)
+			return 0;
+
+	return ((*(unsigned char*) s1 < *(unsigned char*) s2) ? -1 : 1);
+}
+
+__weak
+int strncmp(const char* s1, const char* s2, size_t n) {
+	for(; n > 0; s1++, s2++, --n)
+		if(*s1 != *s2)
+			return ((*(unsigned char*) s1 < *(unsigned char*) s2) ? -1 : 1);
+		else if (*s1 == 0)
+			return 0;
+
+	return 0;
+}
+
+__weak
+double fmod(double x, double y) {
+	return (double)((long) x % (long) y);
+}
+
 #endif

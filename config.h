@@ -2,11 +2,11 @@
 #define _CONFIG_H
 
 
-#define DEBUG			0
+#define DEBUG			1
 #define TEST			1
 #define FREESTANDING	0
 
-#define CONFIG_JNI		1
+#define CONFIG_JNI		0
 
 
 #define APP_NAME		"avm"
@@ -34,11 +34,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#if DEBUG
-#if !FREESTANDING
+#if DEBUG && !FREESTANDING
 #include <stdlib.h>
 #include <stdio.h>
-#endif
 #define LOG(x)			\
 	{ printf("%s: %s\n", APP_NAME, x); }
 #define LOGF(x, y...)	\
