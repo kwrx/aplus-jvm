@@ -1,10 +1,12 @@
 OUTPUT	:= bin/avm
+OUTLIB	:= bin/libavm.a
 RUNTIME	:= bin/rt.jpk
 JPK		:= bin/jpk
 
 CC		:= gcc
 LD		:= gcc
 JCC		:= gcj
+AR		:= ar -rcs
 
 FIND	:= /usr/bin/find
 
@@ -26,7 +28,7 @@ JCFILES	:= $(JFILES:.java=.class)
 
 .SUFFIXES: .java .class
 
-all: $(OUTPUT) $(RUNTIME) lib test
+all: $(OUTPUT) $(OUTLIB) $(RUNTIME) lib test
 .c.o:
 	@echo "  CC   " $<
 	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -pipe -fomit-frame-pointer -include config.h
@@ -34,6 +36,10 @@ all: $(OUTPUT) $(RUNTIME) lib test
 $(OUTPUT): $(OFILES)
 	@echo "  LD   " $@
 	@$(LD) -o $@ $(OFILES) $(LIBS)
+
+$(OUTLIB): $(OFILES)
+	@echo "  AR   " $@
+	@$(AR) $@ $(filter-out src/main.o,$(OFILES))
 	
 test: $(TCFILES)
 lib: $(JCFILES)
