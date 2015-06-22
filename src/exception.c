@@ -60,5 +60,5 @@ void rethrow(java_context_t* j, java_context_t* d) {
 		return;
 	}
 
-	unhandled_exception(j, NULL);
+	unhandled_exception(j, j->exception.name);
 }

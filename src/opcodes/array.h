@@ -6,10 +6,10 @@
 		t1* a = (t1*) JPOP(ptr);											\
 																			\
 		if(unlikely(!a))													\
-			athrow(j, "java/lang/NullPointerException");					\
+			ATHROW("java/lang/NullPointerException");						\
 																			\
 		if(unlikely(idx > JAVA_ARRAY(a)->length))							\
-			athrow(j, "java/lang/ArrayIndexOutOfBoundsException");			\
+			ATHROW("java/lang/ArrayIndexOutOfBoundsException");				\
 																			\
 		JPUSH(t2, a[idx]);													\
 	}
@@ -32,10 +32,10 @@ ALOAD(s, int16_t, i16)
 		t1* a = (t1*) JPOP(ptr);											\
 																			\
 		if(unlikely(!a))													\
-			athrow(j, "java/lang/NullPointerException");					\
+			ATHROW("java/lang/NullPointerException");						\
 																			\
 		if(unlikely(idx > JAVA_ARRAY(a)->length))							\
-			athrow(j, "java/lang/ArrayIndexOutOfBoundsException");			\
+			ATHROW("java/lang/ArrayIndexOutOfBoundsException");				\
 																			\
 		a[idx] = v;															\
 	}
