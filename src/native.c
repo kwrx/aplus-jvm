@@ -219,7 +219,6 @@ void java_native_flush(void) {
 void java_native_init(void) {
 #if CONFIG_JNI
 
-
 #define JNI(c, f, r, s)	\
 	java_native_add(c, #f, s, r, JNI_##f)
 
@@ -228,7 +227,6 @@ void java_native_init(void) {
 	JNI("AVM/VMClass", getName, T_REFERENCE, "L");
 
 	JNI("AVM/VMDebug", Print, T_VOID, "L");
-
 #endif
 }
 

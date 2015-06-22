@@ -1,6 +1,6 @@
 OUTPUT	:= bin/avm
-OUTLIB	:= bin/libavm.a
-RUNTIME	:= bin/rt.jpk
+OUTLIB	:= bin/lib/libavm.a
+RUNTIME	:= bin/lib/rt.jpk
 JPK		:= bin/jpk
 
 CC		:= gcc
@@ -11,7 +11,10 @@ AR		:= ar -rcs
 FIND	:= /usr/bin/find
 
 WARN	:= -Wall -Wno-unused-result -Wno-unused-variable
-OPT		:= -Ofast -mfpmath=sse
+OPT		:= -Ofast -mfpmath=sse -msse2 \
+			-funroll-all-loops -faggressive-loop-optimizations \
+			-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine \
+			-fno-align-functions -fno-align-loops
 
 INCDIR	:= src/include
 LIBS	:= -lffi
@@ -31,7 +34,7 @@ JCFILES	:= $(JFILES:.java=.class)
 all: $(OUTPUT) $(OUTLIB) $(RUNTIME) lib test
 .c.o:
 	@echo "  CC   " $<
-	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -pipe -fomit-frame-pointer -include config.h
+	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -pipe -include config.h
 	
 $(OUTPUT): $(OFILES)
 	@echo "  LD   " $@
@@ -56,6 +59,10 @@ $(JPK): src/jpk.c
 	@$(CC) -O2 -o $(JPK) src/jpk.c -I $(INCDIR) $(WARN) -D__JPK__ -include config.h
 	
 	
+clean_fast:
+	@$(RM) $(OFILES)
+	@$(RM) $(OUTPUT)
+
 clean:
 	@$(RM) $(OFILES)
 	@$(RM) $(JCFILES)

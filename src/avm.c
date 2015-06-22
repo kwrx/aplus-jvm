@@ -13,7 +13,7 @@ void avm_begin(void) {
 		java_assembly_t* A = (java_assembly_t*) v->value;
 
 		if(java_assembly_resolve(A) != J_OK)
-			LOGF("Cannot resolve %s", A->name);
+			LOGF("Cannot resolve %s", A->name);	
 
 		LOGF("Loaded %s", A->name);
 	}
@@ -209,4 +209,34 @@ j_value avm_call(const char* classname, const char* name, int nargs, ...) {
 	}
 
 	return r;
+}
+
+j_value avm_main(int argc, char** argv) {
+	java_method_t* method;
+	java_assembly_t* assembly;
+
+
+	vector_t* v;
+	for(v = asm_vector; v; v = v->next) {
+		assembly = (java_assembly_t*) v->value;
+
+		if(java_method_find(&method, assembly->name, "main", "([Ljava/lang/String;)V") == J_OK) {
+			LOGF("EntryPoint: %s.%s ()", assembly->name, "main");
+			
+			java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * argc) + sizeof(java_array_t));
+			arr->magic = JAVA_ARRAY_MAGIC;
+			arr->type = T_REFERENCE;
+			arr->length = argc;
+
+			memcpy(arr->data, argv, sizeof(char*) * argc);
+
+
+			j_value param;
+			param.ptr = (void*) arr;
+			return java_method_invoke(NULL, assembly, method, &param, 1);
+		}
+	}
+
+	athrow(NULL, "java/lang/NoSuchMethodError");
+	return JVALUE_NULL;
 }

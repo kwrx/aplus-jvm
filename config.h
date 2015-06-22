@@ -2,9 +2,9 @@
 #define _CONFIG_H
 
 
-#define DEBUG			1
-#define TEST			1
-#define FREESTANDING	0
+#define DEBUG			0
+#define TEST			0
+#define FREESTANDING		0
 
 #define CONFIG_JNI		0
 
@@ -16,16 +16,16 @@
 #define APP_CTIME		__TIME__
 
 #ifdef __GNUC__
-#define APP_CC							"gcc"
-#define APP_CC_VERSION					__VERSION__
+#define APP_CC			"gcc"
+#define APP_CC_VERSION		__VERSION__
 #else
-#define APP_CC							"unknown compiler"
-#define APP_CC_VERSION					""
+#define APP_CC			"unknown compiler"
+#define APP_CC_VERSION		""
 #endif
 
-#define APP_VERSION_FORMAT														\
+#define APP_VERSION_FORMAT										\
 		"%s %s\nCopyright (C) %s\nBuilt with %s %s (%s:%s)\n"
-#define APP_VERSION_ARGS														\
+#define APP_VERSION_ARGS										\
 		APP_NAME, APP_VERSION, APP_COPY, APP_CC, APP_CC_VERSION,				\
 		APP_CDATE, APP_CTIME
 
@@ -67,5 +67,13 @@
 #pragma GCC diagnostic ignored "-Wnonnull"
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
+
+
+
+
+
+#define __SYSROOT__			"/xdev/cross"
+#define __PREFIX__			__SYSROOT__ "/prj/AVM/bin"
+#define __LIBDIR__			__PREFIX__ "/lib"
 
 #endif

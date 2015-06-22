@@ -530,6 +530,7 @@ int avm_open(const char* filename);
 char* avm_make_signature(int rettype, ...);
 
 j_value avm_call(const char* classname, const char* name, int nargs, ...);
+j_value avm_main(int argc, char** argv);
 
 #ifdef __cplusplus
 }
