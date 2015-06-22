@@ -61,6 +61,7 @@ clean:
 	@$(RM) $(JCFILES)
 	@$(RM) $(TCFILES)
 	@$(RM) $(OUTPUT)
+	@$(RM) $(OUTLIB)
 	@$(RM) $(RUNTIME)
 	@$(RM) $(JPK)
 
