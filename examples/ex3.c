@@ -16,6 +16,8 @@
 /*								*/
 /*	public static String GetPath() {			*/
 /*		String EnvPath = getenv("PATH");		*/
+/*								*/
+/*		return EnvPath;					*/
 /*	}							*/
 /* }								*/
 
