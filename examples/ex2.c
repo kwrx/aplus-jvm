@@ -6,17 +6,17 @@
 #include <stdio.h>
 
 
-/* Native.java 										*/
-/*													*/
-/* public class Native {							*/
-/*													*/
-/*		// Declare external reference				*/
-/*		static native void PrintNative(String S);	*/
-/*													*/
-/*		public static void PrintHello() {			*/
-/*			PrintNative("Hello World\n");			*/
-/*		}											*/
-/* }												*/
+/* Native.java 							*/
+/*								*/
+/* public class Native {					*/
+/*								*/
+/*	// Declare external reference				*/
+/*	static native void PrintNative(String S);		*/
+/*								*/
+/*	public static void PrintHello() {			*/
+/*		PrintNative("Hello World\n");			*/
+/*	}							*/
+/* }								*/
 
 
 

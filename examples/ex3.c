@@ -7,17 +7,17 @@
 #include <unistd.h>
 
 
-/* Native.java 										*/
-/*													*/
-/* public class Native {							*/
-/*													*/
-/*		// Declare external reference				*/
-/*		static native String getenv(String env);	*/
-/*													*/
-/*		public static String GetPath() {			*/
-/*			String EnvPath = getenv("PATH");		*/
-/*		}											*/
-/* }												*/
+/* Native.java 							*/
+/*								*/
+/* public class Native {					*/
+/*								*/
+/*	// Declare external reference				*/
+/*	static native String getenv(String env);		*/
+/*								*/
+/*	public static String GetPath() {			*/
+/*		String EnvPath = getenv("PATH");		*/
+/*	}							*/
+/* }								*/
 
 
 

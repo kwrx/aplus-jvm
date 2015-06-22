@@ -5,13 +5,13 @@
 #include <stdlib.h>
 
 
-/* HelloWorld.java 									*/
-/*													*/
+/* HelloWorld.java 							*/
+/*									*/
 /* public class HelloWorld {						*/
-/*		public static void PrintHello()	{			*/
-/*			System.out.println("Hello World");		*/
-/*		}											*/
-/* }												*/
+/*	public static void PrintHello()	{				*/
+/*		System.out.println("Hello World");			*/
+/*	}								*/
+/* }									*/
 
 
 int main(int argc, char** argv) {
