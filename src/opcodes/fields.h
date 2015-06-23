@@ -47,7 +47,7 @@ OPCODE(getfield) {
 	java_object_t* obj = (java_object_t*) JPOP(ptr);
 
 	if(unlikely(!obj))
-		ATHROW("java/lang/NullPointerException");
+		ATHROW("java/lang/NullPointerException", "Object cannot be null");
 
 	
 	u2 cidx = j->assembly->java_this.jc_cp[idx].field_ref.class_index;
@@ -74,7 +74,7 @@ OPCODE(putfield) {
 
 
 	if(unlikely(!obj))
-		ATHROW("java/lang/NullPointerException");
+		ATHROW("java/lang/NullPointerException", "Object cannot be null");
 
 	u2 cidx = j->assembly->java_this.jc_cp[idx].field_ref.class_index;
 	u2 nidx = j->assembly->java_this.jc_cp[idx].field_ref.name_and_type_index;

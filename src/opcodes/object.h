@@ -51,9 +51,10 @@ OPCODE(instanceof) {
 		return;
 	}
 
+	const char* aname = (const char*) j->assembly->java_this.jc_cp[j->assembly->java_this.jc_cp[idx].class_info.name_index].utf8_info.bytes;
 	java_assembly_t* a;
-	if(java_assembly_find(&a, (const char*) j->assembly->java_this.jc_cp[j->assembly->java_this.jc_cp[idx].class_info.name_index].utf8_info.bytes) != J_OK)
-		ATHROW("java/lang/UnsatisfiedLinkError");
+	if(java_assembly_find(&a, aname) != J_OK)
+		ATHROW("java/lang/UnsatisfiedLinkError", aname);
 
 	register int r = ((strcmp(a->name, obj->assembly->name) == 0) || (__check_super(obj->assembly, a) == 0));
 	JPUSH(i32, r);

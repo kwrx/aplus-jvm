@@ -15,7 +15,7 @@ void avm_begin(void) {
 		if(java_assembly_resolve(A) != J_OK)
 			LOGF("Cannot resolve %s", A->name);	
 
-		LOGF("Loaded %s", A->name);
+		LOGF("Loaded %s\n", A->name);
 	}
 
 	java_native_init();
@@ -237,6 +237,6 @@ j_value avm_main(int argc, char** argv) {
 		}
 	}
 
-	athrow(NULL, "java/lang/NoSuchMethodError");
+	athrow(NULL, "java/lang/NoSuchMethodError", "\"main\" not found");
 	return JVALUE_NULL;
 }

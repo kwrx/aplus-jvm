@@ -6,7 +6,7 @@
 #define TEST			0
 #define FREESTANDING		0
 
-#define CONFIG_JNI		0
+#define CONFIG_JNI		1
 
 
 #define APP_NAME		"avm"

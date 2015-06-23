@@ -58,9 +58,9 @@
 	{ j->flags = JAVACTX_FLAG_RETURN; }
 
 
-#define ATHROW(x)				\
+#define ATHROW(x, y)			\
 	{							\
-		athrow(j, x);			\
+		athrow(j, x, y);		\
 		return;					\
 	}
 

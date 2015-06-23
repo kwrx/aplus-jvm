@@ -7,7 +7,7 @@ OPCODE(invokevirtual) {
 
 	java_method_t* method;
 	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
-		ATHROW("java/lang/NoSuchMethodError");
+		ATHROW("java/lang/NoSuchMethodError", strfmt("Method from index %d not found", idx));
 
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
@@ -32,7 +32,7 @@ OPCODE(invokespecial) {
 
 	java_method_t* method;
 	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
-		ATHROW("java/lang/NoSuchMethodError");
+		ATHROW("java/lang/NoSuchMethodError", strfmt("Method from index %d not found", idx));
 	
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
@@ -57,7 +57,7 @@ OPCODE(invokestatic) {
 
 	java_method_t* method;
 	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
-		ATHROW("java/lang/NoSuchMethodError");
+		ATHROW("java/lang/NoSuchMethodError", strfmt("Method from index %d not found", idx));
 
 
 	j_value R0;
@@ -88,7 +88,7 @@ OPCODE(invokeinterface) {
 
 	java_method_t* method;
 	if(java_method_find_reference(&method, j->assembly, NULL, idx) != J_OK)
-		ATHROW("java/lang/NoSuchMethodError");
+		ATHROW("java/lang/NoSuchMethodError", strfmt("Method from index %d not found", idx));
 
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
@@ -106,7 +106,7 @@ OPCODE(invokeinterface) {
 }
 
 OPCODE(invokedynamic) {
-	ATHROW("java/lang/UnsupportedOperationException");
+	ATHROW("java/lang/UnsupportedOperationException", "");
 }
 
 OPCODE(athrow) {
@@ -114,7 +114,7 @@ OPCODE(athrow) {
 	JPUSH(ptr, (void*) obj);
 	
 	if(unlikely(!obj))
-		ATHROW("java/lang/NullPointerException");
+		ATHROW("java/lang/NullPointerException", "Object cannot be null");
 
-	athrow(j, obj->name);
+	athrow(j, obj->name, "");
 }

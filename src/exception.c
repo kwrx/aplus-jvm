@@ -8,7 +8,7 @@
 #include "opcodes/opcode.h"
 
 
-static void unhandled_exception(java_context_t* j, const char* exception) {
+static void unhandled_exception(java_context_t* j, const char* exception, const char* message) {
 	if(likely(j)) {
 		PRINTF("(Unhandled Exception) %s: %s\n", j->exception.name, j->exception.message);
 
@@ -25,28 +25,33 @@ static void unhandled_exception(java_context_t* j, const char* exception) {
 			ln = a->line_number_table.table[ln - 1].line_number;			
 		}
 
+	
+		char* ss = "";
+		if(java_attribute_find(&a, j->assembly, j->assembly->java_this.jc_attributes, j->assembly->java_this.jc_attributes_count, "SourceFile") == J_OK)
+			ss = (char*) j->assembly->java_this.jc_cp[a->sourcefile.sourcefile_index].utf8_info.bytes;
 
-		PRINTF("\tat %s.%s():%d\n", j->assembly->name, j->assembly->java_this.jc_cp[j->frame.method->name_index].utf8_info.bytes, ln);
+
+		PRINTF("\tat %s.%s(%s:%d)\n", j->assembly->name, j->assembly->java_this.jc_cp[j->frame.method->name_index].utf8_info.bytes, ss, ln);
 		PRINTF("\tat bytecode: [%d+%d] %s\n", PB, PC - PB, j_opcodes[j->frame.code[PB]].name);
 
 	} else
-		PRINTF("(Unhandled Exception) %s\n", exception);
+		PRINTF("(Unhandled Exception) %s: %s\n", exception, message);
 
 	
 	EXIT(1);
 }
 
-void athrow(java_context_t* j, const char* exception) {
+void athrow(java_context_t* j, const char* exception, const char* message) {
 	if(likely(j)) {
 		j->flags = JAVACTX_FLAG_EXCEPTION;
 		j->exception.name = strdup(exception);
-		j->exception.message = ""; /* TODO */
+		j->exception.message = strdup(message);
 		j->exception.owner = j;
 	
 		return;
 	}
 
-	unhandled_exception(NULL, exception);
+	unhandled_exception(NULL, exception, message);
 }
 
 
@@ -60,5 +65,5 @@ void rethrow(java_context_t* j, java_context_t* d) {
 		return;
 	}
 
-	unhandled_exception(j, j->exception.name);
+	unhandled_exception(j, j->exception.name, j->exception.message);
 }

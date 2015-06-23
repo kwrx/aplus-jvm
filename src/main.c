@@ -16,13 +16,16 @@ static void die(char* e) {
 
 
 
-DEFARG(help);
-DEFARG(version);
+DEFARG(p_help);
+DEFARG(p_version);
 
-DEFARG(nostdlib);
+DEFARG(p_nostdlib);
 static int __stdlib = 1;
 
+DEFARG(p_library);
 
+DEFARG(p_argv);
+static int __argv_idx = -1;
 
 
 struct {
@@ -31,14 +34,16 @@ struct {
 	char* docs;
 	void (*handler) (char** argv, int* idx);
 } args[] = {
-	{ "--version", "-v", "Display AVM version information", version },
-	{ "--help", "-h", "Display this information", help },
-	{ "-nostdlib", "", "Use only library's directories defined", nostdlib },
+	{ "--version", "-v", "Display AVM version information", p_version },
+	{ "--help", "-h", "Display this information", p_help },
+	{ "--nostdlib", "-n", "Use only libraries user-defined", p_nostdlib },
+	{ "--library", "-l", "Load a library", p_library },
+	{ "--argv", "-a", "Use the next arguments as parameters for main", p_argv },
 	{ NULL, NULL, NULL, NULL }
 };
 
 
-DEFARG(help) {
+DEFARG(p_help) {
 	fprintf(stderr, APP_VERSION_FORMAT, APP_VERSION_ARGS);
 	
 
@@ -47,6 +52,7 @@ DEFARG(help) {
 			"\t\tto invoke CLASS.main, or\n"
 			"\tavm JPKFILE [ARGS] ...\n"
 			"\t\tto execute a jpk file\n"
+			"\nExample:\n\tavm echo.jpk --argv Hello World\n"
 		);
 
 
@@ -60,16 +66,40 @@ DEFARG(help) {
 	exit(0);
 }
 
-DEFARG(version) {
+DEFARG(p_version) {
 	fprintf(stderr, APP_VERSION_FORMAT, APP_VERSION_ARGS);
 	exit(0);
 }
 
 
-DEFARG(nostdlib) {
+DEFARG(p_nostdlib) {
 	__stdlib = 0;
 }
 
+DEFARG(p_library) {
+	char* lname = NULL;
+	if((strncmp(argv[*(idx)], "-l", 2) == 0) && (strlen(argv[*(idx)]) > 2))
+			lname = &(argv[*(idx)] [2]);
+	else {
+		lname = argv[*(idx) + 1]; 
+		*idx += 1; 
+	}
+
+	char buf[256];
+	memset(buf, 0, sizeof(buf));
+
+	strcat(buf, __LIBDIR__);
+	strcat(buf, "/");
+	strcat(buf, lname);
+	strcat(buf, ".jpk");
+
+	if(avm_open(buf) == J_ERR)
+			die(buf);
+}
+
+DEFARG(p_argv) {
+	__argv_idx = *(idx) + 1;
+}
 
 int main(int argc, char** argv) {
 
@@ -87,11 +117,11 @@ int main(int argc, char** argv) {
 
 
 	int i, j;
-	for(i = 1; i < argc; i++) {
+	for(i = 1; (i < argc) && (__argv_idx == -1); i++) {
 		for(j = 0; args[j].handler; j++) {
 			if(
 				!((strcmp(argv[i], args[j].longopt) == 0) ||
-				(strcmp(argv[i], args[j].shortopt) == 0))
+				(strncmp(argv[i], args[j].shortopt, strlen(args[j].shortopt)) == 0))
 			) continue;
 
 			args[j].handler(argv, &i);
@@ -110,6 +140,17 @@ int main(int argc, char** argv) {
 	if(__stdlib)
 		if(avm_open(__LIBDIR__ "/rt.jpk") == J_ERR)
 			die("rt.jpk");
+
+	
+
+	if(__argv_idx != -1) {
+		argv = &argv[__argv_idx];
+		argc -= __argv_idx;
+	} else {
+		argv = &argv[argc];
+		argc = 0;
+	}
+
 
 	avm_begin();
 	avm_main(argc, argv);

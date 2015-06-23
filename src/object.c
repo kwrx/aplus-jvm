@@ -47,9 +47,10 @@ int java_object_new(java_object_t** obj, const char* name) {
 	java_object_t* o = (java_object_t*) avm->calloc(1, sizeof(java_object_t));
 	
 	o->refcount = 1;
-	o->lock = 0;
 	o->name = strdup(name);
 	o->id = nextid++;
+
+	avm_mutex_init(&o->lock, AVM_MTX_KIND_ERRORCHECK);
 	
 	if(java_object_instance(&o->assembly, objasm) != J_OK) {
 		LOGF("java_object_new() Instance of %s failed!", objasm->name);

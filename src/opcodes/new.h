@@ -6,7 +6,7 @@ OPCODE(new) {
 
 	java_object_t* obj;
 	if(java_object_new_from_idx(&obj, j->assembly, idx) != J_OK)
-		ATHROW("java/lang/OutOfMemoryError");
+		ATHROW("java/lang/OutOfMemoryError", "");
 
 	JPUSH(ptr, (void*) obj);
 }
@@ -18,7 +18,7 @@ OPCODE(newarray) {
 	int32_t count = JPOP(i32);
 
 	if(unlikely(count < 0))
-		ATHROW("java/lang/NegativeArraySizeException");
+		ATHROW("java/lang/NegativeArraySizeException", strfmt("%d", count));
 
 
 	register int sz = 1;
@@ -41,7 +41,7 @@ OPCODE(newarray) {
 			sz = sizeof(int64_t);
 			break;
 		default:
-			ATHROW("java/lang/TypeNotPresentException");
+			ATHROW("java/lang/TypeNotPresentException", strfmt("%d", type));
 	}
 
 	
@@ -60,7 +60,7 @@ OPCODE(anewarray) {
 	int32_t count = JPOP(i32);
 
 	if(unlikely(count < 0))
-		ATHROW("java/lang/NegativeArraySizeException");
+		ATHROW("java/lang/NegativeArraySizeException", strfmt("%d", count));
 
 
 	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
@@ -83,7 +83,7 @@ OPCODE(multinewarray) {
 		count += JPOP(i32);
 
 	if(unlikely(count < 0))
-		ATHROW("java/lang/NegativeArraySizeException");
+		ATHROW("java/lang/NegativeArraySizeException", strfmt("%d", count));
 
 	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
 	arr->magic = JAVA_ARRAY_MAGIC;

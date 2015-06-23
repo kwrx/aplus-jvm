@@ -6,11 +6,14 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sched.h>
+#include <string.h>
 
 #ifdef __GLIBC__
 static void free_stub(void* ptr) {
 	return;
 }
+#else
+#define free_stub free
 #endif
 
 static struct avm_ops __ops = {
@@ -20,7 +23,8 @@ static struct avm_ops __ops = {
 	.close = close,
 	.lseek = (int (*) (int, int, int)) lseek,
 	.read = (int (*) (int, void*, int)) read,
-	.yield = (void (*) ()) sched_yield
+	.yield = (void (*) ()) sched_yield,
+	.getpid = (int (*) ()) getpid
 };
 
 #else
@@ -66,6 +70,10 @@ static void yield_stub() {
 	return;
 }
 
+static int getpid_stub() {
+	return 1;
+}
+
 static struct avm_ops __ops = {
 	.calloc = calloc_stub,
 	.free = free_stub,
@@ -74,6 +82,7 @@ static struct avm_ops __ops = {
 	.lseek = lseek_stub,
 	.read = read_stub,
 	.yield = yield_stub,
+	.getpid = getpid_stub,
 };
 #endif
 
@@ -142,3 +151,52 @@ double fmod(double x, double y) {
 }
 
 #endif
+
+
+const char* strfmt(const char* fmt, ...) {
+	va_list ll;
+	va_start(ll, fmt);
+
+	char buf[1024];
+	char* p = buf;
+		
+	do {
+		switch(*fmt) {
+			case '%':
+				fmt++;
+				switch(*fmt) {
+					case '\0':
+						break;
+					case 's': {
+						const char* s = va_arg(ll, const char*);
+						while(*s)
+							*p++ = *s++;
+					} break;
+					case 'd': {
+						int i = va_arg(ll, int);
+						if(i < 0)
+							*p++ = '-';
+
+						int j;
+						for(j = i; j; p++)
+							j /= 10;
+
+						do {
+							*--p = '0' + (i % 10);
+							i /= 10;
+						} while(i != 0);
+					} break;
+				}
+				break;
+
+			default:
+				*p++ = *fmt;
+		}
+
+		fmt++;
+	} while(*fmt);
+
+	va_end(ll);
+
+	return strdup(buf);
+}

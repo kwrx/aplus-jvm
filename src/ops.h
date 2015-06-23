@@ -49,6 +49,7 @@ struct avm_ops {
 	int (*lseek) (int, int, int);
 	int (*read) (int, void*, int);
 	void (*yield) ();
+	int (*getpid) ();
 };
 
 
@@ -83,6 +84,8 @@ double fmod(double x, double y);
 #define O_BINARY		0
 
 #endif
+
+const char* strfmt(const char* fmt, ...);
 
 
 #endif

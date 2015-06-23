@@ -4,7 +4,7 @@ OPCODE(irem) {
 	int32_t a = JPOP(i32);
 
 	if(unlikely(b == 0))
-		ATHROW("java/lang/ArithmeticException");
+		ATHROW("java/lang/ArithmeticException", "Division by zero");
 
 	JPUSH(i32, a % b);
 }
@@ -14,7 +14,7 @@ OPCODE(lrem) {
 	int64_t a = JPOP(i64);
 
 	if(unlikely(b == 0))
-		ATHROW("java/lang/ArithmeticException");
+		ATHROW("java/lang/ArithmeticException", "Division by zero");
 
 	JPUSH(i64, a % b);
 }

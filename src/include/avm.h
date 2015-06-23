@@ -144,6 +144,26 @@ typedef union {
 #define JAVA_ARRAY_MAGIC		0xCAFE
 
 
+
+
+
+
+typedef volatile long avm_spinlock_t;
+
+#define AVM_MTX_KIND_DEFAULT			0
+#define AVM_MTX_KIND_ERRORCHECK			1
+#define AVM_MTX_KIND_RECURSIVE			2
+
+
+typedef struct {
+	avm_spinlock_t lock;
+	long recursion;
+	long kind;
+	long owner;
+} __packed avm_mutex_t;
+
+
+
 typedef struct {
 	u1 tag;
 	
@@ -457,7 +477,7 @@ typedef struct {
 typedef struct java_object {
 	java_assembly_t* assembly;
 
-	u1 lock;
+	avm_mutex_t lock;
 	u4 refcount;
 	u8 id;
 
@@ -510,7 +530,7 @@ int java_field_resolve(java_field_t* field, java_assembly_t* assembly);
 
 void java_context_run(java_context_t* j);
 
-void athrow(java_context_t* j, const char* exception);
+void athrow(java_context_t* j, const char* exception, const char* message);
 void rethrow(java_context_t* j, java_context_t* d);
 
 int java_object_new(java_object_t** obj, const char* classname);
@@ -519,6 +539,8 @@ int java_object_new_from_idx(java_object_t** obj, java_assembly_t* assembly, u2 
 j_value java_native_invoke(java_method_t* method, java_native_t* func, j_value* params, int nargs);
 int java_native_find(java_native_t** func, const char* classname, const char* name);
 int java_native_add(const char* classname, const char* name, const char* desc, u2 rettype, void* handler);
+
+
 
 
 /* A+ Virtual Machine - Main API */
@@ -531,6 +553,17 @@ char* avm_make_signature(int rettype, ...);
 
 j_value avm_call(const char* classname, const char* name, int nargs, ...);
 j_value avm_main(int argc, char** argv);
+
+
+int avm_spinlock_init(avm_spinlock_t* lock);
+void avm_spinlock_lock(avm_spinlock_t* lock);
+int avm_spinlock_trylock(avm_spinlock_t* lock);
+void avm_spinlock_unlock(avm_spinlock_t* lock);
+
+int avm_mutex_init(avm_mutex_t* mtx, long kind);
+int avm_mutex_lock(avm_mutex_t* mtx);
+int avm_mutex_trylock(avm_mutex_t* mtx);
+int avm_mutex_unlock(avm_mutex_t* mtx);
 
 #ifdef __cplusplus
 }
