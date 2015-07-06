@@ -89,7 +89,7 @@ static double __decode_double(u8 bytes) {
 
 	
 int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
-	LOGF("%s: java_class_parse(%p, %d)", assembly->path, buffer, size);
+	//LOGF("%s: java_class_parse(%p, %d)", assembly->path, buffer, size);
 	
 	vector_t* vector = NULL;
 	java_class_t* jc = &assembly->java_this;
@@ -105,8 +105,8 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	R16(jc->jc_version.major);
 	R16(jc->jc_cp_count);
 	
-	LOGF("%s: Version %d.%d", assembly->path, (int) jc->jc_version.major, (int) jc->jc_version.minor);
-	LOGF("%s: Constant Pool entries %d", assembly->path, (int) jc->jc_cp_count);
+	//LOGF("%s: Version %d.%d", assembly->path, (int) jc->jc_version.major, (int) jc->jc_version.minor);
+	//LOGF("%s: Constant Pool entries %d", assembly->path, (int) jc->jc_cp_count);
 
 
 
@@ -177,11 +177,11 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	R16(jc->jc_super);
 
 	assembly->name = strdup((char*) jc->jc_cp[jc->jc_cp[jc->jc_this].class_info.name_index].utf8_info.bytes);
-	LOGF("%s: Resolved name of this(%d) \"%s\"", assembly->path, jc->jc_this, assembly->name);	
+	//LOGF("%s: Resolved name of this(%d) \"%s\"", assembly->path, jc->jc_this, assembly->name);	
 
 
 	R16(jc->jc_interfaces_count);
-	LOGF("%s: Interfaces entries %d", assembly->path, (int) jc->jc_interfaces_count);
+	//LOGF("%s: Interfaces entries %d", assembly->path, (int) jc->jc_interfaces_count);
 	
 	if(likely(jc->jc_interfaces_count)) {
 		jc->jc_interfaces = (u2*) avm->calloc(sizeof(u2), jc->jc_interfaces_count);
@@ -191,7 +191,7 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 
 
 	R16(jc->jc_fields_count);
-	LOGF("%s: Fields entries %d", assembly->path, (int) jc->jc_fields_count);
+	//LOGF("%s: Fields entries %d", assembly->path, (int) jc->jc_fields_count);
 
 	if(likely(jc->jc_fields_count)) {
 		jc->jc_fields = (java_field_t*) avm->calloc(sizeof(java_field_t), jc->jc_fields_count);
@@ -211,7 +211,7 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	}
 
 	R16(jc->jc_methods_count);
-	LOGF("%s: Methods entries %d", assembly->path, (int) jc->jc_methods_count);
+	//LOGF("%s: Methods entries %d", assembly->path, (int) jc->jc_methods_count);
 
 	if(likely(jc->jc_methods_count)) {
 		jc->jc_methods = (java_method_t*) avm->calloc(sizeof(java_method_t), jc->jc_methods_count);
@@ -230,7 +230,7 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	}
 
 	R16(jc->jc_attributes_count);
-	LOGF("%s: Attributes entries %d", assembly->path, (int) jc->jc_attributes_count);
+	//LOGF("%s: Attributes entries %d", assembly->path, (int) jc->jc_attributes_count);
 
 	s = java_attribute_load(assembly, buffer, &jc->jc_attributes, jc->jc_attributes_count);
 	RXX(NULL, s);

@@ -27,7 +27,7 @@ j_void PrintNative(j_pointer message) {
 
 
 int main(int argc, char** argv) {
-
+	
 	/* Open Native.class */
 	if(avm_open("Native.class") == J_ERR)
 		{ perror("Native.class"); abort(); }

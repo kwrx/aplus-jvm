@@ -6,6 +6,13 @@
 #include <stdarg.h>
 
 extern vector_t* asm_vector;
+static vector_t* path_vector = NULL;
+
+
+void avm_path_add(const char* dir) {
+	vector_add(&path_vector, strdup(dir));
+}
+
 
 void avm_begin(void) {
 	vector_t* v;
@@ -15,7 +22,7 @@ void avm_begin(void) {
 		if(java_assembly_resolve(A) != J_OK)
 			LOGF("Cannot resolve %s", A->name);	
 
-		LOGF("Loaded %s\n", A->name);
+		LOGF("Loaded %s", A->name);
 	}
 
 	java_native_init();
@@ -30,18 +37,51 @@ void avm_end(void) {
 			LOGF("Cannot destroy %s", A->name);
 	}
 
+	for(v = path_vector; v; v = v->next)
+		avm->free(v->value);
+
 
 	vector_destroy(&asm_vector);
+	vector_destroy(&path_vector);
 
 	java_native_flush();
 	java_object_flush();
 }
 
+
+static int __java_assembly_open_wrapper(const char* filename) { return java_assembly_open(NULL, filename); }
+
 int avm_open(const char* filename) {
+	int (*open_wrapper) (const char*) = __java_assembly_open_wrapper;
+
+	if(strcmp(&filename[strlen(filename) - 4], ".jar") == 0)
+		open_wrapper = jar_open;
+
 	if(strcmp(&filename[strlen(filename) - 4], ".jpk") == 0)
-		return jpk_open(filename);
-	
-	return java_assembly_open(NULL, filename);
+		open_wrapper = jpk_open;
+
+
+	if(open_wrapper(filename) == J_OK)
+		return J_OK;
+
+
+	char buf[1024];
+	vector_t* v;
+	for(v = path_vector; v; v = v->next) {
+		const char* path = (const char*) v->value;
+		memset(buf, 0, sizeof(buf));
+
+
+		strcat(buf, path);
+		if(path[strlen(path) - 1] != '/')
+			strcat(buf, "/");
+		strcat(buf, filename);
+
+		if(open_wrapper(buf) == J_OK)
+			return J_OK;
+	}
+
+	return J_ERR;
 }
 
 int avm_load(void* buffer, int size, const char* name) {

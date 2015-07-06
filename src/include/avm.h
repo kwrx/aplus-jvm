@@ -513,6 +513,8 @@ int java_assembly_destroy(java_assembly_t* assembly, int recursive);
 int jpk_open(const char* filename);
 int jpk_load(void* buffer, size_t size);
 
+int jar_open(const char* filename);
+
 
 int java_attribute_load(java_assembly_t* assembly, void* buffer, java_attribute_t** attributes, u2 attr_count);
 int java_attribute_find(java_attribute_t** attribute, java_assembly_t* assembly, java_attribute_t* A, int attr_count, const char* name);
@@ -553,6 +555,8 @@ char* avm_make_signature(int rettype, ...);
 
 j_value avm_call(const char* classname, const char* name, int nargs, ...);
 j_value avm_main(int argc, char** argv);
+
+void avm_path_add(const char* dir);
 
 
 int avm_spinlock_init(avm_spinlock_t* lock);

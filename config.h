@@ -7,6 +7,7 @@
 #define FREESTANDING		0
 
 #define CONFIG_JNI		1
+#define CONFIG_JAR		1
 
 
 #define APP_NAME		"avm"
@@ -72,8 +73,10 @@
 
 
 
-#define __SYSROOT__			"/xdev/cross"
-#define __PREFIX__			__SYSROOT__ "/prj/AVM/bin"
-#define __LIBDIR__			__PREFIX__ "/lib"
+#define INITIALIZE_PATH() {						\
+		avm_path_add("/xdev/cross/prj/AJVM/bin/lib");		\
+		avm_path_add("/usr/lib");				\
+		avm_path_add("/usr/local/lib");				\
+	}
 
 #endif

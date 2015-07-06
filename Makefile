@@ -1,11 +1,12 @@
 OUTPUT	:= bin/avm
 OUTLIB	:= bin/lib/libavm.a
-RUNTIME	:= bin/lib/rt.jpk
+RUNTIME	:= bin/lib/rt.jar
 JPK		:= bin/jpk
 
 CC		:= gcc
 LD		:= gcc
 JCC		:= gcj
+JAR		:= jar -cf
 AR		:= ar -rcs
 
 FIND	:= /usr/bin/find
@@ -17,7 +18,7 @@ OPT		:= -Ofast -mfpmath=sse -msse2 \
 			-fno-align-functions -fno-align-loops
 
 INCDIR	:= src/include
-LIBS	:= -lffi
+LIBS	:= -lffi -lzip -lz
 
 
 CFILES	:= $(shell $(FIND) src -type f -name "*.c")
@@ -52,14 +53,16 @@ lib: $(JCFILES)
 
 
 $(RUNTIME): $(JPK) $(JCFILES)
-	@echo "  JPK  " $(RUNTIME)
-	@$(JPK) $(RUNTIME) $(JCFILES)
+	@echo "  JAR  " $(RUNTIME)
+	@$(JAR) $(RUNTIME) $(JCFILES)
+
+
 $(JPK): src/jpk.c
 	@echo "  CC   " $(JPK)
 	@$(CC) -O2 -o $(JPK) src/jpk.c -I $(INCDIR) $(WARN) -D__JPK__ -include config.h
 	
 	
-clean_fast:
+fastclean:
 	@$(RM) $(OFILES)
 	@$(RM) $(OUTPUT)
 

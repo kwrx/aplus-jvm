@@ -158,6 +158,8 @@ const char* strfmt(const char* fmt, ...) {
 	va_start(ll, fmt);
 
 	char buf[1024];
+	memset(buf, 0, 1024);
+
 	char* p = buf;
 		
 	do {

@@ -18,15 +18,13 @@ static void die(char* e) {
 
 DEFARG(p_help);
 DEFARG(p_version);
-
 DEFARG(p_nostdlib);
-static int __stdlib = 1;
-
 DEFARG(p_library);
-
+DEFARG(p_searchdir);
 DEFARG(p_argv);
-static int __argv_idx = -1;
 
+static int __argv_idx = -1;
+static int __stdlib = 1;
 
 struct {
 	char* longopt;
@@ -38,6 +36,7 @@ struct {
 	{ "--help", "-h", "Display this information", p_help },
 	{ "--nostdlib", "-n", "Use only libraries user-defined", p_nostdlib },
 	{ "--library", "-l", "Load a library", p_library },
+	{ "--searchdir", "-L", "Add a search directory for libraries", p_searchdir },
 	{ "--argv", "-a", "Use the next arguments as parameters for main", p_argv },
 	{ NULL, NULL, NULL, NULL }
 };
@@ -79,7 +78,7 @@ DEFARG(p_nostdlib) {
 DEFARG(p_library) {
 	char* lname = NULL;
 	if((strncmp(argv[*(idx)], "-l", 2) == 0) && (strlen(argv[*(idx)]) > 2))
-			lname = &(argv[*(idx)] [2]);
+		lname = &(argv[*(idx)] [2]);
 	else {
 		lname = argv[*(idx) + 1]; 
 		*idx += 1; 
@@ -88,13 +87,35 @@ DEFARG(p_library) {
 	char buf[256];
 	memset(buf, 0, sizeof(buf));
 
-	strcat(buf, __LIBDIR__);
-	strcat(buf, "/");
 	strcat(buf, lname);
 	strcat(buf, ".jpk");
 
-	if(avm_open(buf) == J_ERR)
-			die(buf);
+	if(avm_open(buf) == J_OK)
+		return;
+	
+
+
+	memset(buf, 0, sizeof(buf));
+
+	strcat(buf, lname);
+	strcat(buf, ".jar");
+
+	if(avm_open(buf) == J_OK)
+		return;
+
+	die(lname);
+}
+
+DEFARG(p_searchdir) {
+	char* lname = NULL;
+	if((strncmp(argv[*(idx)], "-L", 2) == 0) && (strlen(argv[*(idx)]) > 2))
+		lname = &(argv[*(idx)] [2]);
+	else {
+		lname = argv[*(idx) + 1]; 
+		*idx += 1; 
+	}
+
+	avm_path_add(lname);
 }
 
 DEFARG(p_argv) {
@@ -115,6 +136,8 @@ int main(int argc, char** argv) {
 		exit(1);
 	}
 
+
+	INITIALIZE_PATH();	/* see config.h */
 
 	int i, j;
 	for(i = 1; (i < argc) && (__argv_idx == -1); i++) {
@@ -138,8 +161,8 @@ int main(int argc, char** argv) {
 	
 
 	if(__stdlib)
-		if(avm_open(__LIBDIR__ "/rt.jpk") == J_ERR)
-			die("rt.jpk");
+		if(avm_open("rt.jar") == J_ERR)
+			die("rt.jar");
 
 	
 
