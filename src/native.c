@@ -166,6 +166,7 @@ int java_native_find(java_native_t** func, const char* classname, const char* na
 int java_native_add(const char* classname, const char* name, const char* desc, u2 rettype, void* handler) {
 #if CONFIG_JNI
 	java_native_t* func = (java_native_t*) avm->calloc(sizeof(java_native_t), 1);
+	ASSERT(func);
 
 	func->classname = strdup(classname);
 	func->name = strdup(name);

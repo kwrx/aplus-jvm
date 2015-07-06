@@ -15,6 +15,9 @@ void avm_path_add(const char* dir) {
 
 
 void avm_begin(void) {
+	
+	java_native_init();
+	
 	vector_t* v;
 	for(v = asm_vector; v; v = v->next) {
 		java_assembly_t* A = (java_assembly_t*) v->value;
@@ -24,8 +27,6 @@ void avm_begin(void) {
 
 		LOGF("Loaded %s", A->name);
 	}
-
-	java_native_init();
 }
 
 void avm_end(void) {
@@ -237,6 +238,8 @@ j_value avm_call(const char* classname, const char* name, int nargs, ...) {
 	) {
 		if(nargs > 0) {
 			params = avm->calloc(sizeof(j_value), nargs);
+			ASSERT(params);
+
 			int i;
 			for(i = 0; i < nargs; i++)
 				params[i] = va_arg(ll, j_value);
@@ -264,6 +267,8 @@ j_value avm_main(int argc, char** argv) {
 			LOGF("EntryPoint: %s.%s ()", assembly->name, "main");
 			
 			java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * argc) + sizeof(java_array_t));
+			ASSERT(arr);
+
 			arr->magic = JAVA_ARRAY_MAGIC;
 			arr->type = T_REFERENCE;
 			arr->length = argc;

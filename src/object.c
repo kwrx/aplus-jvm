@@ -13,6 +13,8 @@ int java_object_instance(java_assembly_t** instance, java_assembly_t* assembly) 
 		return J_ERR;
 
 	java_assembly_t* A = (java_assembly_t*) avm->calloc(sizeof(java_assembly_t), 1);
+	ASSERT(A);
+
 	memcpy(A, assembly, sizeof(java_assembly_t));
 
 	java_assembly_t* tmp;
@@ -22,6 +24,7 @@ int java_object_instance(java_assembly_t** instance, java_assembly_t* assembly) 
 
 		java_field_t* fields = tmp->java_this.jc_fields;
 		tmp->java_this.jc_fields = (java_field_t*) avm->calloc(sizeof(java_field_t), tmp->java_this.jc_fields_count);
+		ASSERT(tmp->java_this.jc_fields);
 		
 		memcpy(tmp->java_this.jc_fields, fields, sizeof(java_field_t) * tmp->java_this.jc_fields_count);
 	}
@@ -45,6 +48,7 @@ int java_object_new(java_object_t** obj, const char* name) {
 		return J_OK;
 
 	java_object_t* o = (java_object_t*) avm->calloc(1, sizeof(java_object_t));
+	ASSERT(o);
 	
 	o->refcount = 1;
 	o->name = strdup(name);

@@ -14,6 +14,8 @@ typedef struct vector {
 
 static inline void vector_add(vector_t** head, void* value) {
 	vector_t* v = (vector_t*) avm->calloc(1, sizeof(vector_t));
+	ASSERT(v);
+
 	v->value = value;
 	v->next = *head;
 	*head = v;
@@ -31,6 +33,8 @@ static inline int vector_size(vector_t** head) {
 
 static inline void* vector_to_array(vector_t** vec, int length, int membsize) {
 	long a = (long) avm->calloc(length, membsize);
+	ASSERT(a);
+
 	int idx = length - 1;
 	
 	vector_t* v = *vec;

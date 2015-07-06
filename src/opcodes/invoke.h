@@ -11,6 +11,7 @@ OPCODE(invokevirtual) {
 
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
+	ASSERT(params);
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
@@ -36,6 +37,7 @@ OPCODE(invokespecial) {
 	
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
+	ASSERT(params);
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)
@@ -64,6 +66,7 @@ OPCODE(invokestatic) {
 
 	if(method->nargs) {
 		j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
+		ASSERT(params);
 
 		int i = method->nargs - 1;
 		for(; i >= 0; i--)
@@ -92,6 +95,7 @@ OPCODE(invokeinterface) {
 
 
 	j_value* params = (j_value*) avm->calloc(sizeof(j_value), (method->nargs + 1));
+	ASSERT(params);
 
 	int i = method->nargs /* + 1 (this) */;
 	for(; i >= 0; i--)

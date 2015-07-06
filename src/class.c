@@ -115,6 +115,7 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	int i, s;
 	for(i = 0; i < jc->jc_cp_count - 1; i++) {
 		java_cp_info_t* cp = CP_EMPTY;
+		ASSERT(cp);
 		
 		R8(cp->tag);
 		switch(__cp_info[cp->tag].length) {
@@ -149,6 +150,8 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 				break;
 			case JAVACLASS_TAG_UTF8STRING:
 				cp->utf8_info.bytes = (u1*) avm->calloc(1, cp->utf8_info.length + 1);
+				ASSERT(cp->utf8_info.bytes);
+
 				RXX(cp->utf8_info.bytes, cp->utf8_info.length);
 				break;
 		}
@@ -185,6 +188,8 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 	
 	if(likely(jc->jc_interfaces_count)) {
 		jc->jc_interfaces = (u2*) avm->calloc(sizeof(u2), jc->jc_interfaces_count);
+		ASSERT(jc->jc_interfaces);
+
 		for(i = 0; i < jc->jc_interfaces_count; i++)
 			R16(jc->jc_interfaces[i]);
 	}
@@ -195,6 +200,8 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 
 	if(likely(jc->jc_fields_count)) {
 		jc->jc_fields = (java_field_t*) avm->calloc(sizeof(java_field_t), jc->jc_fields_count);
+		ASSERT(jc->jc_fields);
+
 		for(i = 0; i < jc->jc_fields_count; i++) {
 			R16(jc->jc_fields[i].flags);
 			R16(jc->jc_fields[i].name_index);
@@ -215,6 +222,8 @@ int java_class_load(java_assembly_t* assembly, void* buffer, int size) {
 
 	if(likely(jc->jc_methods_count)) {
 		jc->jc_methods = (java_method_t*) avm->calloc(sizeof(java_method_t), jc->jc_methods_count);
+		ASSERT(jc->jc_methods);
+
 		for(i = 0; i < jc->jc_methods_count; i++) {
 			R16(jc->jc_methods[i].flags);
 			R16(jc->jc_methods[i].name_index);

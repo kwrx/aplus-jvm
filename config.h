@@ -49,7 +49,7 @@
 #else
 #define LOG(x)
 #define LOGF(x, y...)
-#define ASSERT(x) ((void) x)
+#define ASSERT(x)
 #endif
 
 #if FREESTANDING
@@ -74,9 +74,9 @@
 
 
 #define INITIALIZE_PATH() {						\
-		avm_path_add("/xdev/cross/prj/AJVM/bin/lib");		\
 		avm_path_add("/usr/lib");				\
 		avm_path_add("/usr/local/lib");				\
+		avm_path_add("/usr/share/java");			\
 	}
 
 #endif

@@ -86,6 +86,7 @@ int java_method_resolve(java_method_t* method, java_assembly_t* assembly) {
 	p++;
 
 	method->signature = (u1*) avm->calloc(1, strlen(signature));
+	ASSERT(method->signature);
 
 	while(*p && *p != ')') {
 		switch(*p) {
@@ -93,6 +94,7 @@ int java_method_resolve(java_method_t* method, java_assembly_t* assembly) {
 				do {
 					p++;
 				} while(*p == '[');
+				p--;
 			case 'L':
 				p++;
 				switch(*p) {
@@ -198,12 +200,17 @@ j_value java_method_invoke(java_context_t* j, java_assembly_t* assembly, java_me
 
 
 	java_context_t* ctx = (java_context_t*) avm->calloc(sizeof(java_context_t), 1);
+	ASSERT(ctx);
+
 	ctx->parent = j;
 	ctx->assembly = assembly;
 	ctx->flags = JAVACTX_FLAG_CONTINUE;
 	
 	ctx->frame.stack = (j_value*) avm->calloc(sizeof(j_value), method->code->code.max_stack);
 	ctx->frame.locals = (j_value*) avm->calloc(sizeof(j_value), method->code->code.max_locals);
+
+	ASSERT(ctx->frame.stack);
+	ASSERT(ctx->frame.locals);
 	
 	ctx->frame.stack_size = method->code->code.max_stack;
 	ctx->frame.locals_size = method->code->code.max_stack;

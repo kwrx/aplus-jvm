@@ -120,6 +120,8 @@ size_t strlen(const char* s) {
 __weak
 char* strdup(const char* s) {
 	char* p = avm->calloc(1, strlen(s));
+	ASSERT(p);
+
 	strcpy(p, s);
 	
 	return p;

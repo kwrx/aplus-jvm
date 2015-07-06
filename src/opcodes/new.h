@@ -46,6 +46,8 @@ OPCODE(newarray) {
 
 	
 	java_array_t* arr = (java_array_t*) avm->calloc(1, (sz * count) + sizeof(java_array_t));
+	ASSERT(arr);
+
 	arr->magic = JAVA_ARRAY_MAGIC;
 	arr->type = type;
 	arr->length = count;
@@ -64,6 +66,8 @@ OPCODE(anewarray) {
 
 
 	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
+	ASSERT(arr);
+
 	arr->magic = JAVA_ARRAY_MAGIC;
 	arr->type = T_REFERENCE;
 	arr->length = count;
@@ -86,6 +90,8 @@ OPCODE(multinewarray) {
 		ATHROW("java/lang/NegativeArraySizeException", strfmt("%d", count));
 
 	java_array_t* arr = (java_array_t*) avm->calloc(1, (sizeof(void*) * count) + sizeof(java_array_t));
+	ASSERT(arr);
+
 	arr->magic = JAVA_ARRAY_MAGIC;
 	arr->type = T_REFERENCE;
 	arr->length = count;

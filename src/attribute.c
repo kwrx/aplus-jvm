@@ -15,10 +15,13 @@ void parse_code(java_assembly_t* assembly, void* buffer, java_attribute_t* attri
 	R32(attribute->code.code_length);
 	
 	attribute->code.code = (u1*) avm->calloc(sizeof(u1), attribute->code.code_length);
+	ASSERT(attribute->code.code);
+
 	RXX(attribute->code.code, attribute->code.code_length);
 
 	R16(attribute->code.exception_table_length);
 	attribute->code.exception_table = (java_exception_table_t*) avm->calloc(sizeof(java_exception_table_t), attribute->code.exception_table_length);
+	ASSERT(attribute->code.exception_table);
 	
 	int i;
 	for(i = 0; i < attribute->code.exception_table_length; i++) {
@@ -35,6 +38,7 @@ void parse_code(java_assembly_t* assembly, void* buffer, java_attribute_t* attri
 void parse_exceptions(java_assembly_t* assembly, void* buffer, java_attribute_t* attribute, u4 length) {
 	R16(attribute->exceptions.number_of_exceptions);
 	attribute->exceptions.exception_index_table = (u2*) avm->calloc(sizeof(u2), attribute->exceptions.number_of_exceptions);
+	ASSERT(attribute->exceptions.exception_index_table);
 
 
 	int i;
@@ -49,6 +53,7 @@ void parse_sourcefile(java_assembly_t* assembly, void* buffer, java_attribute_t*
 void parse_lntable(java_assembly_t* assembly, void* buffer, java_attribute_t* attribute, u4 length) {
 	R16(attribute->line_number_table.line_number_table_length);
 	attribute->line_number_table.table = (java_line_number_table_t*) avm->calloc(sizeof(java_line_number_table_t), attribute->line_number_table.line_number_table_length);
+	ASSERT(attribute->line_number_table.table);
 	
 	int i;
 	for(i = 0; i < attribute->line_number_table.line_number_table_length; i++) {
@@ -90,6 +95,8 @@ struct {
 int java_attribute_load(java_assembly_t* assembly, void* buffer, java_attribute_t** attributes, u2 attr_count) {
 	long buffer_s = (long) buffer;	
 	*attributes = (java_attribute_t*) avm->calloc(sizeof(java_attribute_t), attr_count);
+	ASSERT(*attributes);
+
 	#define A (*attributes)
 
 

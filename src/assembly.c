@@ -35,6 +35,8 @@ int java_assembly_load(java_assembly_t** assembly, void* buffer, int size, const
 
 
 	java_assembly_t* A = (java_assembly_t*) avm->calloc(1, sizeof(java_assembly_t));
+	ASSERT(A);
+
 	A->path = path ? strdup(path) : "Memory";
 	A->name = NULL;
 	A->java_super = NULL;
@@ -69,6 +71,8 @@ int java_assembly_open(java_assembly_t** assembly, const char* filename) {
 	avm->lseek(fd, 0, SEEK_SET);
 	
 	void* buffer = (void*) avm->calloc(1, size);
+	ASSERT(buffer);
+
 	if(unlikely(avm->read(fd, buffer, size) != size)) {
 		LOGF("I/O Read Error in \"%s\"", filename);
 

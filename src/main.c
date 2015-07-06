@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <signal.h>
 
 
 static void die(char* e) {
@@ -85,6 +86,18 @@ DEFARG(p_library) {
 	}
 
 	char buf[256];
+
+	memset(buf, 0, sizeof(buf));
+
+	strcat(buf, "lib");
+	strcat(buf, lname);
+	strcat(buf, ".jpk");
+
+	if(avm_open(buf) == J_OK)
+		return;
+
+
+
 	memset(buf, 0, sizeof(buf));
 
 	strcat(buf, lname);
@@ -92,7 +105,20 @@ DEFARG(p_library) {
 
 	if(avm_open(buf) == J_OK)
 		return;
+
+
+
 	
+	memset(buf, 0, sizeof(buf));
+
+	strcat(buf, "lib");
+	strcat(buf, lname);
+	strcat(buf, ".jar");
+
+	if(avm_open(buf) == J_OK)
+		return;
+
+
 
 
 	memset(buf, 0, sizeof(buf));
