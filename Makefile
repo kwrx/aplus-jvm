@@ -15,7 +15,7 @@ WARN	:= -Wall -Wno-unused-result -Wno-unused-variable
 OPT		:= -Ofast -mfpmath=sse -msse2 \
 			-funroll-all-loops -faggressive-loop-optimizations \
 			-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine \
-			-fno-align-functions -fno-align-loops -fstack-protector-all
+			-fno-align-functions -fno-align-loops
 
 INCDIR	:= src/include
 LIBS	:= -lffi -lzip -lz
