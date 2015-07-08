@@ -498,6 +498,12 @@ typedef struct java_native {
 	struct java_native* next;
 } java_native_t;
 
+typedef struct java_library {
+	const char* filename;
+	void* fd;
+
+	struct java_library* next;
+} java_library_t;
 
 
 #ifdef __cplusplus
@@ -510,10 +516,11 @@ int java_assembly_open(java_assembly_t** assembly, const char* filename);
 int java_assembly_load(java_assembly_t** assembly, void* buffer, int size, const char* path);
 int java_assembly_destroy(java_assembly_t* assembly, int recursive);
 
-int jpk_open(const char* filename);
-int jpk_load(void* buffer, size_t size);
 
 int jar_open(const char* filename);
+
+int java_library_add(java_library_t** lib, const char* filename);
+int java_library_load(java_library_t* lib, java_assembly_t**, const char* filename);
 
 
 int java_attribute_load(java_assembly_t* assembly, void* buffer, java_attribute_t** attributes, u2 attr_count);
@@ -548,9 +555,12 @@ int java_native_add(const char* classname, const char* name, const char* desc, u
 /* A+ Virtual Machine - Main API */
 void avm_begin(void);
 void avm_end(void);
+int avm_initialized(void);
+void avm_set_entrypoint(char* e);
 
 int avm_load(void* buffer, int size, const char* name);
 int avm_open(const char* filename);
+int avm_open_library(const char* filename);
 char* avm_make_signature(int rettype, ...);
 
 j_value avm_call(const char* classname, const char* name, int nargs, ...);

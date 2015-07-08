@@ -1,8 +1,7 @@
-#if CONFIG_JAR
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
+#if !FREESTANDING && CONFIG_JAR
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -12,19 +11,21 @@
 #endif
 
 
+
 int jar_open(const char* filename) {
+#if CONFIG_JAR
+
 	int e;
 	struct zip* zip = zip_open(filename, 0, &e);
 
 	
-
 	if(!zip) {
 		char ebuf[128];
 		memset(ebuf, 0, sizeof(ebuf));
 
 		zip_error_to_str(ebuf, sizeof(ebuf), e, errno);
 
-		LOGF("JAR ERROR! %s: %s", filename, ebuf);	
+		LOGF("jar_open() %s: %s", filename, ebuf);	
 		return J_ERR;
 	}
 	
@@ -43,7 +44,7 @@ int jar_open(const char* filename) {
 		struct zip_file* zf = zip_fopen_index(zip, i, 0);
 
 		if(unlikely(!zf)) {
-			LOGF("JAR ERROR! %s: %s", filename, zip_strerror(zip));
+			LOGF("jar_open() %s: %s", filename, zip_strerror(zip));
 			return J_ERR;
 		}
 
@@ -55,11 +56,16 @@ int jar_open(const char* filename) {
 			LOGF("Cannot load %s from JAR Archive", sb.name);
 	}
 
+
 	zip_close(zip);
 	return J_OK;
+#else
+	LOG("WARNING: Java Archive Interface disabled");
+	return J_ERR;
+#endif
 }
 
-#endif
+
 
 
 

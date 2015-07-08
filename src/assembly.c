@@ -9,6 +9,39 @@
 
 vector_t* asm_vector = NULL;
 
+void java_assembly_init(void) {
+	vector_t* v;
+	int R;
+	do {
+		R = 0;
+		for(v = asm_vector; v; v = v->next) {
+			java_assembly_t* A = (java_assembly_t*) v->value;
+
+			if(!A->resolved) {
+				if(java_assembly_resolve(A) != J_OK)
+					athrow(NULL, "java/lang/InternalError", strfmt("Cannot resolve %s", A->name));
+				
+
+				R++;
+				LOGF("Loaded %s", A->name);	
+			}
+		
+		}
+	} while(R);
+}
+
+void java_assembly_flush(void) {
+	vector_t* v;
+	for(v = asm_vector; v; v = v->next) {
+		java_assembly_t* A = (java_assembly_t*) v->value;
+
+		if(java_assembly_destroy(A, 0) != J_OK)
+			LOGF("Cannot destroy %s", A->name);
+	}
+
+	vector_destroy(&asm_vector);
+}
+
 int java_assembly_find(java_assembly_t** assembly, const char* name) {
 	if(unlikely(!name))
 		return J_ERR;
@@ -25,7 +58,8 @@ int java_assembly_find(java_assembly_t** assembly, const char* name) {
 		}
 	}
 
-	return J_ERR;
+
+	return java_library_load(NULL, assembly, name);
 }
 
 
@@ -52,6 +86,11 @@ int java_assembly_load(java_assembly_t** assembly, void* buffer, int size, const
 		*assembly = A;
 
 	vector_add(&asm_vector, A);
+
+
+	if(avm_initialized())
+		java_assembly_init();
+
 	return J_OK;
 }
 

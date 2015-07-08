@@ -53,6 +53,11 @@
 #endif
 
 #if FREESTANDING
+#undef CONFIG_JNI
+#define CONFIG_JNI		0
+#undef CONFIG_JAR
+#define CONFIG_JAR		0
+
 #define PRINTF(x, y...)
 #define EXIT(x)	for(;;)
 #else
@@ -72,11 +77,11 @@
 
 
 
-
-#define INITIALIZE_PATH() {						\
-		avm_path_add("/usr/lib");				\
-		avm_path_add("/usr/local/lib");				\
-		avm_path_add("/usr/share/java");			\
+#define __SYSROOT__ "/"
+#define INITIALIZE_PATH() {									\
+		avm_path_add(__SYSROOT__ "usr/lib");				\
+		avm_path_add(__SYSROOT__ "usr/local/lib");			\
+		avm_path_add(__SYSROOT__ "usr/share/java");			\
 	}
 
 #endif

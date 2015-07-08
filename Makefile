@@ -1,7 +1,6 @@
 OUTPUT	:= bin/avm
 OUTLIB	:= bin/lib/libavm.a
 RUNTIME	:= bin/lib/rt.jar
-JPK		:= bin/jpk
 
 CC		:= gcc
 LD		:= gcc
@@ -52,14 +51,9 @@ lib: $(JCFILES)
 	@$(JCC) --classpath=lib -C $<
 
 
-$(RUNTIME): $(JPK) $(JCFILES)
+$(RUNTIME): $(JCFILES)
 	@echo "  JAR  " $(RUNTIME)
-	@$(JAR) $(RUNTIME) $(JCFILES)
-
-
-$(JPK): src/jpk.c
-	@echo "  CC   " $(JPK)
-	@$(CC) -O2 -o $(JPK) src/jpk.c -I $(INCDIR) $(WARN) -D__JPK__ -include config.h
+	@cd lib && $(JAR) ../$(RUNTIME) $(subst lib/,,$(JCFILES))
 	
 	
 fastclean:
@@ -73,5 +67,4 @@ clean:
 	@$(RM) $(OUTPUT)
 	@$(RM) $(OUTLIB)
 	@$(RM) $(RUNTIME)
-	@$(RM) $(JPK)
 

@@ -8,45 +8,48 @@
 extern vector_t* asm_vector;
 static vector_t* path_vector = NULL;
 
+static int __avm_initialized = 0;
+static char* __entrypoint = NULL;
 
 void avm_path_add(const char* dir) {
 	vector_add(&path_vector, strdup(dir));
 }
 
 
+void avm_set_entrypoint(char* e) {
+	__entrypoint = strdup(e);
+}
+
+int avm_initialized(void) {
+	return __avm_initialized;
+}
+
 void avm_begin(void) {
-	
 	java_native_init();
-	
-	vector_t* v;
-	for(v = asm_vector; v; v = v->next) {
-		java_assembly_t* A = (java_assembly_t*) v->value;
+	java_assembly_init();
 
-		if(java_assembly_resolve(A) != J_OK)
-			LOGF("Cannot resolve %s", A->name);	
-
-		LOGF("Loaded %s", A->name);
-	}
+	__avm_initialized = 1;
 }
 
 void avm_end(void) {
 	vector_t* v;
-	for(v = asm_vector; v; v = v->next) {
-		java_assembly_t* A = (java_assembly_t*) v->value;
-
-		if(java_assembly_destroy(A, 0) != J_OK)
-			LOGF("Cannot destroy %s", A->name);
-	}
-
 	for(v = path_vector; v; v = v->next)
 		avm->free(v->value);
 
-
-	vector_destroy(&asm_vector);
 	vector_destroy(&path_vector);
 
-	java_native_flush();
+
+	
 	java_object_flush();
+	java_native_flush();
+	java_library_flush();
+	java_assembly_flush();
+
+	if(__entrypoint)
+		avm->free(__entrypoint);
+
+	__entrypoint = NULL;
+	__avm_initialized = 0;
 }
 
 
@@ -57,9 +60,6 @@ int avm_open(const char* filename) {
 
 	if(strcmp(&filename[strlen(filename) - 4], ".jar") == 0)
 		open_wrapper = jar_open;
-
-	if(strcmp(&filename[strlen(filename) - 4], ".jpk") == 0)
-		open_wrapper = jpk_open;
 
 
 	if(open_wrapper(filename) == J_OK)
@@ -85,10 +85,28 @@ int avm_open(const char* filename) {
 	return J_ERR;
 }
 
-int avm_load(void* buffer, int size, const char* name) {
-	if(strncmp((const char*) buffer, "JPK", 3) == 0)
-		return jpk_load(buffer, size);
+int avm_open_library(const char* filename) {
 
+	char buf[1024];
+	vector_t* v;
+	for(v = path_vector; v; v = v->next) {
+		const char* path = (const char*) v->value;
+		memset(buf, 0, sizeof(buf));
+
+
+		strcat(buf, path);
+		if(path[strlen(path) - 1] != '/')
+			strcat(buf, "/");
+		strcat(buf, filename);
+
+		if(java_library_add(NULL, buf) == J_OK)
+			return J_OK;
+	}
+
+	return J_ERR;
+}
+
+int avm_load(void* buffer, int size, const char* name) {
 	return java_assembly_load(NULL, buffer, size, name);
 }
 
@@ -262,6 +280,10 @@ j_value avm_main(int argc, char** argv) {
 	vector_t* v;
 	for(v = asm_vector; v; v = v->next) {
 		assembly = (java_assembly_t*) v->value;
+
+		if(__entrypoint)
+			if(strcmp(__entrypoint, assembly->name) != 0)
+				continue;
 
 		if(java_method_find(&method, assembly->name, "main", "([Ljava/lang/String;)V") == J_OK) {
 			LOGF("EntryPoint: %s.%s ()", assembly->name, "main");

@@ -61,8 +61,11 @@ int java_class_load(java_assembly_t*, void*, int);
 int java_attribute_load(java_assembly_t* assembly, void* buffer, java_attribute_t** attributes, u2 attr_count);
 
 void java_native_init(void);
-void java_native_flush(void);
+void java_assembly_init(void);
 
+void java_assembly_flush(void);
+void java_library_flush(void);
+void java_native_flush(void);
 void java_object_flush(void);
 
 

@@ -23,6 +23,7 @@ DEFARG(p_nostdlib);
 DEFARG(p_library);
 DEFARG(p_searchdir);
 DEFARG(p_argv);
+DEFARG(p_entry);
 
 static int __argv_idx = -1;
 static int __stdlib = 1;
@@ -39,6 +40,7 @@ struct {
 	{ "--library", "-l", "Load a library", p_library },
 	{ "--searchdir", "-L", "Add a search directory for libraries", p_searchdir },
 	{ "--argv", "-a", "Use the next arguments as parameters for main", p_argv },
+	{ "--mainclass", "-e", "Override default Main-Class", p_entry },
 	{ NULL, NULL, NULL, NULL }
 };
 
@@ -86,39 +88,14 @@ DEFARG(p_library) {
 	}
 
 	char buf[256];
-
-	memset(buf, 0, sizeof(buf));
-
-	strcat(buf, "lib");
-	strcat(buf, lname);
-	strcat(buf, ".jpk");
-
-	if(avm_open(buf) == J_OK)
-		return;
-
-
-
-	memset(buf, 0, sizeof(buf));
-
-	strcat(buf, lname);
-	strcat(buf, ".jpk");
-
-	if(avm_open(buf) == J_OK)
-		return;
-
-
-
-	
 	memset(buf, 0, sizeof(buf));
 
 	strcat(buf, "lib");
 	strcat(buf, lname);
 	strcat(buf, ".jar");
 
-	if(avm_open(buf) == J_OK)
+	if(avm_open_library(buf) == J_OK)
 		return;
-
-
 
 
 	memset(buf, 0, sizeof(buf));
@@ -126,7 +103,7 @@ DEFARG(p_library) {
 	strcat(buf, lname);
 	strcat(buf, ".jar");
 
-	if(avm_open(buf) == J_OK)
+	if(avm_open_library(buf) == J_OK)
 		return;
 
 	die(lname);
@@ -146,6 +123,19 @@ DEFARG(p_searchdir) {
 
 DEFARG(p_argv) {
 	__argv_idx = *(idx) + 1;
+}
+
+
+DEFARG(p_entry) {
+	char* lname = NULL;
+	if((strncmp(argv[*(idx)], "-e", 2) == 0) && (strlen(argv[*(idx)]) > 2))
+		lname = &(argv[*(idx)] [2]);
+	else {
+		lname = argv[*(idx) + 1]; 
+		*idx += 1; 
+	}
+
+	avm_set_entrypoint(lname);
 }
 
 int main(int argc, char** argv) {
@@ -187,7 +177,7 @@ int main(int argc, char** argv) {
 	
 
 	if(__stdlib)
-		if(avm_open("rt.jar") == J_ERR)
+		if(avm_open_library("rt.jar") == J_ERR)
 			die("rt.jar");
 
 	
