@@ -2,27 +2,24 @@
 #define _CONFIG_H
 
 
-#define DEBUG			0
-#define TEST			0
-#define FREESTANDING		0
+#define DEBUG			@CONFIG_DEBUG@
+#define FREESTANDING		@CONFIG_FREESTANDING@
 
-#define CONFIG_JNI		1
-#define CONFIG_JAR		1
+#define CONFIG_JNI		@CONFIG_JNI@
+#define CONFIG_JAR		@CONFIG_JAR@
+#define CONFIG_SYSROOT 		"@CONFIG_SYSROOT@"
 
 
-#define APP_NAME		"avm"
-#define APP_VERSION		"0.1-alpha"
-#define APP_COPY		"2015 Antonio Natale"
+#define APP_NAME		"@CONFIG_PACKAGE@"
+#define APP_VERSION		"@CONFIG_VERSION@"
+#define APP_COPY		"@CONFIG_COPY@"
 #define APP_CDATE		__DATE__
 #define APP_CTIME		__TIME__
 
-#ifdef __GNUC__
-#define APP_CC			"gcc"
+#define APP_CC			"@CC@"
 #define APP_CC_VERSION		__VERSION__
-#else
-#define APP_CC			"unknown compiler"
-#define APP_CC_VERSION		""
-#endif
+
+
 
 #define APP_VERSION_FORMAT										\
 		"%s %s\nCopyright (C) %s\nBuilt with %s %s (%s:%s)\n"
@@ -53,11 +50,6 @@
 #endif
 
 #if FREESTANDING
-#undef CONFIG_JNI
-#define CONFIG_JNI		0
-#undef CONFIG_JAR
-#define CONFIG_JAR		0
-
 #define PRINTF(x, y...)
 #define EXIT(x)	for(;;)
 #else
@@ -76,12 +68,10 @@
 
 
 
-
-#define __SYSROOT__ "/"
-#define INITIALIZE_PATH() {									\
-		avm_path_add(__SYSROOT__ "usr/lib");				\
-		avm_path_add(__SYSROOT__ "usr/local/lib");			\
-		avm_path_add(__SYSROOT__ "usr/share/java");			\
+#define INITIALIZE_PATH() {							\
+		avm_path_add(CONFIG_SYSROOT "/usr/lib");			\
+		avm_path_add(CONFIG_SYSROOT "/usr/local/lib");			\
+		avm_path_add(CONFIG_SYSROOT "/usr/share/java");			\
 	}
 
 #endif

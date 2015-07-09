@@ -1,23 +1,23 @@
-OUTPUT	:= bin/avm
-OUTLIB	:= bin/lib/libavm.a
-RUNTIME	:= bin/lib/rt.jar
+OUTPUT		:= bin/avm
+OUTLIB		:= bin/lib/libavm.a
+RUNTIME		:= bin/lib/rt.jar
 
-CC		:= gcc
-LD		:= gcc
-JCC		:= gcj
+CC		:= @CC@
+LD		:= @CC@
+JCC		:= @JAVAC@
 JAR		:= jar -cf
 AR		:= ar -rcs
 
-FIND	:= /usr/bin/find
+FIND		:= /usr/bin/find
 
-WARN	:= -Wall -Wno-unused-result -Wno-unused-variable
-OPT		:= -Ofast -mfpmath=sse -msse2 \
-			-funroll-all-loops -faggressive-loop-optimizations \
-			-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine \
+WARN		:= -Wall -Wno-unused-result -Wno-unused-variable
+OPT		:= -Ofast -mfpmath=sse -msse2 						\
+			-funroll-all-loops -faggressive-loop-optimizations 		\
+			-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine 	\
 			-fno-align-functions -fno-align-loops
 
 INCDIR	:= src/include
-LIBS	:= -lffi -lzip -lz
+LIBS	:= @CONFIG_LIBS@
 
 
 CFILES	:= $(shell $(FIND) src -type f -name "*.c")
@@ -34,7 +34,7 @@ JCFILES	:= $(JFILES:.java=.class)
 all: $(OUTPUT) $(OUTLIB) $(RUNTIME) lib test
 .c.o:
 	@echo "  CC   " $<
-	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -pipe -include config.h
+	@$(CC) -c $< -o $@ $(OPT) $(WARN) -I $(INCDIR) -include config.h
 	
 $(OUTPUT): $(OFILES)
 	@echo "  LD   " $@
@@ -48,7 +48,7 @@ test: $(TCFILES)
 lib: $(JCFILES)
 .java.class:
 	@echo "  JAVA " $<
-	@$(JCC) --classpath=lib -C $<
+	@$(JCC) --classpath=lib $<
 
 
 $(RUNTIME): $(JCFILES)
@@ -67,4 +67,16 @@ clean:
 	@$(RM) $(OUTPUT)
 	@$(RM) $(OUTLIB)
 	@$(RM) $(RUNTIME)
+
+distclean: clean
+	@$(RM) -r autom4te.cache
+	@$(RM) config.h
+	@$(RM) config.status
+	@$(RM) config.log
+	@$(RM) Makefile
+	@$(RM) @CONFIG_PACKAGE@-@CONFIG_VERSION@.tar.gz
+
+dist: distclean
+	@tar -cf @CONFIG_PACKAGE@-@CONFIG_VERSION@.tar *
+	@gzip @CONFIG_PACKAGE@-@CONFIG_VERSION@.tar
 
