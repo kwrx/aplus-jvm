@@ -28,7 +28,6 @@ AC_PROVIDE([$0])
 
 
 # Checks for programs.
-AC_PROG_CXX
 AC_PROG_CC
 AC_PROG_JAVAC
 
@@ -79,6 +78,10 @@ AC_SUBST([CONFIG_COPY], "2015 Antonio Natale")
 
 if test $freestanding == false
 then
+	AC_CHECK_LIB([m], [fmod])
+	AC_CHECK_LIB([c], [printf])
+	AC_SUBST([CONFIG_FREESTANDING], [0])
+
 	if test $jni == true
 	then
 		AC_CHECK_LIB([ffi], [ffi_call])
@@ -91,8 +94,6 @@ then
 		AC_CHECK_LIB([zip], [zip_open])
 		AC_SUBST([CONFIG_JAR], [1])
 	fi
-	
-	AC_SUBST([CONFIG_FREESTANDING], [0])
 fi
 
 if test $debug == true

@@ -63,7 +63,6 @@
 
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wnonnull"
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
 
