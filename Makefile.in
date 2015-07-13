@@ -2,6 +2,12 @@ OUTPUT		:= bin/avm
 OUTLIB		:= bin/lib/libavm.a
 RUNTIME		:= bin/lib/rt.jar
 
+
+DESTDIR		:= @CONFIG_SYSROOT@
+prefix		:= @prefix@
+exec_prefix	:= @exec_prefix@
+
+
 CC		:= @CC@
 LD		:= @CC@
 JCC		:= @JAVAC@
@@ -79,4 +85,16 @@ distclean: clean
 dist: distclean
 	@tar -cf @CONFIG_PACKAGE@-@CONFIG_VERSION@.tar *
 	@gzip @CONFIG_PACKAGE@-@CONFIG_VERSION@.tar
+
+install:
+	@install -D -m 644 -t $(DESTDIR)/@libdir@ bin/lib/libavm.a
+	@install -D -m 644 -t $(DESTDIR)/@libdir@/avm bin/lib/rt.jar
+	@install -D -m 644 -t $(DESTDIR)/@includedir@ src/include/avm.h
+	@install -D -m 777 -t $(DESTDIR)/@bindir@ bin/avm
+
+uninstall:
+	@$(RM) $(DESTDIR)/@libdir@/libavm.a
+	@$(RM) $(DESTDIR)/@libdir@/avm/rt.jar
+	@$(RM) $(DESTDIR)/@includedir@/avm.h
+	@$(RM) $(DESTDIR)/@bindir@/avm
 

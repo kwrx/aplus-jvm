@@ -566,7 +566,18 @@ char* avm_make_signature(int rettype, ...);
 j_value avm_call(const char* classname, const char* name, int nargs, ...);
 j_value avm_main(int argc, char** argv);
 
-void avm_path_add(const char* dir);
+void avm_config_path_add(const char* dir);
+void avm_config_set_ops (
+	void* (*calloc) (int, int),
+	void (*free) (void*),
+	int (*open) (const char*, int, int),
+	int (*close) (int),
+	int (*lseek) (int, int, int),
+	int (*read) (int, void*, int),
+	void (*yield) (),
+	int (*getpid) (),
+	int (*printf) (const char*, ...)
+);
 
 
 int avm_spinlock_init(avm_spinlock_t* lock);

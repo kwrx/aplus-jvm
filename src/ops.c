@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <sched.h>
 #include <string.h>
+#include <stdio.h>
 
 #ifdef __GLIBC__
 static void free_stub(void* ptr) {
@@ -24,7 +25,8 @@ static struct avm_ops __ops = {
 	.lseek = (int (*) (int, int, int)) lseek,
 	.read = (int (*) (int, void*, int)) read,
 	.yield = (void (*) ()) sched_yield,
-	.getpid = (int (*) ()) getpid
+	.getpid = (int (*) ()) getpid,
+	.printf = printf,
 };
 
 #else
@@ -74,6 +76,10 @@ static int getpid_stub() {
 	return 1;
 }
 
+static int printf_stub(const char* fmt, ...) {
+	return 0;
+}
+
 static struct avm_ops __ops = {
 	.calloc = calloc_stub,
 	.free = free_stub,
@@ -83,6 +89,7 @@ static struct avm_ops __ops = {
 	.read = read_stub,
 	.yield = yield_stub,
 	.getpid = getpid_stub,
+	.printf = printf_stub,
 };
 #endif
 
@@ -90,6 +97,14 @@ struct avm_ops* avm = &__ops;
 
 
 #if FREESTANDING
+__weak
+void* memset(void* s1, int value, size_t size) {
+	register char* p1 = s1;
+	while(size--)
+		*p1++ = value;
+
+	return s1;
+}
 __weak
 void* memcpy(void* s1, const void* s2, size_t size) {
 	register char* p1 = s1;
@@ -116,7 +131,6 @@ size_t strlen(const char* s) {
 		
 	return p;
 }
-
 __weak
 char* strdup(const char* s) {
 	char* p = avm->calloc(1, strlen(s));
@@ -126,7 +140,11 @@ char* strdup(const char* s) {
 	
 	return p;
 }
-
+__weak
+char* strcat(char* s1, const char *s2) {
+	strcpy(&s1[strlen(s1)], s2);
+	return s1;
+}
 __weak
 int strcmp(const char* s1, const char* s2) {
 	for(; *s1 == *s2; s1++, s2++)
@@ -149,7 +167,18 @@ int strncmp(const char* s1, const char* s2, size_t n) {
 
 __weak
 double fmod(double x, double y) {
+#if defined(__i386__) || defined(__x86_64__)
+	register double v;	
+	__asm__ __volatile__ (
+		"1: fprem; fnstsw %%ax; sahf; jp 1b"
+		: "=t"(v)
+		: "0"(x), "u"(y) : "ax", "cc"
+	);
+
+	return v;
+#else
 	return (double)((long) x % (long) y);
+#endif
 }
 
 #endif

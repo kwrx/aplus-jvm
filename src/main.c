@@ -1,6 +1,8 @@
 #include <avm.h>
 #include "ops.h"
 
+#if !FREESTANDING
+
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
@@ -118,7 +120,7 @@ DEFARG(p_searchdir) {
 		*idx += 1; 
 	}
 
-	avm_path_add(lname);
+	avm_config_path_add(lname);
 }
 
 DEFARG(p_argv) {
@@ -198,3 +200,7 @@ int main(int argc, char** argv) {
  
 	return 0;
 }
+
+#else
+int main() { return 1; }
+#endif

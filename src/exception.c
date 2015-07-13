@@ -38,7 +38,7 @@ static void unhandled_exception(java_context_t* j, const char* exception, const 
 		PRINTF("(Unhandled Exception) %s: %s\n", exception, message);
 
 	
-	EXIT(1);
+	ABORT();
 }
 
 void athrow(java_context_t* j, const char* exception, const char* message) {

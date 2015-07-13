@@ -2,6 +2,7 @@
 #include "ops.h"
 #include "vector.h"
 
+
 /* Freestanding header */
 #include <stdarg.h>
 
@@ -11,8 +12,35 @@ static vector_t* path_vector = NULL;
 static int __avm_initialized = 0;
 static char* __entrypoint = NULL;
 
-void avm_path_add(const char* dir) {
+void avm_config_path_add(const char* dir) {
 	vector_add(&path_vector, strdup(dir));
+}
+
+void avm_config_set_ops (
+	void* (*calloc) (int, int),
+	void (*free) (void*),
+	int (*open) (const char*, int, int),
+	int (*close) (int),
+	int (*lseek) (int, int, int),
+	int (*read) (int, void*, int),
+	void (*yield) (),
+	int (*getpid) (),
+	int (*printf) (const char*, ...)
+) {
+	#define C(x)			\
+		if((x))			\
+			avm->x = x
+
+	C(calloc);
+	C(free);
+	C(open);
+	C(close);
+	C(lseek);
+	C(read);
+	C(yield);
+	C(getpid);
+	C(printf);
+						
 }
 
 
@@ -307,3 +335,4 @@ j_value avm_main(int argc, char** argv) {
 	athrow(NULL, "java/lang/NoSuchMethodError", "\"main\" not found");
 	return JVALUE_NULL;
 }
+

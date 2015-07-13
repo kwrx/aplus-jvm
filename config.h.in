@@ -32,16 +32,21 @@
 #include <stdarg.h>
 #include <stdint.h>
 
-#if DEBUG && !FREESTANDING
+#if !FREESTANDING
 #include <stdlib.h>
-#include <stdio.h>
+#define ABORT()			abort();
+#else
+#define ABORT()			for(;;)
+#endif
+
+#if DEBUG
 #define LOG(x)			\
-	{ printf("%s: %s\n", APP_NAME, x); }
+	{ avm->printf("%s: %s\n", APP_NAME, x); }
 #define LOGF(x, y...)	\
-	{ printf("%s: " x "\n", APP_NAME, y); }
+	{ avm->printf("%s: " x "\n", APP_NAME, y); }
 
 #define ASSERT(x)	\
-	{ if(unlikely(!(x))) { LOGF("Assertion \"%s\" failed in %s:%d", #x, __FILE__, __LINE__); abort(); } }
+	{ if(unlikely(!(x))) { LOGF("Assertion \"%s\" failed in %s:%d", #x, __FILE__, __LINE__); ABORT(); } }
 
 #else
 #define LOG(x)
@@ -49,16 +54,9 @@
 #define ASSERT(x)
 #endif
 
-#if FREESTANDING
-#define PRINTF(x, y...)
-#define EXIT(x)	for(;;)
-#else
-#include <stdlib.h>
-#include <stdio.h>
 #define PRINTF(x, y...)	\
-	{ printf(x, y); }
-#define EXIT(x) exit(x)
-#endif
+	{ avm->printf(x, y); }
+
 
 
 #ifdef __GNUC__
@@ -67,10 +65,10 @@
 
 
 
-#define INITIALIZE_PATH() {							\
-		avm_path_add(CONFIG_SYSROOT "/usr/lib");			\
-		avm_path_add(CONFIG_SYSROOT "/usr/local/lib");			\
-		avm_path_add(CONFIG_SYSROOT "/usr/share/java");			\
+#define INITIALIZE_PATH() {									\
+		avm_config_path_add(CONFIG_SYSROOT "/usr/lib/avm");				\
+		avm_config_path_add(CONFIG_SYSROOT "/usr/local/lib/avm");			\
+		avm_config_path_add(CONFIG_SYSROOT "/usr/share/java");				\
 	}
 
 #endif

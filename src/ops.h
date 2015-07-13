@@ -3,42 +3,46 @@
 
 #include <avm.h>
 
-#define R8(x)											\
-	{													\
-		(x) = *(u1*) buffer;							\
+#define R8(x)								\
+	{								\
+		(x) = *(u1*) buffer;					\
 		buffer = (void*) ((long) buffer + 1);			\
 	}
 
-#define R16(x)											\
-	{													\
-		(x) = SWAP(*(u2*) buffer, 16);					\
+#define R16(x)								\
+	{								\
+		(x) = SWAP(*(u2*) buffer, 16);				\
 		buffer = (void*) ((long) buffer + 2);			\
 	}
 
-#define R32(x)											\
-	{													\
-		(x) = SWAP(*(u4*) buffer, 32);					\
+#define R32(x)								\
+	{								\
+		(x) = SWAP(*(u4*) buffer, 32);				\
 		buffer = (void*) ((long) buffer + 4);			\
 	}
 
-#define R64(x)											\
-	{													\
-		(x) = SWAP(*(u8*) buffer, 64);					\
+#define R64(x)								\
+	{								\
+		(x) = SWAP(*(u8*) buffer, 64);				\
 		buffer = (void*) ((long) buffer + 8);			\
 	}
 	
-#define RXX(x, s)										\
-	{													\
-		if(likely(x)) memcpy(x, buffer, s);				\
+#define RXX(x, s)							\
+	{								\
+		if(likely(x)) memcpy(x, buffer, s);			\
 		buffer = (void*) ((long) buffer + s);			\
 	}
+
+
+
+
 
 #ifndef NAN
 #define NAN				(0.0 / 0.0)
 #endif
 
 #ifndef INFINITY
-#define INFINITY		(1.0 / 0.0)
+#define INFINITY			(1.0 / 0.0)
 #endif
 
 struct avm_ops {
@@ -50,6 +54,7 @@ struct avm_ops {
 	int (*read) (int, void*, int);
 	void (*yield) ();
 	int (*getpid) ();
+	int (*printf) (const char*, ...);
 };
 
 
@@ -70,10 +75,12 @@ void java_object_flush(void);
 
 
 #if FREESTANDING
+void* memset(void* s1, int value, size_t size);
 void* memcpy(void* s1, const void* s2, size_t size);
 char* strcpy(char* s1, const char* s2);
 size_t strlen(const char* s);
 char* strdup(const char* s);
+char* strcat(char*, const char*);
 int strcmp(const char* s1, const char* s2);
 int strncmp(const char* s1, const char* s2, size_t n);
 double fmod(double x, double y);
