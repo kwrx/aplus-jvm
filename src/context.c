@@ -4,9 +4,6 @@
 #define _WITH_OPCODES
 #include "opcodes/opcode.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 
 static int __check_exception(const char* exname, const char* aname) {

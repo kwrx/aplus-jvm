@@ -1,9 +1,6 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 int java_method_find(java_method_t** method, const char* classname, const char* methodname, const char* signature) {
 	java_assembly_t* A = NULL;

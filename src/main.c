@@ -1,11 +1,7 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
-
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
+#if __STDC_HOSTED__
 
 
 static void die(char* e) {

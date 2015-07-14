@@ -1,16 +1,6 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING && CONFIG_JAR
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-
-#include <zip.h>
-#endif
-
-
 
 int jar_open(const char* filename) {
 #if CONFIG_JAR

@@ -1,102 +1,68 @@
 #include "ops.h"
 
 
-#if !FREESTANDING
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sched.h>
-#include <string.h>
-#include <stdio.h>
-
-#ifdef __GLIBC__
-static void free_stub(void* ptr) {
-	return;
-}
-#else
-#define free_stub free
+#if !HAVE_ERRNO_H
+__weak
+int errno = 0;
 #endif
 
-static struct avm_ops __ops = {
-	.calloc = (void* (*)(int, int)) calloc,
-	.free = free_stub,
-	.open = (int (*)(const char*, int, int)) open,
-	.close = close,
-	.lseek = (int (*) (int, int, int)) lseek,
-	.read = (int (*) (int, void*, int)) read,
-	.yield = (void (*) ()) sched_yield,
-	.getpid = (int (*) ()) getpid,
-	.printf = printf,
-};
-
-#else
-
-#define O_BINARY	0
-#define O_RDONLY	0
-
-#define SEEK_SET	0
-#define SEEK_END	2
-#define SEEK_CUR	1
-
-static void* calloc_stub(int size, int nmemb) {
-	extern int end;
-	static long p = (long) &end;
-	
-	register long k = p;
-	p += size * nmemb;
-	
-	return (void*) k;
+#if !HAVE_STDLIB_H
+__weak
+void* calloc(size_t x, size_t y) {
+	return NULL;
 }
 
-static void free_stub(void* ptr) {
+__weak
+void free(void* ptr) {
 	return;
 }
 
-static int open_stub(const char* filename, int flags, int mode) {
+__weak
+void abort(void) {
+	for(;;);
+}
+#endif
+
+#if !HAVE_STDIO_H
+__weak
+int printf(const char* fmt, ...) {
+	return 0;
+}
+#endif
+
+
+#if !HAVE_UNISTD_H
+__weak 
+int close(int fd) {
 	return -1;
 }
 
-static int close_stub(int fd) {
+__weak
+off_t lseek(int fd, off_t off, int dir) {
 	return -1;
 }
 
-static int lseek_stub(int fd, int pos, int dir) {
+int open(const char* name, int flags, ...) {
 	return -1;
 }
 
-static int read_stub(int fd, void* buf, int size) {
+ssize_t read(int fd, void* buf, size_t size) {
 	return 0;
 }
 
-static void yield_stub() {
-	return;
+pid_t getpid(void) {
+	return 1; /* Fake Process ID */
 }
-
-static int getpid_stub() {
-	return 1;
-}
-
-static int printf_stub(const char* fmt, ...) {
-	return 0;
-}
-
-static struct avm_ops __ops = {
-	.calloc = calloc_stub,
-	.free = free_stub,
-	.open = open_stub,
-	.close = close_stub,
-	.lseek = lseek_stub,
-	.read = read_stub,
-	.yield = yield_stub,
-	.getpid = getpid_stub,
-	.printf = printf_stub,
-};
 #endif
 
-struct avm_ops* avm = &__ops;
 
+#if !HAVE_SCHED_H
+int sched_yield(void) {
+	return -1;
+}
+#endif
 
-#if FREESTANDING
+#if !HAVE_STRING_H
 __weak
 void* memset(void* s1, int value, size_t size) {
 	register char* p1 = s1;
@@ -164,7 +130,10 @@ int strncmp(const char* s1, const char* s2, size_t n) {
 
 	return 0;
 }
+#endif
 
+
+#if !HAVE_MATH_H
 __weak
 double fmod(double x, double y) {
 #if defined(__i386__) || defined(__x86_64__)
@@ -180,8 +149,33 @@ double fmod(double x, double y) {
 	return (double)((long) x % (long) y);
 #endif
 }
-
 #endif
+
+
+#ifdef __GLIBC__
+static void free_stub(void* ptr) {
+	return;
+}
+#else
+#define free_stub free
+#endif
+
+static struct avm_ops __ops = {
+	.calloc = calloc,
+	.free = free_stub,
+	.open = open,
+	.close = close,
+	.lseek = lseek,
+	.read = read,
+	.yield = sched_yield,
+	.getpid = getpid,
+	.printf = printf,
+};
+
+
+
+struct avm_ops* avm = &__ops;
+
 
 
 const char* strfmt(const char* fmt, ...) {

@@ -3,8 +3,6 @@
 #include "vector.h"
 
 
-/* Freestanding header */
-#include <stdarg.h>
 
 extern vector_t* asm_vector;
 static vector_t* path_vector = NULL;
@@ -17,14 +15,14 @@ void avm_config_path_add(const char* dir) {
 }
 
 void avm_config_set_ops (
-	void* (*calloc) (int, int),
+	void* (*calloc) (size_t, size_t),
 	void (*free) (void*),
-	int (*open) (const char*, int, int),
+	int (*open) (const char*, int, ...),
 	int (*close) (int),
-	int (*lseek) (int, int, int),
-	int (*read) (int, void*, int),
-	void (*yield) (),
-	int (*getpid) (),
+	off_t (*lseek) (int, off_t, int),
+	ssize_t (*read) (int, void*, size_t),
+	int (*yield) (),
+	pid_t (*getpid) (),
 	int (*printf) (const char*, ...)
 ) {
 	#define C(x)			\

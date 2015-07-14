@@ -3,9 +3,6 @@
 
 #include "ops.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 typedef struct vector {
 	void* value;

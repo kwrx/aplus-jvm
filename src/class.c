@@ -2,9 +2,6 @@
 #include "ops.h"
 #include "vector.h"
 
-#if !FREESTANDING
-#include <math.h>
-#endif
 
 	
 #define CP_EMPTY	(java_cp_info_t*) avm->calloc(1, sizeof(java_cp_info_t))

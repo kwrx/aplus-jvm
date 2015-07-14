@@ -1,22 +1,38 @@
 #ifndef _CONFIG_H
 #define _CONFIG_H
 
+#undef HAVE_STDDEF_H
+#undef HAVE_STDARG_H
+#undef HAVE_STDINT_H
 
-#define DEBUG			@CONFIG_DEBUG@
-#define FREESTANDING		@CONFIG_FREESTANDING@
+#undef HAVE_STDLIB_H
+#undef HAVE_STDIO_H
+#undef HAVE_STRING_H
+#undef HAVE_MATH_H
+#undef HAVE_FCNTL_H
+#undef HAVE_UNISTD_H
+#undef HAVE_ERRNO_H
+#undef HAVE_SCHED_H
+#undef HAVE_SYS_TYPES_H
 
-#define CONFIG_JNI		@CONFIG_JNI@
-#define CONFIG_JAR		@CONFIG_JAR@
-#define CONFIG_SYSROOT 		"@CONFIG_SYSROOT@"
+
+#undef HAVE_ZIP_H
+#undef HAVE_FFI_H
+
+#undef DEBUG
+#undef CONFIG_SYSROOT
 
 
-#define APP_NAME		"@CONFIG_PACKAGE@"
-#define APP_VERSION		"@CONFIG_VERSION@"
-#define APP_COPY		"@CONFIG_COPY@"
+#undef APP_NAME
+#undef APP_VERSION
+#undef APP_COPY
+#undef APP_CC
+
+
+
 #define APP_CDATE		__DATE__
 #define APP_CTIME		__TIME__
 
-#define APP_CC			"@CC@"
 #define APP_CC_VERSION		__VERSION__
 
 
@@ -28,16 +44,115 @@
 		APP_CDATE, APP_CTIME
 
 
-#include <stddef.h>
-#include <stdarg.h>
-#include <stdint.h>
 
-#if !FREESTANDING
-#include <stdlib.h>
-#define ABORT()			abort();
+#if HAVE_STDDEF_H
+#include <stddef.h>
 #else
-#define ABORT()			for(;;)
+#error "stddef.h not found (freestanding header)"
 #endif
+
+#if HAVE_STDARG_H
+#include <stdarg.h>
+#else
+#error "stdarg.h not found (freestanding header)"
+#endif
+
+#if HAVE_STDINT_H
+#include <stdint.h>
+#else
+#error "stdint.h not found (freestanding header)"
+#endif
+
+
+#if HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#else
+typedef int pid_t;
+typedef int off_t;
+typedef int ssize_t;
+#endif
+
+#if HAVE_STDLIB_H
+#include <stdlib.h>
+#else
+void* calloc(size_t, size_t);
+void free(void*);
+void abort(void);
+#endif
+
+#if HAVE_STDIO_H
+#include <stdio.h>
+#else
+int printf(const char*, ...);
+#endif
+
+#if HAVE_MATH_H
+#include <math.h>
+#else
+double fmod(double, double);
+#endif
+
+#if HAVE_FCNTL_H
+#include <fcntl.h>
+#else
+#define O_RDONLY		0
+
+#define SEEK_SET		0
+#define SEEK_CUR		1
+#define SEEK_END		2
+#endif
+
+
+#if HAVE_ZIP_H
+#define CONFIG_JAR		1
+#include <zip.h>
+#endif
+
+#if HAVE_FFI_H
+#define CONFIG_JNI		1
+#include <ffi.h>
+#endif
+
+#if HAVE_STRING_H
+#include <string.h>
+#else
+void* memset(void* s1, int value, size_t size);
+void* memcpy(void* s1, const void* s2, size_t size);
+char* strcpy(char* s1, const char* s2);
+size_t strlen(const char* s);
+char* strdup(const char* s);
+char* strcat(char*, const char*);
+int strcmp(const char* s1, const char* s2);
+int strncmp(const char* s1, const char* s2, size_t n);
+double fmod(double x, double y);
+#endif
+
+#if HAVE_ERRNO_H
+#include <errno.h>
+#else
+extern int errno;
+#endif
+
+#if HAVE_UNISTD_H
+#include <unistd.h>
+#else
+
+int close(int);
+off_t lseek(int, off_t, int);
+ssize_t read(int, void*, size_t);
+int open(const char*, int, ...);
+pid_t getpid();
+#endif
+
+#if HAVE_SCHED_H
+#include <sched.h>
+#else
+int sched_yield(void);
+#endif
+
+
+
+
 
 #if DEBUG
 #define LOG(x)			\

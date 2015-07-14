@@ -1,9 +1,6 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 static u8 nextid = 0;
 java_object_t* __jobj_queue = NULL;

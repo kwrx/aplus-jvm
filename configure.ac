@@ -33,6 +33,7 @@ AC_PROG_JAVAC
 
 
 
+
 AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [Compile in debug mode]), [
 	case $enableval in
 		no) debug=false ;;
@@ -40,12 +41,6 @@ AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug], [Compile in debug mode]), 
 	esac
 ], debug=false)
 
-AC_ARG_ENABLE(freestanding, AS_HELP_STRING([--enable-freestanding], [Compile in kernel mode]), [
-	case $enableval in
-		no) freestanding=false ;;
-		yes) freestanding=true ;;
-	esac
-], freestanding=false)
 
 AC_ARG_ENABLE(jni, AS_HELP_STRING([--disable-jni], [Disable Java Native Interface (Require libffi)]), [
 	case $enableval in
@@ -66,39 +61,36 @@ AC_ARG_WITH(sysroot, AS_HELP_STRING([--with-sysroot[=PATH]], [Search for depende
 ], sysroot="")
 
 
-AC_SUBST([CONFIG_JNI], [0])
-AC_SUBST([CONFIG_JAR], [0])
-AC_SUBST([CONFIG_FREESTANDING], [1])
-AC_SUBST([CONFIG_DEBUG], [0])
+AC_DEFINE_UNQUOTED([CONFIG_SYSROOT], ["$sysroot"])
+AC_DEFINE_UNQUOTED([APP_CC], ["$CC"])
+
+AC_DEFINE([APP_NAME], ["avm"])
+AC_DEFINE([APP_VERSION], ["0.1-alpha"])
+AC_DEFINE([APP_COPY], ["2015 Antonio Natale"])
+
 AC_SUBST([CONFIG_SYSROOT], $sysroot)
 AC_SUBST([CONFIG_PACKAGE], "avm")
 AC_SUBST([CONFIG_VERSION], "0.1-alpha")
 AC_SUBST([CONFIG_COPY], "2015 Antonio Natale")
 
 
-if test $freestanding == false
+
+if test $jni == true
 then
-	AC_CHECK_LIB([m], [fmod])
-	AC_CHECK_LIB([c], [printf])
-	AC_SUBST([CONFIG_FREESTANDING], [0])
+	AC_CHECK_LIB([ffi], [ffi_call])
+	AC_CHECK_HEADERS([ffi.h])
+fi
 
-	if test $jni == true
-	then
-		AC_CHECK_LIB([ffi], [ffi_call])
-		AC_SUBST([CONFIG_JNI], [1])
-	fi
-
-	if test $jar == true	
-	then
-		AC_CHECK_LIB([z], [inflate])
-		AC_CHECK_LIB([zip], [zip_open])
-		AC_SUBST([CONFIG_JAR], [1])
-	fi
+if test $jar == true	
+then
+	AC_CHECK_LIB([z], [inflate])
+	AC_CHECK_LIB([zip], [zip_open])
+	AC_CHECK_HEADERS([zip.h])
 fi
 
 if test $debug == true
 then
-	AC_SUBST([CONFIG_DEBUG], [1])
+	AC_DEFINE([DEBUG], [1])
 fi
 
 
@@ -106,22 +98,10 @@ AC_SUBST([CONFIG_LIBS], $LIBS)
 
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h stddef.h stdint.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([stddef.h stdarg.h stdint.h sys/types.h stdarg.h stdlib.h stdio.h string.h math.h fcntl.h unistd.h errno.h sched.h])
 
-
-AC_C_INLINE
-AC_TYPE_INT16_T
-AC_TYPE_INT32_T
-AC_TYPE_INT64_T
-AC_TYPE_INT8_T
-AC_TYPE_SIZE_T
-AC_TYPE_UINT16_T
-AC_TYPE_UINT32_T
-AC_TYPE_UINT64_T
-AC_TYPE_UINT8_T
-AC_TYPE_UINTPTR_T
 
 
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_FILES([config.h])
+AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT

@@ -46,14 +46,14 @@
 #endif
 
 struct avm_ops {
-	void* (*calloc) (int, int);
+	void* (*calloc) (size_t, size_t);
 	void (*free) (void*);
-	int (*open) (const char*, int, int);
+	int (*open) (const char*, int, ...);
 	int (*close) (int);
-	int (*lseek) (int, int, int);
-	int (*read) (int, void*, int);
-	void (*yield) ();
-	int (*getpid) ();
+	off_t (*lseek) (int, off_t, int);
+	ssize_t (*read) (int, void*, size_t);
+	int (*yield) (void);
+	pid_t (*getpid) (void);
 	int (*printf) (const char*, ...);
 };
 
@@ -74,26 +74,6 @@ void java_native_flush(void);
 void java_object_flush(void);
 
 
-#if FREESTANDING
-void* memset(void* s1, int value, size_t size);
-void* memcpy(void* s1, const void* s2, size_t size);
-char* strcpy(char* s1, const char* s2);
-size_t strlen(const char* s);
-char* strdup(const char* s);
-char* strcat(char*, const char*);
-int strcmp(const char* s1, const char* s2);
-int strncmp(const char* s1, const char* s2, size_t n);
-double fmod(double x, double y);
-
-
-#define SEEK_SET		0
-#define SEEK_CUR		1
-#define SEEK_END		2
-
-#define O_RDONLY		0
-#define O_BINARY		0
-
-#endif
 
 const char* strfmt(const char* fmt, ...);
 

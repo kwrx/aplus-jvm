@@ -3,13 +3,6 @@
 
 
 #if !FREESTANDING && CONFIG_JAR
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-
-#include <zip.h>
-
 static java_library_t* lb_queue = NULL;
 #endif
 

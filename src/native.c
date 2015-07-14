@@ -4,8 +4,6 @@
 
 
 #if CONFIG_JNI
-#include <ffi.h>
-
 static java_native_t* __jni_queue = NULL;
 #endif
 

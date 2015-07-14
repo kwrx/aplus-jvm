@@ -1,9 +1,6 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 #include "opcodes/opcode.h"
 
@@ -38,7 +35,7 @@ static void unhandled_exception(java_context_t* j, const char* exception, const 
 		PRINTF("(Unhandled Exception) %s: %s\n", exception, message);
 
 	
-	ABORT();
+	abort();
 }
 
 void athrow(java_context_t* j, const char* exception, const char* message) {

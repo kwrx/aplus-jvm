@@ -1,9 +1,6 @@
 #include <avm.h>
 #include "ops.h"
 
-#if !FREESTANDING
-#include <string.h>
-#endif
 
 int java_field_find(java_field_t** field, const char* classname, const char* fieldname, const char* signature) {
 	java_assembly_t* A = NULL;

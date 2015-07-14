@@ -2,10 +2,6 @@
 #include "ops.h"
 #include "vector.h"
 
-#if !FREESTANDING
-#include <fcntl.h>
-#endif
-
 
 vector_t* asm_vector = NULL;
 

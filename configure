@@ -593,18 +593,14 @@ ac_includes_default="\
 
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+CONFIG_LIBS
 EGREP
 GREP
 CPP
-CONFIG_LIBS
 CONFIG_COPY
 CONFIG_VERSION
 CONFIG_PACKAGE
 CONFIG_SYSROOT
-CONFIG_DEBUG
-CONFIG_FREESTANDING
-CONFIG_JAR
-CONFIG_JNI
 JAVAC
 OBJEXT
 EXEEXT
@@ -655,7 +651,6 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_debug
-enable_freestanding
 enable_jni
 enable_jar
 with_sysroot
@@ -1280,7 +1275,6 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          Compile in debug mode
-  --enable-freestanding   Compile in kernel mode
   --disable-jni           Disable Java Native Interface (Require libffi)
   --disable-jar           Disable Java Archive Interface (Require libzip,
                           zlib)
@@ -1667,183 +1661,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
 
 } # ac_fn_c_check_header_compile
-
-# ac_fn_c_find_intX_t LINENO BITS VAR
-# -----------------------------------
-# Finds a signed integer type with width BITS, setting cache variable VAR
-# accordingly.
-ac_fn_c_find_intX_t ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for int$2_t" >&5
-$as_echo_n "checking for int$2_t... " >&6; }
-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=no"
-     for ac_type in int$2_t 'int' 'long int' \
-	 'long long int' 'short int' 'signed char'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-static int test_array [1 - 2 * !(0 < ($ac_type) (((($ac_type) 1 << ($2 - 2)) - 1) * 2 + 1))];
-test_array [0] = 0
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-static int test_array [1 - 2 * !(($ac_type) (((($ac_type) 1 << ($2 - 2)) - 1) * 2 + 1)
-		 < ($ac_type) (((($ac_type) 1 << ($2 - 2)) - 1) * 2 + 2))];
-test_array [0] = 0
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-else
-  case $ac_type in #(
-  int$2_t) :
-    eval "$3=yes" ;; #(
-  *) :
-    eval "$3=\$ac_type" ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-       eval as_val=\$$3
-   if test "x$as_val" = x""no; then :
-
-else
-  break
-fi
-     done
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
-
-} # ac_fn_c_find_intX_t
-
-# ac_fn_c_check_type LINENO TYPE VAR INCLUDES
-# -------------------------------------------
-# Tests whether TYPE exists after having included INCLUDES, setting cache
-# variable VAR accordingly.
-ac_fn_c_check_type ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
-$as_echo_n "checking for $2... " >&6; }
-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=no"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main ()
-{
-if (sizeof ($2))
-	 return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$4
-int
-main ()
-{
-if (sizeof (($2)))
-	    return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-else
-  eval "$3=yes"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
-
-} # ac_fn_c_check_type
-
-# ac_fn_c_find_uintX_t LINENO BITS VAR
-# ------------------------------------
-# Finds an unsigned integer type with width BITS, setting cache variable VAR
-# accordingly.
-ac_fn_c_find_uintX_t ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for uint$2_t" >&5
-$as_echo_n "checking for uint$2_t... " >&6; }
-if { as_var=$3; eval "test \"\${$as_var+set}\" = set"; }; then :
-  $as_echo_n "(cached) " >&6
-else
-  eval "$3=no"
-     for ac_type in uint$2_t 'unsigned int' 'unsigned long int' \
-	 'unsigned long long int' 'unsigned short int' 'unsigned char'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-static int test_array [1 - 2 * !(($ac_type) -1 >> ($2 - 1) == 1)];
-test_array [0] = 0
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  case $ac_type in #(
-  uint$2_t) :
-    eval "$3=yes" ;; #(
-  *) :
-    eval "$3=\$ac_type" ;;
-esac
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-       eval as_val=\$$3
-   if test "x$as_val" = x""no; then :
-
-else
-  break
-fi
-     done
-fi
-eval ac_res=\$$3
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  eval $as_lineno_stack; test "x$as_lineno_stack" = x && { as_lineno=; unset as_lineno;}
-
-} # ac_fn_c_find_uintX_t
 cat >config.log <<_ACEOF
 This file contains any messages produced by compilers while
 running configure, to aid debugging if configure makes a mistake.
@@ -3090,6 +2907,7 @@ test "x$JAVAC" = x && as_fn_error "no acceptable Java compiler found in \$PATH" 
 
 
 
+
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
   enableval=$enable_debug;
@@ -3102,18 +2920,6 @@ else
   debug=false
 fi
 
-
-# Check whether --enable-freestanding was given.
-if test "${enable_freestanding+set}" = set; then :
-  enableval=$enable_freestanding;
-	case $enableval in
-		no) freestanding=false ;;
-		yes) freestanding=true ;;
-	esac
-
-else
-  freestanding=false
-fi
 
 
 # Check whether --enable-jni was given.
@@ -3154,13 +2960,21 @@ fi
 
 
 
-CONFIG_JNI=0
+cat >>confdefs.h <<_ACEOF
+#define CONFIG_SYSROOT "$sysroot"
+_ACEOF
 
-CONFIG_JAR=0
+cat >>confdefs.h <<_ACEOF
+#define APP_CC "$CC"
+_ACEOF
 
-CONFIG_FREESTANDING=1
 
-CONFIG_DEBUG=0
+$as_echo "#define APP_NAME \"avm\"" >>confdefs.h
+
+$as_echo "#define APP_VERSION \"0.1-alpha\"" >>confdefs.h
+
+$as_echo "#define APP_COPY \"2015 Antonio Natale\"" >>confdefs.h
+
 
 CONFIG_SYSROOT=$sysroot
 
@@ -3172,105 +2986,11 @@ CONFIG_COPY="2015 Antonio Natale"
 
 
 
-if test $freestanding == false
+
+if test $jni == true
 then
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for fmod in -lm" >&5
-$as_echo_n "checking for fmod in -lm... " >&6; }
-if test "${ac_cv_lib_m_fmod+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lm  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char fmod ();
-int
-main ()
-{
-return fmod ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_m_fmod=yes
-else
-  ac_cv_lib_m_fmod=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_fmod" >&5
-$as_echo "$ac_cv_lib_m_fmod" >&6; }
-if test "x$ac_cv_lib_m_fmod" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBM 1
-_ACEOF
-
-  LIBS="-lm $LIBS"
-
-fi
-
-	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for printf in -lc" >&5
-$as_echo_n "checking for printf in -lc... " >&6; }
-if test "${ac_cv_lib_c_printf+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lc  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char printf ();
-int
-main ()
-{
-return printf ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_c_printf=yes
-else
-  ac_cv_lib_c_printf=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_c_printf" >&5
-$as_echo "$ac_cv_lib_c_printf" >&6; }
-if test "x$ac_cv_lib_c_printf" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBC 1
-_ACEOF
-
-  LIBS="-lc $LIBS"
-
-fi
-
-	CONFIG_FREESTANDING=0
-
-
-	if test $jni == true
-	then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffi_call in -lffi" >&5
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffi_call in -lffi" >&5
 $as_echo_n "checking for ffi_call in -lffi... " >&6; }
 if test "${ac_cv_lib_ffi_ffi_call+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -3315,120 +3035,7 @@ _ACEOF
 
 fi
 
-		CONFIG_JNI=1
-
-	fi
-
-	if test $jar == true
-	then
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inflate in -lz" >&5
-$as_echo_n "checking for inflate in -lz... " >&6; }
-if test "${ac_cv_lib_z_inflate+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lz  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char inflate ();
-int
-main ()
-{
-return inflate ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_z_inflate=yes
-else
-  ac_cv_lib_z_inflate=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_inflate" >&5
-$as_echo "$ac_cv_lib_z_inflate" >&6; }
-if test "x$ac_cv_lib_z_inflate" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBZ 1
-_ACEOF
-
-  LIBS="-lz $LIBS"
-
-fi
-
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for zip_open in -lzip" >&5
-$as_echo_n "checking for zip_open in -lzip... " >&6; }
-if test "${ac_cv_lib_zip_zip_open+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lzip  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char zip_open ();
-int
-main ()
-{
-return zip_open ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_zip_zip_open=yes
-else
-  ac_cv_lib_zip_zip_open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_zip_zip_open" >&5
-$as_echo "$ac_cv_lib_zip_zip_open" >&6; }
-if test "x$ac_cv_lib_zip_zip_open" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBZIP 1
-_ACEOF
-
-  LIBS="-lzip $LIBS"
-
-fi
-
-		CONFIG_JAR=1
-
-	fi
-fi
-
-if test $debug == true
-then
-	CONFIG_DEBUG=1
-
-fi
-
-
-CONFIG_LIBS=$LIBS
-
-
-
-# Checks for header files.
-ac_ext=c
+	ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
@@ -3826,7 +3433,139 @@ fi
 done
 
 
-for ac_header in fcntl.h stddef.h stdint.h stdlib.h string.h unistd.h
+for ac_header in ffi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ffi.h" "ac_cv_header_ffi_h" "$ac_includes_default"
+if test "x$ac_cv_header_ffi_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_FFI_H 1
+_ACEOF
+
+fi
+
+done
+
+fi
+
+if test $jar == true
+then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inflate in -lz" >&5
+$as_echo_n "checking for inflate in -lz... " >&6; }
+if test "${ac_cv_lib_z_inflate+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lz  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char inflate ();
+int
+main ()
+{
+return inflate ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_z_inflate=yes
+else
+  ac_cv_lib_z_inflate=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_z_inflate" >&5
+$as_echo "$ac_cv_lib_z_inflate" >&6; }
+if test "x$ac_cv_lib_z_inflate" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBZ 1
+_ACEOF
+
+  LIBS="-lz $LIBS"
+
+fi
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for zip_open in -lzip" >&5
+$as_echo_n "checking for zip_open in -lzip... " >&6; }
+if test "${ac_cv_lib_zip_zip_open+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lzip  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char zip_open ();
+int
+main ()
+{
+return zip_open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_zip_zip_open=yes
+else
+  ac_cv_lib_zip_zip_open=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_zip_zip_open" >&5
+$as_echo "$ac_cv_lib_zip_zip_open" >&6; }
+if test "x$ac_cv_lib_zip_zip_open" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBZIP 1
+_ACEOF
+
+  LIBS="-lzip $LIBS"
+
+fi
+
+	for ac_header in zip.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "zip.h" "ac_cv_header_zip_h" "$ac_includes_default"
+if test "x$ac_cv_header_zip_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_ZIP_H 1
+_ACEOF
+
+fi
+
+done
+
+fi
+
+if test $debug == true
+then
+	$as_echo "#define DEBUG 1" >>confdefs.h
+
+fi
+
+
+CONFIG_LIBS=$LIBS
+
+
+
+# Checks for header files.
+for ac_header in stddef.h stdarg.h stdint.h sys/types.h stdarg.h stdlib.h stdio.h string.h math.h fcntl.h unistd.h errno.h sched.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -3842,198 +3581,10 @@ done
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for inline" >&5
-$as_echo_n "checking for inline... " >&6; }
-if test "${ac_cv_c_inline+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_c_inline=no
-for ac_kw in inline __inline__ __inline; do
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#ifndef __cplusplus
-typedef int foo_t;
-static $ac_kw foo_t static_foo () {return 0; }
-$ac_kw foo_t foo () {return 0; }
-#endif
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_c_inline=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  test "$ac_cv_c_inline" != no && break
-done
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_inline" >&5
-$as_echo "$ac_cv_c_inline" >&6; }
-
-case $ac_cv_c_inline in
-  inline | yes) ;;
-  *)
-    case $ac_cv_c_inline in
-      no) ac_val=;;
-      *) ac_val=$ac_cv_c_inline;;
-    esac
-    cat >>confdefs.h <<_ACEOF
-#ifndef __cplusplus
-#define inline $ac_val
-#endif
-_ACEOF
-    ;;
-esac
-
-ac_fn_c_find_intX_t "$LINENO" "16" "ac_cv_c_int16_t"
-case $ac_cv_c_int16_t in #(
-  no|yes) ;; #(
-  *)
-
-cat >>confdefs.h <<_ACEOF
-#define int16_t $ac_cv_c_int16_t
-_ACEOF
-;;
-esac
-
-ac_fn_c_find_intX_t "$LINENO" "32" "ac_cv_c_int32_t"
-case $ac_cv_c_int32_t in #(
-  no|yes) ;; #(
-  *)
-
-cat >>confdefs.h <<_ACEOF
-#define int32_t $ac_cv_c_int32_t
-_ACEOF
-;;
-esac
-
-ac_fn_c_find_intX_t "$LINENO" "64" "ac_cv_c_int64_t"
-case $ac_cv_c_int64_t in #(
-  no|yes) ;; #(
-  *)
-
-cat >>confdefs.h <<_ACEOF
-#define int64_t $ac_cv_c_int64_t
-_ACEOF
-;;
-esac
-
-ac_fn_c_find_intX_t "$LINENO" "8" "ac_cv_c_int8_t"
-case $ac_cv_c_int8_t in #(
-  no|yes) ;; #(
-  *)
-
-cat >>confdefs.h <<_ACEOF
-#define int8_t $ac_cv_c_int8_t
-_ACEOF
-;;
-esac
-
-ac_fn_c_check_type "$LINENO" "size_t" "ac_cv_type_size_t" "$ac_includes_default"
-if test "x$ac_cv_type_size_t" = x""yes; then :
-
-else
-
-cat >>confdefs.h <<_ACEOF
-#define size_t unsigned int
-_ACEOF
-
-fi
-
-ac_fn_c_find_uintX_t "$LINENO" "16" "ac_cv_c_uint16_t"
-case $ac_cv_c_uint16_t in #(
-  no|yes) ;; #(
-  *)
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint16_t $ac_cv_c_uint16_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "32" "ac_cv_c_uint32_t"
-case $ac_cv_c_uint32_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT32_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint32_t $ac_cv_c_uint32_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "64" "ac_cv_c_uint64_t"
-case $ac_cv_c_uint64_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT64_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint64_t $ac_cv_c_uint64_t
-_ACEOF
-;;
-  esac
-
-ac_fn_c_find_uintX_t "$LINENO" "8" "ac_cv_c_uint8_t"
-case $ac_cv_c_uint8_t in #(
-  no|yes) ;; #(
-  *)
-
-$as_echo "#define _UINT8_T 1" >>confdefs.h
-
-
-cat >>confdefs.h <<_ACEOF
-#define uint8_t $ac_cv_c_uint8_t
-_ACEOF
-;;
-  esac
-
-
-  ac_fn_c_check_type "$LINENO" "uintptr_t" "ac_cv_type_uintptr_t" "$ac_includes_default"
-if test "x$ac_cv_type_uintptr_t" = x""yes; then :
-
-$as_echo "#define HAVE_UINTPTR_T 1" >>confdefs.h
-
-else
-  for ac_type in 'unsigned int' 'unsigned long int' \
-	'unsigned long long int'; do
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-$ac_includes_default
-int
-main ()
-{
-static int test_array [1 - 2 * !(sizeof (void *) <= sizeof ($ac_type))];
-test_array [0] = 0
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-cat >>confdefs.h <<_ACEOF
-#define uintptr_t $ac_type
-_ACEOF
-
-	  ac_type=
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-       test -z "$ac_type" && break
-     done
-fi
-
-
-
 
 ac_config_files="$ac_config_files Makefile"
 
-ac_config_files="$ac_config_files config.h"
+ac_config_headers="$ac_config_headers config.h"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4114,43 +3665,7 @@ test "x$prefix" = xNONE && prefix=$ac_default_prefix
 # Let make expand exec_prefix.
 test "x$exec_prefix" = xNONE && exec_prefix='${prefix}'
 
-# Transform confdefs.h into DEFS.
-# Protect against shell expansion while executing Makefile rules.
-# Protect against Makefile macro expansion.
-#
-# If the first sed substitution is executed (which looks for macros that
-# take arguments), then branch to the quote section.  Otherwise,
-# look for a macro that doesn't take arguments.
-ac_script='
-:mline
-/\\$/{
- N
- s,\\\n,,
- b mline
-}
-t clear
-:clear
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 (][^	 (]*([^)]*)\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-s/^[	 ]*#[	 ]*define[	 ][	 ]*\([^	 ][^	 ]*\)[	 ]*\(.*\)/-D\1=\2/g
-t quote
-b any
-:quote
-s/[	 `~#$^&*(){}\\|;'\''"<>?]/\\&/g
-s/\[/\\&/g
-s/\]/\\&/g
-s/\$/$$/g
-H
-:any
-${
-	g
-	s/^\n//
-	s/\n/ /g
-	p
-}
-'
-DEFS=`sed -n "$ac_script" confdefs.h`
-
+DEFS=-DHAVE_CONFIG_H
 
 ac_libobjs=
 ac_ltlibobjs=
@@ -4594,11 +4109,15 @@ case $ac_config_files in *"
 "*) set x $ac_config_files; shift; ac_config_files=$*;;
 esac
 
+case $ac_config_headers in *"
+"*) set x $ac_config_headers; shift; ac_config_headers=$*;;
+esac
 
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 # Files that config.status was made for.
 config_files="$ac_config_files"
+config_headers="$ac_config_headers"
 
 _ACEOF
 
@@ -4618,9 +4137,14 @@ Usage: $0 [OPTION]... [TAG]...
       --recheck    update $as_me by reconfiguring in the same conditions
       --file=FILE[:TEMPLATE]
                    instantiate the configuration file FILE
+      --header=FILE[:TEMPLATE]
+                   instantiate the configuration header FILE
 
 Configuration files:
 $config_files
+
+Configuration headers:
+$config_headers
 
 Report bugs to <antonio.natale97@hotmail.com>."
 
@@ -4673,7 +4197,18 @@ do
     esac
     as_fn_append CONFIG_FILES " '$ac_optarg'"
     ac_need_defaults=false;;
-  --he | --h |  --help | --hel | -h )
+  --header | --heade | --head | --hea )
+    $ac_shift
+    case $ac_optarg in
+    *\'*) ac_optarg=`$as_echo "$ac_optarg" | sed "s/'/'\\\\\\\\''/g"` ;;
+    esac
+    as_fn_append CONFIG_HEADERS " '$ac_optarg'"
+    ac_need_defaults=false;;
+  --he | --h)
+    # Conflict between --help and --header
+    as_fn_error "ambiguous option: \`$1'
+Try \`$0 --help' for more information.";;
+  --help | --hel | -h )
     $as_echo "$ac_cs_usage"; exit ;;
   -q | -quiet | --quiet | --quie | --qui | --qu | --q \
   | -silent | --silent | --silen | --sile | --sil | --si | --s)
@@ -4730,7 +4265,7 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
-    "config.h") CONFIG_FILES="$CONFIG_FILES config.h" ;;
+    "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
 
   *) as_fn_error "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -4743,6 +4278,7 @@ done
 # bizarre bug on SunOS 4.1.3.
 if $ac_need_defaults; then
   test "${CONFIG_FILES+set}" = set || CONFIG_FILES=$config_files
+  test "${CONFIG_HEADERS+set}" = set || CONFIG_HEADERS=$config_headers
 fi
 
 # Have a temporary directory for convenience.  Make it in the build tree
@@ -4920,8 +4456,116 @@ fi
 cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
 fi # test -n "$CONFIG_FILES"
 
+# Set up the scripts for CONFIG_HEADERS section.
+# No need to generate them if there are no CONFIG_HEADERS.
+# This happens for instance with `./config.status Makefile'.
+if test -n "$CONFIG_HEADERS"; then
+cat >"$tmp/defines.awk" <<\_ACAWK ||
+BEGIN {
+_ACEOF
 
-eval set X "  :F $CONFIG_FILES      "
+# Transform confdefs.h into an awk script `defines.awk', embedded as
+# here-document in config.status, that substitutes the proper values into
+# config.h.in to produce config.h.
+
+# Create a delimiter string that does not exist in confdefs.h, to ease
+# handling of long lines.
+ac_delim='%!_!# '
+for ac_last_try in false false :; do
+  ac_t=`sed -n "/$ac_delim/p" confdefs.h`
+  if test -z "$ac_t"; then
+    break
+  elif $ac_last_try; then
+    as_fn_error "could not make $CONFIG_HEADERS" "$LINENO" 5
+  else
+    ac_delim="$ac_delim!$ac_delim _$ac_delim!! "
+  fi
+done
+
+# For the awk script, D is an array of macro values keyed by name,
+# likewise P contains macro parameters if any.  Preserve backslash
+# newline sequences.
+
+ac_word_re=[_$as_cr_Letters][_$as_cr_alnum]*
+sed -n '
+s/.\{148\}/&'"$ac_delim"'/g
+t rset
+:rset
+s/^[	 ]*#[	 ]*define[	 ][	 ]*/ /
+t def
+d
+:def
+s/\\$//
+t bsnl
+s/["\\]/\\&/g
+s/^ \('"$ac_word_re"'\)\(([^()]*)\)[	 ]*\(.*\)/P["\1"]="\2"\
+D["\1"]=" \3"/p
+s/^ \('"$ac_word_re"'\)[	 ]*\(.*\)/D["\1"]=" \2"/p
+d
+:bsnl
+s/["\\]/\\&/g
+s/^ \('"$ac_word_re"'\)\(([^()]*)\)[	 ]*\(.*\)/P["\1"]="\2"\
+D["\1"]=" \3\\\\\\n"\\/p
+t cont
+s/^ \('"$ac_word_re"'\)[	 ]*\(.*\)/D["\1"]=" \2\\\\\\n"\\/p
+t cont
+d
+:cont
+n
+s/.\{148\}/&'"$ac_delim"'/g
+t clear
+:clear
+s/\\$//
+t bsnlc
+s/["\\]/\\&/g; s/^/"/; s/$/"/p
+d
+:bsnlc
+s/["\\]/\\&/g; s/^/"/; s/$/\\\\\\n"\\/p
+b cont
+' <confdefs.h | sed '
+s/'"$ac_delim"'/"\\\
+"/g' >>$CONFIG_STATUS || ac_write_fail=1
+
+cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
+  for (key in D) D_is_set[key] = 1
+  FS = ""
+}
+/^[\t ]*#[\t ]*(define|undef)[\t ]+$ac_word_re([\t (]|\$)/ {
+  line = \$ 0
+  split(line, arg, " ")
+  if (arg[1] == "#") {
+    defundef = arg[2]
+    mac1 = arg[3]
+  } else {
+    defundef = substr(arg[1], 2)
+    mac1 = arg[2]
+  }
+  split(mac1, mac2, "(") #)
+  macro = mac2[1]
+  prefix = substr(line, 1, index(line, defundef) - 1)
+  if (D_is_set[macro]) {
+    # Preserve the white space surrounding the "#".
+    print prefix "define", macro P[macro] D[macro]
+    next
+  } else {
+    # Replace #undef with comments.  This is necessary, for example,
+    # in the case of _POSIX_SOURCE, which is predefined and required
+    # on some systems where configure will not decide to define it.
+    if (defundef == "undef") {
+      print "/*", prefix defundef, macro, "*/"
+      next
+    }
+  }
+}
+{ print }
+_ACAWK
+_ACEOF
+cat >>$CONFIG_STATUS <<\_ACEOF || ac_write_fail=1
+  as_fn_error "could not setup config headers machinery" "$LINENO" 5
+fi # test -n "$CONFIG_HEADERS"
+
+
+eval set X "  :F $CONFIG_FILES  :H $CONFIG_HEADERS    "
 shift
 for ac_tag
 do
@@ -5128,7 +4772,30 @@ which seems to be undefined.  Please make sure it is defined." >&2;}
   esac \
   || as_fn_error "could not create $ac_file" "$LINENO" 5
  ;;
-
+  :H)
+  #
+  # CONFIG_HEADER
+  #
+  if test x"$ac_file" != x-; then
+    {
+      $as_echo "/* $configure_input  */" \
+      && eval '$AWK -f "$tmp/defines.awk"' "$ac_file_inputs"
+    } >"$tmp/config.h" \
+      || as_fn_error "could not create $ac_file" "$LINENO" 5
+    if diff "$ac_file" "$tmp/config.h" >/dev/null 2>&1; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: $ac_file is unchanged" >&5
+$as_echo "$as_me: $ac_file is unchanged" >&6;}
+    else
+      rm -f "$ac_file"
+      mv "$tmp/config.h" "$ac_file" \
+	|| as_fn_error "could not create $ac_file" "$LINENO" 5
+    fi
+  else
+    $as_echo "/* $configure_input  */" \
+      && eval '$AWK -f "$tmp/defines.awk"' "$ac_file_inputs" \
+      || as_fn_error "could not create -" "$LINENO" 5
+  fi
+ ;;
 
 
   esac
