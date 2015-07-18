@@ -514,6 +514,7 @@ int java_assembly_resolve(java_assembly_t* assembly);
 int java_assembly_open(java_assembly_t** assembly, const char* filename);
 int java_assembly_load(java_assembly_t** assembly, void* buffer, int size, const char* path);
 int java_assembly_destroy(java_assembly_t* assembly, int recursive);
+int java_assembly_base(java_assembly_t** base, java_assembly_t* A);
 
 
 int jar_open(const char* filename);
@@ -552,6 +553,7 @@ int java_native_add(const char* classname, const char* name, const char* desc, u
 
 
 /* A+ Virtual Machine - Main API */
+void avm_init(void);
 void avm_begin(void);
 void avm_end(void);
 int avm_initialized(void);

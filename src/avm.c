@@ -50,6 +50,13 @@ int avm_initialized(void) {
 	return __avm_initialized;
 }
 
+
+void avm_init(void) {
+#if HAVE_GC_H
+	GC_INIT();
+#endif
+}
+
 void avm_begin(void) {
 	java_native_init();
 	java_assembly_init();

@@ -26,6 +26,9 @@
 
 int main(int argc, char** argv) {
 
+	/* Initialize VM */
+	avm_init();
+
 	/* Open Native.class */
 	if(avm_open("Native.class") == J_ERR)
 		{ perror("Native.class"); abort(); }

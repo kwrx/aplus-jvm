@@ -18,6 +18,7 @@
 
 #undef HAVE_ZIP_H
 #undef HAVE_FFI_H
+#undef HAVE_GC_H
 
 #undef DEBUG
 #undef CONFIG_SYSROOT
@@ -78,6 +79,7 @@ typedef int ssize_t;
 void* calloc(size_t, size_t);
 void free(void*);
 void abort(void);
+void exit(int);
 #endif
 
 #if HAVE_STDIO_H
@@ -112,6 +114,30 @@ double fmod(double, double);
 #define CONFIG_JNI		1
 #include <ffi.h>
 #endif
+
+#if HAVE_GC_H
+#include <gc.h>
+
+static inline void* __gc_calloc(size_t x, size_t y) {
+	void* p = GC_malloc_uncollectable(x * y);
+	if(!p)
+		return NULL;
+
+	register int i = x * y;
+	for(char* d = p; i--; d++)
+		*d = 0;
+		
+	return p;
+}
+
+#define strdup(s) GC_STRDUP(s)
+#define __calloc __gc_calloc
+#define __free GC_FREE
+#else
+#define __calloc calloc
+#define __free free
+#endif
+
 
 #if HAVE_STRING_H
 #include <string.h>
@@ -161,7 +187,7 @@ int sched_yield(void);
 	{ avm->printf("%s: " x "\n", APP_NAME, y); }
 
 #define ASSERT(x)	\
-	{ if(unlikely(!(x))) { LOGF("Assertion \"%s\" failed in %s:%d", #x, __FILE__, __LINE__); ABORT(); } }
+	{ if(unlikely(!(x))) { LOGF("Assertion \"%s\" failed in %s:%d", #x, __FILE__, __LINE__); abort(); } }
 
 #else
 #define LOG(x)

@@ -56,6 +56,13 @@ AC_ARG_ENABLE(jar, AS_HELP_STRING([--disable-jar], [Disable Java Archive Interfa
 	esac
 ], jar=true)
 
+AC_ARG_ENABLE(gc, AS_HELP_STRING([--disable-gc], [Disable Garbage Collection (Require TinyGC or Boehm-GC)]), [
+	case $enableval in
+		no) gc=false ;;
+		yes) gc=true ;;
+	esac
+], gc=true)
+
 AC_ARG_WITH(sysroot, AS_HELP_STRING([--with-sysroot[=PATH]], [Search for dependent libraries within DIR (or the compiler's sysroot if not specified).]), [
 	sysroot=$withval
 ], sysroot="")
@@ -86,6 +93,12 @@ then
 	AC_CHECK_LIB([z], [inflate])
 	AC_CHECK_LIB([zip], [zip_open])
 	AC_CHECK_HEADERS([zip.h])
+fi
+
+if test $gc == true
+then
+	AC_CHECK_LIB([gc], [GC_malloc])
+	AC_CHECK_HEADERS([gc.h])
 fi
 
 if test $debug == true

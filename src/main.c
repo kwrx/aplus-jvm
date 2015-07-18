@@ -3,10 +3,19 @@
 
 #if __STDC_HOSTED__
 
+#include <signal.h>
 
 static void die(char* e) {
 	perror(e);
 	exit(1);
+}
+
+
+static void sighandler(int sig) {
+	if(avm_initialized())
+		athrow(NULL, "java/lang/InternalError", strsignal(sig));
+
+	exit(sig);
 }
 
 
@@ -136,6 +145,45 @@ DEFARG(p_entry) {
 	avm_set_entrypoint(lname);
 }
 
+
+#if DEBUG
+#if HAVE_GC_H
+static void gc_dump() {
+
+	const char* UNIT(int x) {
+		static char* units[] = {
+			"Bytes",
+			"KiB",
+			"MiB",
+			"GiB",
+			"TiB",
+			NULL
+		};
+
+		int i;
+		for(i = 0; (x / 1024) > 0; x /= 1024, i++)
+			;
+
+		return strfmt("%d %s", x, units[i]);
+	}
+
+	GC_word x, y, z, w, t;
+	unsigned v = GC_get_version();
+	GC_get_heap_usage_safe(&x, &y, &z, &w, &t);
+	PRINTF("\nGarbage Collector v%d.%d.%d\n", (v >> 16) & 0xFF, (v >> 8) & 0xFF, v & 0xFF);
+	PRINTF("Collections:\t%d\n", GC_get_gc_no());
+	PRINTF("Size:\t\t%s\n", UNIT(x));
+	PRINTF("Free:\t\t%s\n", UNIT(y));
+	PRINTF("Unmapped:\t%s\n", UNIT(z));
+	PRINTF("Since GC:\t%s\n", UNIT(w));
+	PRINTF("Used:\t\t%s\n", UNIT(t));
+
+}
+#endif
+#endif
+
+
+
 int main(int argc, char** argv) {
 
 	if(argc < 2) {
@@ -151,7 +199,20 @@ int main(int argc, char** argv) {
 	}
 
 
+	avm_init();
 	INITIALIZE_PATH();	/* see config.h */
+
+
+	signal(SIGINT, sighandler);
+	signal(SIGILL, sighandler);
+	signal(SIGFPE, sighandler);
+	signal(SIGSEGV, sighandler);
+
+#if HAVE_GC_H
+#if DEBUG
+	atexit(gc_dump);
+#endif
+#endif
 
 	int i, j;
 	for(i = 1; (i < argc) && (__argv_idx == -1); i++) {
@@ -189,11 +250,12 @@ int main(int argc, char** argv) {
 	}
 
 
+	
 	avm_begin();
 	avm_main(argc, argv);
 	avm_end();
 
- 
+
 	return 0;
 }
 

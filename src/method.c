@@ -67,7 +67,7 @@ int java_method_find_reference(java_method_t** method, java_assembly_t* assembly
 		}
 	}
 	
-	LOGF("java_method_find_reference() No such method in %s", assembly->name);
+	LOGF("java_method_find_reference() No such method %s.%s", classname, name);
 
 	return J_ERR;
 }

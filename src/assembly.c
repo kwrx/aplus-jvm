@@ -180,4 +180,14 @@ int java_assembly_resolve(java_assembly_t* assembly) {
 }
 
 
+int java_assembly_base(java_assembly_t** base, java_assembly_t* A) {
+	for(; A->java_super; A = A->java_super)
+		if(strcmp(A->java_super->name, "java/lang/Object") == 0)
+			break;
+	
+	if(base)
+		*base = A;
+
+	return J_OK;
+}
 

@@ -73,5 +73,9 @@ void java_context_run(java_context_t* j) {
 		return;
 	}
 
+#if HAVE_GC_H
+	//GC_gcollect();
+#endif
+
 	j->flags = JAVACTX_FLAG_SUCCESS;
 }

@@ -21,6 +21,10 @@ __weak
 void abort(void) {
 	for(;;);
 }
+
+void exit(int s) {
+	for(;;);
+}
 #endif
 
 #if !HAVE_STDIO_H
@@ -99,6 +103,10 @@ size_t strlen(const char* s) {
 }
 __weak
 char* strdup(const char* s) {
+#if HAVE_GC_H
+	return GC_STRDUP(s);
+#endif
+
 	char* p = avm->calloc(1, strlen(s));
 	ASSERT(p);
 
@@ -152,24 +160,26 @@ double fmod(double x, double y) {
 #endif
 
 
-#ifdef __GLIBC__
-static void free_stub(void* ptr) {
+
+static void __free_stub(void* ptr) {
 	return;
 }
-#else
-#define free_stub free
-#endif
+
 
 static struct avm_ops __ops = {
-	.calloc = calloc,
-	.free = free_stub,
-	.open = open,
-	.close = close,
-	.lseek = lseek,
-	.read = read,
-	.yield = sched_yield,
-	.getpid = getpid,
-	.printf = printf,
+	__calloc,
+#ifdef __GLIBC__
+	__free_stub,
+#else
+	__free,
+#endif
+	open,
+	close,
+	lseek,
+	read,
+	sched_yield,
+	getpid,
+	printf,
 };
 
 
@@ -201,17 +211,27 @@ const char* strfmt(const char* fmt, ...) {
 					} break;
 					case 'd': {
 						int i = va_arg(ll, int);
-						if(i < 0)
+						if(i == 0) {
+							*p++ = '0';
+							break;
+						}
+
+						if(i < 0) {
 							*p++ = '-';
+							i = -i;
+						}
 
 						int j;
 						for(j = i; j; p++)
 							j /= 10;
 
+						register char* t = p;
 						do {
 							*--p = '0' + (i % 10);
 							i /= 10;
 						} while(i != 0);
+					
+						p = t;
 					} break;
 				}
 				break;

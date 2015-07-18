@@ -74,7 +74,6 @@ void java_native_flush(void);
 void java_object_flush(void);
 
 
-
 const char* strfmt(const char* fmt, ...);
 
 

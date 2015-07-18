@@ -5,6 +5,9 @@
 static u8 nextid = 0;
 java_object_t* __jobj_queue = NULL;
 
+
+
+
 int java_object_instance(java_assembly_t** instance, java_assembly_t* assembly) {
 	if(unlikely(!assembly))
 		return J_ERR;
@@ -44,8 +47,10 @@ int java_object_new(java_object_t** obj, const char* name) {
 	if(unlikely(!obj))
 		return J_OK;
 
+
 	java_object_t* o = (java_object_t*) avm->calloc(1, sizeof(java_object_t));
 	ASSERT(o);
+	
 	
 	o->refcount = 1;
 	o->name = strdup(name);

@@ -16,6 +16,9 @@
 
 int main(int argc, char** argv) {
 
+	/* Initialize VM */
+	avm_init();
+
 	/* Open Calc.class */
 	if(avm_open("Calc.class") == J_ERR)
 		{ perror("Calc.class"); abort(); }

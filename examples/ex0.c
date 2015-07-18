@@ -16,6 +16,9 @@
 
 int main(int argc, char** argv) {
 
+	/* Initialize VM */
+	avm_init();
+
 	/* Open HelloWorld.class */
 	if(avm_open("HelloWorld.class") == J_ERR)
 		{ perror("HelloWorld.class"); abort(); }
