@@ -124,7 +124,8 @@ static inline void* __gc_calloc(size_t x, size_t y) {
 		return NULL;
 
 	register int i = x * y;
-	for(char* d = p; i--; d++)
+	char* d;
+	for(d = p; i--; d++)
 		*d = 0;
 		
 	return p;

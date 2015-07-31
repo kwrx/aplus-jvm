@@ -569,7 +569,7 @@ j_value avm_main(int argc, char** argv);
 
 void avm_config_path_add(const char* dir);
 void avm_config_set_ops (
-	void* (*calloc) (size_t, size_t),
+/*	void* (*calloc) (size_t, size_t),
 	void (*free) (void*),
 	int (*open) (const char*, int, ...),
 	int (*close) (int),
@@ -578,6 +578,8 @@ void avm_config_set_ops (
 	int (*yield) (),
 	pid_t (*getpid) (),
 	int (*printf) (const char*, ...)
+*/
+	void*, void*, void*, void*, void*, void*, void*, void*, void*
 );
 
 

@@ -15,15 +15,15 @@ void avm_config_path_add(const char* dir) {
 }
 
 void avm_config_set_ops (
-	void* (*calloc) (size_t, size_t),
-	void (*free) (void*),
-	int (*open) (const char*, int, ...),
-	int (*close) (int),
-	off_t (*lseek) (int, off_t, int),
-	ssize_t (*read) (int, void*, size_t),
-	int (*yield) (),
-	pid_t (*getpid) (),
-	int (*printf) (const char*, ...)
+	void* calloc,
+	void* free,
+	void* open,
+	void* close,
+	void* lseek,
+	void* read,
+	void* yield,
+	void* getpid,
+	void* printf
 ) {
 	#define C(x)			\
 		if((x))			\
@@ -290,6 +290,7 @@ j_value avm_call(const char* classname, const char* name, int nargs, ...) {
 		if(nargs > 0) {
 			params = avm->calloc(sizeof(j_value), nargs);
 			ASSERT(params);
+			ASSERT(nargs == strlen(method->signature));
 
 			int i;
 			for(i = 0; i < nargs; i++)

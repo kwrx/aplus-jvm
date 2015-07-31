@@ -28,11 +28,13 @@ int main(int argc, char** argv) {
 	avm_begin();
 
 
-	j_int a = 10;
-	j_int b = 15;
+	j_value a, b;
+	
+	a.i32 = 10;
+	b.i32 = 15;
 
 	/* c = Calc.Sum(a, b); */
-	j_int c = avm_call("Calc", "Sum", 2, a, b).i32;
+	j_value c = avm_call("Calc", "Sum", 2, a, b);
 
 	/* Destroy context & all resources */
 	avm_end();

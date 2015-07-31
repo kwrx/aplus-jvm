@@ -3,11 +3,7 @@ package java.lang;
 
 public class String {
 
-	private char chars[];
-
-	public String intern() {
-		return (String) ((Object) chars);
-	}
+	public native String intern();
 
 	public String() {
 
