@@ -8,31 +8,31 @@ prefix		:= @prefix@
 exec_prefix	:= @exec_prefix@
 
 
-CC		:= @CC@
-LD		:= @CC@
-JCC		:= @JAVAC@
-JAR		:= jar -cf
-AR		:= ar -rcs
+CC			:= @CC@
+LD			:= @CC@
+JCC			:= @JAVAC@
+JAR			:= jar -cf
+AR			:= ar -rcs
 
 FIND		:= /usr/bin/find
 
 
-OPT		:= -Ofast -mfpmath=sse -msse2 						\
-			-funroll-all-loops -faggressive-loop-optimizations 		\
-			-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine 	\
-			-fno-align-functions -fno-align-loops
+OPT			:= -Ofast -mfpmath=sse -msse2 										\
+				-funroll-all-loops -faggressive-loop-optimizations 				\
+				-fomit-frame-pointer -fira-loop-pressure -floop-strip-mine 		\
+				-fno-align-functions -fno-align-loops
 
-INCDIR	:= src/include
-LIBS	:= @CONFIG_LIBS@
+INCDIR		:= src/include
+LIBS		:= @CONFIG_LIBS@
 
 
-CFILES	:= $(shell $(FIND) src -type f -name "*.c")
-TFILES	:= $(shell $(FIND) test -type f -name "*.java")
-JFILES	:= $(shell $(FIND) lib -type f -name "*.java")
+CFILES		:= $(shell $(FIND) src -type f -name "*.c")
+TFILES		:= $(shell $(FIND) test -type f -name "*.java")
+JFILES		:= $(shell $(FIND) lib -type f -name "*.java")
 
-OFILES	:= $(CFILES:.c=.o)
-TCFILES	:= $(TFILES:.java=.class)
-JCFILES	:= $(JFILES:.java=.class)
+OFILES		:= $(CFILES:.c=.o)
+TCFILES		:= $(TFILES:.java=.class)
+JCFILES		:= $(JFILES:.java=.class)
 
 
 .SUFFIXES: .java .class
@@ -54,7 +54,7 @@ test: $(TCFILES)
 lib: $(JCFILES)
 .java.class:
 	@echo "  JAVA " $<
-	@$(JCC) --classpath=lib $<
+	@$(JCC) -classpath lib $<
 
 
 $(RUNTIME): $(JCFILES)

@@ -184,6 +184,7 @@ static struct avm_ops __ops = {
 
 
 
+
 struct avm_ops* avm = &__ops;
 
 

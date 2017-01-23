@@ -4,6 +4,7 @@ package java.lang;
 public class String {
 
 	public native String intern();
+	private char[] chars;
 
 	public String() {
 

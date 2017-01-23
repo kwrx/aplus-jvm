@@ -51,7 +51,7 @@ struct avm_ops {
 	int (*open) (const char*, int, ...);
 	int (*close) (int);
 	off_t (*lseek) (int, off_t, int);
-	ssize_t (*read) (int, void*, size_t);
+	int (*read) (int, void*, size_t);
 	int (*yield) (void);
 	pid_t (*getpid) (void);
 	int (*printf) (const char*, ...);

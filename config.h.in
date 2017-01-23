@@ -38,9 +38,9 @@
 
 
 
-#define APP_VERSION_FORMAT										\
+#define APP_VERSION_FORMAT														\
 		"%s %s\nCopyright (C) %s\nBuilt with %s %s (%s:%s)\n"
-#define APP_VERSION_ARGS										\
+#define APP_VERSION_ARGS														\
 		APP_NAME, APP_VERSION, APP_COPY, APP_CC, APP_CC_VERSION,				\
 		APP_CDATE, APP_CTIME
 
@@ -207,8 +207,8 @@ int sched_yield(void);
 
 
 
-#define INITIALIZE_PATH() {									\
-		avm_config_path_add(CONFIG_SYSROOT "/usr/lib/avm");				\
+#define INITIALIZE_PATH() {													\
+		avm_config_path_add(CONFIG_SYSROOT "/usr/lib/avm");					\
 		avm_config_path_add(CONFIG_SYSROOT "/usr/local/lib/avm");			\
 		avm_config_path_add(CONFIG_SYSROOT "/usr/share/java");				\
 	}
