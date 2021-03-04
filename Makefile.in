@@ -20,7 +20,7 @@ AR			:= ar -rcs
 FIND		:= /usr/bin/find
 
 
-OPT			:= -O3 -mnative
+OPT			:= -O3 -march=native
 LIBS		:= @CONFIG_LIBS@
 
 
@@ -42,7 +42,7 @@ all: $(OUTPUT) $(OUTLIB) $(RUNTIME) lib test
 	
 $(OUTPUT): $(OFILES)
 	@echo "  LD   " $@
-	@$(LD) -o $@ $(OFILES) $(LIBS)
+	@$(LD) -o $@ $(OFILES) $(LIBS) -lc -lm
 
 $(OUTLIB): $(OFILES)
 	@echo "  AR   " $@
@@ -52,7 +52,7 @@ test: $(TCFILES)
 lib: $(JCFILES)
 .java.class:
 	@echo "  JAVA " $<
-	@$(JCC) -classpath lib $<
+	@$(JCC) --class-path lib --release 8 $<
 
 
 $(RUNTIME): $(JCFILES)

@@ -1,0 +1,11 @@
+*.class
+*.log
+*.jar
+*.o
+*.d
+*.a
+*.status
+
+/Makefile
+/avm
+/config.h
