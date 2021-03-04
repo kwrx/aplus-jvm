@@ -16,11 +16,11 @@ $> make
 $> make install
 ```
 
-**NOTE:** Replace ```DESTDIR``` with your destionation path, default: ```/usr/local```
+**NOTE:** Replace ```DESTDIR``` with your destionation path, default: ```/usr/local```  
 **NOTE:** See ```./configure --help``` for more infos
 
 
-### Examples
+### Example
 
 ```java
 //
