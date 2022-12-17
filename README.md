@@ -43,9 +43,11 @@ int main(int argc, char** argv) {
     avm_init();
 
     /* Open Calc.class */
-    if(avm_open("Calc.class") == J_ERR)
-        { perror("Calc.class"); abort(); }
-
+    if(avm_open("Calc.class") == J_ERR) { 
+        perror("Calc.class");
+        abort(); 
+    }
+    
 
     /* Initialize context & resolve assemblies */
     avm_begin();
@@ -58,9 +60,13 @@ int main(int argc, char** argv) {
 
     /* c = Calc.Sum(a, b); */
     j_value c = avm_call("Calc", "Sum", 2, a, b);
-
+    
+    
     /* Destroy context & all resources */
     avm_end();
+    
+    
+    printf("The sum of %d + %d = %d\n", a.i32, b.i32, c.i32);
 
 }
 ```
